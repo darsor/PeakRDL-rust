@@ -2,7 +2,7 @@ import abc
 import shutil
 from dataclasses import dataclass
 from pathlib import Path
-from typing import ClassVar, List, Tuple, Union
+from typing import ClassVar, List, Optional, Tuple, Union
 
 from caseconverter import snakecase
 from systemrdl import component
@@ -51,20 +51,34 @@ class Instantiation:
 
 
 @dataclass
+class Array:
+    """Instantiated array"""
+
+    # format-ready string, e.g. "[[[{}; 5]; 3]; 4]"
+    type: str
+    dims: list[int]
+    # string using loop variables i0, i1, ..., etc. to calculate address of an instance
+    # for example: "(((i0 * 3) + i1) * 4) + i2) * 0x100"
+    addr_offset: str
+
+
+@dataclass
 class AddrmapRegInst(Instantiation):
     """Register instantiated within an Addrmap"""
 
-    addr_offset: int  # address offset from parent component
+    # address offset from parent component, only used if array is None
+    addr_offset: Optional[int]
     access: Union[str, None]  # "R", "W", "RW", or None
-    is_array: bool
+    array: Optional[Array]
 
 
 @dataclass
 class AddrmapSubmapInst(Instantiation):
     """Addrmap or Regfile instantiated within an Addrmap"""
 
-    addr_offset: int  # address offset from parent component
-    is_array: bool
+    # address offset from parent component, only used if array is None
+    addr_offset: Optional[int]
+    array: Optional[Array]
 
 
 @dataclass

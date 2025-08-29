@@ -1,0 +1,12 @@
+{% macro loop(depth, dims, expr) %}
+{% set idx = "i" ~ depth %}
+let mut {{idx}} = 0;
+while {{idx}} < {{dims[depth]}} {
+    {% if depth + 1 < dims|length %}
+    {{loop(depth+1, dims, expr) | indent(4*(depth+1))}}
+    {% else %}
+    array{% for d in range(depth+1) %}[i{{d}}]{% endfor %}.write({{expr}});
+    {% endif %}
+    {{idx}} += 1;
+}
+{% endmacro %}

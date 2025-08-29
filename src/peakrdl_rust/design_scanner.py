@@ -17,6 +17,7 @@ from .crate_generator import (
     Addrmap,
     AddrmapRegInst,
     AddrmapSubmapInst,
+    Array,
     RegFieldInst,
     Register,
 )
@@ -59,12 +60,32 @@ class DesignScanner(RDLListener):
         named_type_instances: List[Tuple[str, str]] = []
 
         for child in node.children():
-            # TODO: remove this once arrays are implemented
-            if isinstance(child, RegfileNode):
-                continue
-
             assert isinstance(child, AddressableNode)
             inst_name = kw_filter(snakecase(child.inst_name))
+            if child.is_array:
+                dims = child.array_dimensions
+                assert dims is not None
+                stride = child.array_stride
+                assert stride is not None
+
+                arr_type = "{}"
+                addr_offset = "i0"
+                for i, dim in enumerate(dims):
+                    arr_type = f"[{arr_type}; {dim}]"
+                    if i != 0:
+                        addr_offset = f"({addr_offset} * {dim}) + i{i}"
+
+                if len(dims) > 1:
+                    addr_offset = f"({addr_offset}) * {hex(stride)}"
+                else:
+                    addr_offset = f"{addr_offset} * {hex(stride)}"
+
+                array = Array(type=arr_type, dims=dims, addr_offset=addr_offset)
+                addr_offset = None
+            else:
+                array = None
+                addr_offset = child.address_offset
+
             if isinstance(child, RegNode):
                 if (access := utils.reg_access(child)) is None:
                     continue
@@ -72,9 +93,9 @@ class DesignScanner(RDLListener):
                     AddrmapRegInst(
                         comment=utils.doc_comment(child),
                         inst_name=inst_name,
-                        is_array=child.is_array,
-                        addr_offset=child.address_offset,
                         type_name=inst_name + "::" + pascalcase(child.type_name),
+                        array=array,
+                        addr_offset=addr_offset,
                         access=access,
                     )
                 )
@@ -83,9 +104,9 @@ class DesignScanner(RDLListener):
                     AddrmapSubmapInst(
                         comment=utils.doc_comment(child),
                         inst_name=inst_name,
-                        is_array=child.is_array,
-                        addr_offset=child.address_offset,
                         type_name=inst_name + "::" + pascalcase(child.type_name),
+                        array=array,
+                        addr_offset=addr_offset,
                     )
                 )
             else:
