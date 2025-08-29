@@ -72,9 +72,9 @@ class DesignScanner(RDLListener):
                     AddrmapRegInst(
                         comment=utils.doc_comment(child),
                         inst_name=inst_name,
-                        type_name=inst_name + "::" + pascalcase(child.inst_name),
                         is_array=child.is_array,
                         addr_offset=child.address_offset,
+                        type_name=inst_name + "::" + pascalcase(child.type_name),
                         access=access,
                     )
                 )
@@ -83,9 +83,9 @@ class DesignScanner(RDLListener):
                     AddrmapSubmapInst(
                         comment=utils.doc_comment(child),
                         inst_name=inst_name,
-                        type_name=inst_name + "::" + pascalcase(child.inst_name),
                         is_array=child.is_array,
                         addr_offset=child.address_offset,
+                        type_name=inst_name + "::" + pascalcase(child.type_name),
                     )
                 )
             else:
@@ -148,7 +148,7 @@ class DesignScanner(RDLListener):
             named_type_instances=[],
             named_type_declarations=[],
             use_statements=[],
-            type_name=pascalcase(node.inst_name),
+            type_name=pascalcase(node.type_name),
             primitive=f"u{node.get_property('regwidth')}",
             reset_val=0,  # TODO
             fields=fields,
