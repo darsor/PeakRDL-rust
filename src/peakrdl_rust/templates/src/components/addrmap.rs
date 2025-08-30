@@ -1,30 +1,5 @@
 {% import 'src/components/macros.jinja2' as macros %}
-{% for use in ctx.use_statements %}
-{{use}}
-{% endfor %}
-
-{% if ctx.anon_instances|length > 0 %}
-// anonymous component instances
-{% endif %}
-{% for mod in ctx.anon_instances %}
-pub mod {{mod}};
-{% endfor %}
-
-{% if ctx.named_type_declarations|length > 0 %}
-// named component type declarations
-pub mod named_types {
-    {% for mod in ctx.named_type_declarations %}
-    pub mod {{mod}};
-    {% endfor %}
-}
-{% endif %}
-
-{% if ctx.named_type_instances|length > 0 %}
-// instances of named component types
-{% endif %}
-{% for (inst_name, module) in ctx.named_type_instances %}
-pub use {{module}} as {{inst_name}};
-{% endfor %}
+{{macros.includes(ctx)}}
 
 {{ctx.comment}}
 #[derive(Copy, Clone, Eq, PartialEq)]
