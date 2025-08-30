@@ -13,12 +13,11 @@ from systemrdl.node import (
 )
 
 from .design_state import DesignState
-from .identifier_filter import kw_filter as kwf
 
 
 @dataclass
 class Component(abc.ABC):
-    """Base class for an RDL component, defined in its own Rust module"""
+    """Base class for an RDL component or type, defined in its own Rust module"""
 
     template: ClassVar[str]  # Jinja template path
 
@@ -87,6 +86,7 @@ class RegFieldInst(Instantiation):
 
     access: Union[str, None]  # "R", "W", "RW", or None
     primitive: str  # which unsigned rust type is used to represent
+    encoding: Optional[str]  # encoding enum
     bit_offset: int  # lowest bit index
     mask: int  # bitmask of the width of the field
 
@@ -110,6 +110,25 @@ class Register(Component):
     primitive: str  # rust unsigned primitive used to represent
     reset_val: int
     fields: List[RegFieldInst]
+
+
+@dataclass
+class EnumVariant:
+    """Variant of a user-defined enum"""
+
+    comment: str
+    name: str
+    value: int
+
+
+@dataclass
+class Enum(Component):
+    """User-defined enum type used to encode a field"""
+
+    template: ClassVar[str] = "src/components/enum.rs"
+
+    primitive: str  # which unsigned rust type is used to represent
+    variants: List[EnumVariant]
 
 
 def write_crate(

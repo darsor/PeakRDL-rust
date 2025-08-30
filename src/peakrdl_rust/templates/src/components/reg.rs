@@ -17,9 +17,12 @@ impl {{ctx.type_name}} {
     {% if "R" in field.access %}
     {{field.comment | indent()}}
     #[inline(always)]
-    pub const fn {{field.inst_name}}(&self) -> {{field.primitive}} {
+    {% set return_type = "Option<" ~ field.encoding ~ ">" if field.encoding else field.primitive %}
+    pub const fn {{field.inst_name}}(&self) -> {{return_type}} {
         let val = (self.0 >> {{field.bit_offset}}usize) & 0x{{"%x" % field.mask}};
-        {% if field.primitive == "bool" %}
+        {% if field.encoding is not none %}
+        {{field.encoding}}::from_bits(val as {{field.primitive}})
+        {% elif field.primitive == "bool" %}
         val != 0
         {% elif field.primitive != ctx.primitive %}
         val as {{field.primitive}}
@@ -32,8 +35,14 @@ impl {{ctx.type_name}} {
     {% if "W" in field.access %}
     {{field.comment | indent()}}
     #[inline(always)]
-    pub const fn set_{{field.inst_name}}(&mut self, val: {{field.primitive}}) {
-        self.0 = (self.0 & !(0x{{"%x" % field.mask}} << {{field.bit_offset}}usize)) | (((val as {{ctx.primitive}}) & 0x{{"%x" % field.mask}}) << {{field.bit_offset}}usize);
+    {% set input_type = field.encoding if field.encoding else field.primitive %}
+    pub const fn set_{{field.inst_name}}(&mut self, val: {{input_type}}) {
+        {% if field.encoding %}
+        let val = val.bits() as {{ctx.primitive}};
+        {% else %}
+        let val = val as {{ctx.primitive}};
+        {% endif %}
+        self.0 = (self.0 & !(0x{{"%x" % field.mask}} << {{field.bit_offset}}usize)) | ((val & 0x{{"%x" % field.mask}}) << {{field.bit_offset}}usize);
     }
     {% endif %}
 

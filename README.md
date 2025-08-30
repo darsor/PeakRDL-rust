@@ -7,7 +7,8 @@ This is a work in progress. Check back later.
 ## TODO
 
 - [x] Arrays
-- [ ] Enum encoding
+- [x] Enum encoding
 - [ ] Reg impl with regwidth != accesswidth
 - [ ] Mem components
+- [ ] Test generator
 - [ ] Fixedpoint
