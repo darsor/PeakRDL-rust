@@ -51,14 +51,14 @@ impl {{ctx.type_name}} {
     #[inline(always)]
     {% if reg.array is none %}
     pub const fn {{reg.inst_name}}(&self) -> crate::reg::Reg<{{reg.type_name}}, crate::reg::{{reg.access}}> {
-        unsafe { crate::reg::Reg::from_ptr(self.ptr.add(0x{{"%x" % reg.addr_offset}}) as _) }
+        unsafe { crate::reg::Reg::from_ptr(self.ptr.byte_add(0x{{"%x" % reg.addr_offset}}) as _) }
     }
     {% else %}
     pub const fn {{reg.inst_name}}(&self) -> {{reg.array.type.format("crate::reg::Reg<" ~ reg.type_name ~ ", crate::reg::" ~ reg.access ~ ">")}} {
         // SAFETY: We will initialize every element before using the array
         let mut array = {{reg.array.type.format("core::mem::MaybeUninit::uninit()")}};
 
-        {% set expr = "unsafe { crate::reg::Reg::<_, crate::reg::" ~ reg.access ~ ">::from_ptr(self.ptr.add(" ~ reg.array.addr_offset ~ ") as _) }"  %}
+        {% set expr = "unsafe { crate::reg::Reg::<_, crate::reg::" ~ reg.access ~ ">::from_ptr(self.ptr.byte_add(" ~ reg.array.addr_offset ~ ") as _) }"  %}
         {{ macros.loop(0, reg.array.dims, expr) | indent(8) }}
 
         // SAFETY: All elements have been initialized above
@@ -73,14 +73,14 @@ impl {{ctx.type_name}} {
     #[inline(always)]
     {% if node.array is none %}
     pub const fn {{node.inst_name}}(&self) -> {{node.type_name}} {
-        unsafe { node.type_name::from_ptr(self.ptr.add(0x{{"%x" % node.addr_offset}}) as _) }
+        unsafe { node.type_name::from_ptr(self.ptr.byte_add(0x{{"%x" % node.addr_offset}}) as _) }
     }
     {% else %}
     pub const fn {{node.inst_name}}(&self) -> {{node.array.type.format(node.type_name)}} {
         // SAFETY: We will initialize every element before using the array
         let mut array = {{node.array.type.format("core::mem::MaybeUninit::uninit()")}};
 
-        {% set expr = "unsafe { " ~ node.type_name ~ "::from_ptr(self.ptr.add(" ~ node.array.addr_offset ~ ") as _) }"  %}
+        {% set expr = "unsafe { " ~ node.type_name ~ "::from_ptr(self.ptr.byte_add(" ~ node.array.addr_offset ~ ") as _) }"  %}
         {{ macros.loop(0, node.array.dims, expr) | indent(8) }}
 
         // SAFETY: All elements have been initialized above
