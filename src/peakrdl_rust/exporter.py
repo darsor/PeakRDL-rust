@@ -91,8 +91,12 @@ class RustExporter:
 
         if not ds.no_fmt:
             result = subprocess.run(["cargo", "fmt"], cwd=ds.output_dir)
-            if result.returncode != 0:
+            if result.returncode == 127:
                 print(
                     "Warning: failed to run `cargo fmt`. Install cargo "
                     "(https://rustup.rs/) or silence this warning with `--no-fmt`"
+                )
+            elif result.returncode != 0:
+                print(
+                    "Failed to format files. Please submit an bug report: https://github.com/darsor/PeakRDL-rust/issues"
                 )
