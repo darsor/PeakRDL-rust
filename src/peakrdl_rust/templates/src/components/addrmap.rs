@@ -62,7 +62,7 @@ impl {{ctx.type_name}} {
         {{ macros.loop(0, reg.array.dims, expr) | indent(8) }}
 
         // SAFETY: All elements have been initialized above
-        unsafe { core::mem::transmute::<_, _>(array) }
+        unsafe { core::mem::transmute(array) }
     }
     {% endif %}
 
@@ -84,7 +84,7 @@ impl {{ctx.type_name}} {
         {{ macros.loop(0, node.array.dims, expr) | indent(8) }}
 
         // SAFETY: All elements have been initialized above
-        unsafe { core::mem::transmute::<_, _>(array) }
+        unsafe { core::mem::transmute(array) }
     }
     {% endif %}
 
