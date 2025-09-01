@@ -1,7 +1,6 @@
 from typing import List, Union
 
 from caseconverter import snakecase
-from systemrdl import component
 from systemrdl.node import FieldNode, Node, RegNode, RootNode
 
 from peakrdl_rust.identifier_filter import kw_filter
@@ -9,15 +8,19 @@ from peakrdl_rust.identifier_filter import kw_filter
 
 def doc_comment(node: Node) -> str:
     name = node.get_property("name")
-    name_comment = "/// " + name
     desc = node.get_property("desc")
-    if desc is None:
-        return name_comment
-    return (
-        name_comment
-        + "\n///\n"
-        + "\n".join(["/// " + line for line in desc.splitlines()])
-    )
+
+    if name is None and desc is None:
+        return ""
+
+    comment = ""
+    if name is not None:
+        comment += "/// " + name
+        if desc is not None:
+            comment += "\n///\n"
+    if desc is not None:
+        comment += "\n".join(["/// " + line for line in desc.splitlines()])
+    return comment
 
 
 def is_anonymous(node: Node) -> bool:
