@@ -1,6 +1,5 @@
 import shutil
 import subprocess
-from pathlib import Path
 from typing import Any, Union
 
 from systemrdl.node import AddrmapNode, MemNode, RegfileNode, RootNode
@@ -8,6 +7,7 @@ from systemrdl.node import AddrmapNode, MemNode, RegfileNode, RootNode
 from .crate_generator import write_crate
 from .design_scanner import DesignScanner
 from .design_state import DesignState
+from .test_generator import write_tests
 
 # from .design_scanner import DesignScanner
 
@@ -83,11 +83,11 @@ class RustExporter:
             else:
                 ds.output_dir.unlink()
 
-        # Write output
+        # Write crate modules
         write_crate(top_nodes, ds)
-        # HeaderGenerator(ds).run(path, top_nodes)
-        # if ds.testcase:
-        #     TestcaseGenerator(ds).run(path, top_nodes)
+
+        # Generate integration tests
+        write_tests(top_nodes, ds)
 
         if not ds.no_fmt:
             result = subprocess.run(["cargo", "fmt"], cwd=ds.output_dir)

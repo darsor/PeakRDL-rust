@@ -10,7 +10,9 @@ This is a work in progress. Check back later.
 - [x] Enum encoding
 - [x] Reg impl with regwidth != accesswidth
 - [x] Impl Default for registers
-- [ ] Impl Debug for registers
-- [ ] Test generator
+- [x] Test generator
+- [ ] Add field constants (width, offset, etc.)
+- [ ] Impl Debug for components
 - [ ] Mem components
+- [ ] More efficient field tests
 - [ ] Fixedpoint

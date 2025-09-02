@@ -175,3 +175,17 @@ def append_unique(list: List, obj: Any):
     """Append an object to a list only if it's not already present"""
     if obj not in list:
         list.append(obj)
+
+
+def reg_access_method(node: RegNode) -> str:
+    """Get register access method, e.g. 'grammeter()[1].status()'"""
+    segments = node.get_path_segments()[1:]
+    called_segments = []
+    for seg in segments:
+        idx = seg.find("[")
+        if idx == -1:
+            # not an array
+            called_segments.append(seg + "()")
+        else:
+            called_segments.append(seg[:idx] + "()" + seg[idx:])
+    return ".".join(called_segments)
