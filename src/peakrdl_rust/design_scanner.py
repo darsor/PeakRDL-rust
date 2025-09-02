@@ -149,6 +149,7 @@ class DesignScanner(RDLListener):
             type_name=pascalcase(node.inst_name),
             registers=registers,
             submaps=submaps,
+            size=node.size,
         )
         return WalkerAction.Continue
 

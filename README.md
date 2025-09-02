@@ -11,6 +11,6 @@ This is a work in progress. Check back later.
 - [x] Reg impl with regwidth != accesswidth
 - [x] Impl Default for registers
 - [ ] Impl Debug for registers
-- [ ] Mem components
 - [ ] Test generator
+- [ ] Mem components
 - [ ] Fixedpoint

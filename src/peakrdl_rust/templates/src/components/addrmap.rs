@@ -13,6 +13,9 @@ unsafe impl Send for {{ctx.type_name}} {}
 unsafe impl Sync for {{ctx.type_name}} {}
 
 impl {{ctx.type_name}} {
+    /// Size in bytes of the underlying memory
+    pub const SIZE: usize = 0x{{"%x" % ctx.size}};
+
     #[inline(always)]
     pub const unsafe fn from_ptr(ptr: *mut ()) -> Self {
         Self { ptr: ptr as *mut u8 }

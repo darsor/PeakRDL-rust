@@ -98,6 +98,7 @@ class Addrmap(Component):
 
     registers: List[AddrmapRegInst]
     submaps: List[AddrmapSubmapInst]
+    size: int
 
 
 @dataclass
