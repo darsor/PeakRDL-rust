@@ -1,5 +1,6 @@
 #![no_std]
 
+#[cfg(not(doctest))]
 pub mod components;
 pub mod reg;
 
