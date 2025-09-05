@@ -37,6 +37,7 @@ class TestField:
     address: int  # byte address
     bit_offset: int  # low bit within register
     width: int  # bit width
+    reg_width: int
     is_readable: bool
     test_patterns: List[TestPattern]
 
@@ -147,6 +148,7 @@ class TestScanner(RDLListener):
                 address=node.parent.absolute_address,
                 bit_offset=node.low,
                 width=node.width,
+                reg_width=node.parent.get_property("regwidth"),
                 is_readable=node.is_sw_readable,
                 test_patterns=generate_test_patterns(node),
             )
