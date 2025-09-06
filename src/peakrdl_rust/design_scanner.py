@@ -159,7 +159,6 @@ class DesignScanner(RDLListener):
         return self.enter_addrmap_or_regfile(node)
 
     def enter_Reg(self, node: RegNode) -> Optional[WalkerAction]:
-        # TODO: relax regwidth == accesswidth constraint on implementation
         # TODO: enforce max regwidth of 64
 
         file = self.get_node_module_file(node)
@@ -200,7 +199,8 @@ class DesignScanner(RDLListener):
             named_type_declarations=[],
             use_statements=[],
             type_name=pascalcase(node.type_name),
-            primitive=f"u{node.get_property('regwidth')}",
+            regwidth=node.get_property("regwidth"),
+            accesswidth=node.get_property("accesswidth"),
             reset_val=0,  # TODO
             fields=fields,
         )

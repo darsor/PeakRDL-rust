@@ -1,6 +1,50 @@
 //! Register abstraction used to read, write, and modify register values
 
 use core::marker::PhantomData;
+use num_traits::{identities::ConstZero, AsPrimitive, Bounded, PrimInt};
+
+pub trait Register: Copy {
+    // NOTE: SystemRDL guarantees accesswidth <= regwidth, and both are 2^N bits where N >= 3
+    type Regwidth: PrimInt + AsPrimitive<Self::Accesswidth> + ConstZero + 'static;
+    type Accesswidth: PrimInt + AsPrimitive<Self::Regwidth>;
+
+    unsafe fn from_raw(val: Self::Regwidth) -> Self;
+    fn to_raw(self) -> Self::Regwidth;
+
+    unsafe fn read_register(ptr: *const Self::Regwidth) -> Self {
+        // this cast is OK since SystemRDL guarantees accesswidth <= regwidth,
+        // and we won't access outside the bounds of the original pointer
+        let ptr = ptr as *const Self::Accesswidth;
+        let accesswidth = 8 * core::mem::size_of::<Self::Accesswidth>();
+        let regwidth = 8 * core::mem::size_of::<Self::Regwidth>();
+        let num_subwords = regwidth / accesswidth;
+        // read one subword at a time, starting at the lowest address
+        let mut result = Self::Regwidth::ZERO;
+        for i in 0..num_subwords {
+            let raw_val = Self::Accesswidth::from_{{endianness}}(unsafe { ptr.add(i).read_volatile() });
+            result = result | raw_val.as_() << ((num_subwords - 1 - i) * accesswidth);
+        }
+        unsafe { Self::from_raw(result) }
+    }
+
+    unsafe fn write_register(ptr: *mut Self::Regwidth, value: Self) {
+        // this is OK since SystemRDL guarantees accesswidth <= regwidth,
+        // and we won't write outside the bounds of the original pointer
+        let ptr = ptr as *mut Self::Accesswidth;
+        let raw_value = value.to_raw();
+        let accesswidth = 8 * core::mem::size_of::<Self::Accesswidth>();
+        let regwidth = 8 * core::mem::size_of::<Self::Regwidth>();
+        let mask = Self::Accesswidth::max_value().as_();
+        let num_subwords = regwidth / accesswidth;
+        // write one subword at a time, starting at the lowest address
+        for i in 0..num_subwords {
+            let subword = (raw_value >> ((num_subwords - 1 - i) * accesswidth)) & mask;
+            unsafe {
+                ptr.add(i).write_volatile(subword.as_().to_{{endianness}}());
+            }
+        }
+    }
+}
 
 /// Read-write register access token
 #[derive(Copy, Clone, PartialEq, Eq)]
@@ -38,24 +82,24 @@ impl Write for W {}
 
 /// Register abstraction used to read, write, and modify register values
 #[derive(Copy, Clone, PartialEq, Eq)]
-pub struct Reg<T: Copy, A: Access> {
-    ptr: *mut u8,
-    phantom: PhantomData<*mut (T, A)>,
+pub struct Reg<T: Register, A: Access> {
+    ptr: *mut T::Regwidth,
+    phantom: PhantomData<A>,
 }
 
-unsafe impl<T: Copy, A: Access> Send for Reg<T, A> {}
-unsafe impl<T: Copy, A: Access> Sync for Reg<T, A> {}
+unsafe impl<T: Register, A: Access> Send for Reg<T, A> {}
+unsafe impl<T: Register, A: Access> Sync for Reg<T, A> {}
 
-// pointer conersion functions
-impl<T: Copy, A: Access> Reg<T, A> {
-    #[allow(clippy::missing_safety_doc)]
+// pointer conversion functions
+impl<T: Register, A: Access> Reg<T, A> {
     #[inline(always)]
-    pub const unsafe fn from_ptr(ptr: *mut T) -> Self {
+    pub const unsafe fn from_ptr(ptr: *mut T::Regwidth) -> Self {
         Self {
-            ptr: ptr as _,
+            ptr,
             phantom: PhantomData,
         }
     }
+
     #[inline(always)]
     pub const fn as_ptr(&self) -> *mut T {
         self.ptr as _
@@ -63,7 +107,7 @@ impl<T: Copy, A: Access> Reg<T, A> {
 }
 
 // read access
-impl<T: Copy, A: Read> Reg<T, A> {
+impl<T: Register, A: Read> Reg<T, A> {
     /// Read a register value.
     ///
     /// If the register is to be modified (i.e., a read-modify-write), use the
@@ -78,12 +122,12 @@ impl<T: Copy, A: Read> Reg<T, A> {
     /// ```
     #[inline(always)]
     pub fn read(&self) -> T {
-        unsafe { (self.ptr as *mut T).read_volatile() }
+        unsafe { T::read_register(self.ptr) }
     }
 }
 
 // write access
-impl<T: Copy, A: Write> Reg<T, A> {
+impl<T: Register, A: Write> Reg<T, A> {
     /// Write a register value.
     ///
     /// Typically one would use [`Reg::write`] or [`Reg::modify`] to update a
@@ -99,11 +143,11 @@ impl<T: Copy, A: Write> Reg<T, A> {
     /// ```
     #[inline(always)]
     pub fn write_value(&self, val: T) {
-        unsafe { (self.ptr as *mut T).write_volatile(val) }
+        unsafe { T::write_register(self.ptr, val) }
     }
 }
 
-impl<T: Default + Copy, A: Write> Reg<T, A> {
+impl<T: Default + Register, A: Write> Reg<T, A> {
     /// Write a register.
     ///
     /// This method takes a closure. The input to the closure is a mutable reference
@@ -129,7 +173,7 @@ impl<T: Default + Copy, A: Write> Reg<T, A> {
 }
 
 // read/write access
-impl<T: Copy, A: Read + Write> Reg<T, A> {
+impl<T: Register, A: Read + Write> Reg<T, A> {
     /// Modify a register.
     ///
     /// This method takes a closure. The input to the closure is a mutable reference

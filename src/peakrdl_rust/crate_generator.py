@@ -106,7 +106,8 @@ class Register(Component):
 
     template: ClassVar[str] = "src/components/reg.rs"
 
-    primitive: str  # rust unsigned primitive used to represent
+    regwidth: int
+    accesswidth: int
     reset_val: int
     fields: List[RegFieldInst]
 
@@ -148,10 +149,14 @@ def write_crate(
     shutil.copyfile(ds.template_dir / ".gitignore", ds.output_dir / ".gitignore")
 
     # src/reg.rs
-    (ds.output_dir / "src").mkdir(parents=True, exist_ok=True)
-    shutil.copyfile(
-        ds.template_dir / "src" / "reg.rs", ds.output_dir / "src" / "reg.rs"
-    )
+    reg_rs_path = ds.output_dir / "src" / "reg.rs"
+    reg_rs_path.parent.mkdir(parents=True, exist_ok=True)
+    with reg_rs_path.open("w") as f:
+        context = {
+            "endianness": "le" if ds.top_node.get_property("littleendian") else "be",
+        }
+        template = ds.jj_env.get_template("src/reg.rs")
+        template.stream(context).dump(f)  # type: ignore # jinja incorrectly typed
 
     # src/lib.rs
     lib_rs_path = ds.output_dir / "src" / "lib.rs"
