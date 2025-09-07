@@ -1,7 +1,8 @@
 from typing import Any, List, Union
 
 from caseconverter import snakecase
-from systemrdl.node import FieldNode, Node, RegNode, RootNode
+from systemrdl.node import FieldNode, Node, RegNode, RootNode, SignalNode
+from systemrdl.rdltypes.references import PropertyReference
 from systemrdl.rdltypes.user_enum import UserEnum
 
 from peakrdl_rust.identifier_filter import kw_filter
@@ -144,6 +145,30 @@ def field_primitive(node: FieldNode, allow_bool: bool = True) -> str:
         if w >= node.width:
             return f"u{w}"
     raise RuntimeError("Field widths > 64 are not supported")
+
+
+def field_reset_value(field: FieldNode) -> int:
+    reset = field.get_property("reset", default=0)
+    if isinstance(reset, int):
+        return reset
+    elif isinstance(reset, FieldNode):
+        return field_reset_value(reset)
+    elif isinstance(reset, PropertyReference):
+        reset = reset.node.get_property(reset.name)
+        if isinstance(reset, int):
+            return reset
+        else:
+            print(
+                f"Warning: could not determine reset value for field {field.get_path()}. Defaulting to 0"
+            )
+            return 0
+    elif isinstance(reset, SignalNode):
+        print(
+            f"Warning: reset value for {field.get_path()} is driven by a hardware signal. Defaulting to 0"
+        )
+        return 0
+    else:
+        return 0
 
 
 def append_unique(list: List, obj: Any):

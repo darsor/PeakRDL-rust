@@ -166,6 +166,7 @@ class DesignScanner(RDLListener):
             # already handled
             return WalkerAction.SkipDescendants
 
+        reg_reset_val = 0
         fields: List[RegFieldInst] = []
         for field in node.fields():
             encoding = field.get_property("encode")
@@ -175,6 +176,10 @@ class DesignScanner(RDLListener):
                     + "::"
                     + pascalcase(encoding.type_name)
                 )
+
+            reset_val = utils.field_reset_value(field)
+            reg_reset_val |= reset_val << field.low
+
             fields.append(
                 RegFieldInst(
                     comment=utils.doc_comment(field),
@@ -201,7 +206,7 @@ class DesignScanner(RDLListener):
             type_name=pascalcase(node.type_name),
             regwidth=node.get_property("regwidth"),
             accesswidth=node.get_property("accesswidth"),
-            reset_val=0,  # TODO
+            reset_val=reg_reset_val,
             fields=fields,
         )
 

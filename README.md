@@ -9,7 +9,7 @@ This is a work in progress. Check back later.
 - [x] Arrays
 - [x] Enum encoding
 - [x] Reg impl with regwidth != accesswidth
-- [ ] Impl Default for registers
+- [x] Impl Default for registers
 - [ ] Impl Debug for registers
 - [ ] Mem components
 - [ ] Test generator
