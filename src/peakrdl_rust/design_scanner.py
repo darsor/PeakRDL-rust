@@ -98,6 +98,9 @@ class DesignScanner(RDLListener):
                 else:
                     addr_offset = f"{addr_offset} * {hex(stride)}"
 
+                if child.raw_absolute_address != 0:
+                    addr_offset = f"{hex(child.raw_address_offset)} + {addr_offset}"
+
                 array = Array(type=arr_type, dims=dims, addr_offset=addr_offset)
                 addr_offset = None
             else:

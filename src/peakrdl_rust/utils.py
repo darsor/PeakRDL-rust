@@ -1,7 +1,14 @@
 from typing import Any, List, Union
 
 from caseconverter import snakecase
-from systemrdl.node import FieldNode, Node, RegNode, RootNode, SignalNode
+from systemrdl.node import (
+    AddressableNode,
+    FieldNode,
+    Node,
+    RegNode,
+    RootNode,
+    SignalNode,
+)
 from systemrdl.rdltypes.references import PropertyReference
 from systemrdl.rdltypes.user_enum import UserEnum
 
@@ -177,7 +184,7 @@ def append_unique(list: List, obj: Any):
         list.append(obj)
 
 
-def reg_access_method(node: RegNode) -> str:
+def dut_access_method(node: AddressableNode) -> str:
     """Get register access method, e.g. 'grammeter()[1].status()'"""
     segments = node.get_path_segments()[1:]
     called_segments = []

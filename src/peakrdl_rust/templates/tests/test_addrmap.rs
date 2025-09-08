@@ -3,6 +3,28 @@ use TODO::components::{{ctx.name}};
 
 mod memory;
 
+/// Test all generated component addresses against the SystemRDL assigned address
+#[test]
+fn test_{{ctx.name}}_addresses() {
+    const SIZE: usize = {{ctx.name}}::{{ctx.type_name}}::SIZE;
+    let mut memory = memory::Memory::<SIZE>::new_zeroed();
+    let base_addr = memory.as_mut_ptr();
+    // SAFETY: this produces aliased mutable memory to simulate the hardware
+    // mutability of actual hardware registers. All accesses through the DUT use
+    // volatile reads/writes.
+    let dut = unsafe { {{ctx.name}}::{{ctx.type_name}}::from_ptr(base_addr as _) };
+
+    // SAFETY: we're using unsafe pointer arithmetic, but never deference the
+    // resulting pointer and should never go outside the bounds of the memory
+    // allocation.
+    unsafe {
+        assert_eq!(dut.as_ptr() as *mut u8, base_addr);
+        {% for address in ctx.addresses %}
+        assert_eq!(dut.{{address.dut_method}}.as_ptr() as *mut u8, base_addr.byte_add(0x{{"%x" % address.absolute_addr}}));
+        {% endfor %}
+    }
+}
+
 #[test]
 fn test_{{ctx.name}}() {
     const SIZE: usize = {{ctx.name}}::{{ctx.type_name}}::SIZE;

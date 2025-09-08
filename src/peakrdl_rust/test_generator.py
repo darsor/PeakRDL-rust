@@ -4,6 +4,7 @@ from typing import List, Optional, Union
 
 from caseconverter import pascalcase, snakecase
 from systemrdl.node import (
+    AddressableNode,
     AddrmapNode,
     FieldNode,
     RegfileNode,
@@ -43,12 +44,19 @@ class TestField:
 
 
 @dataclass
+class TestAddress:
+    dut_method: str  # method chain to call on DUT to access component
+    absolute_addr: int
+
+
+@dataclass
 class TestComponent:
     """Top-level component information for test generation"""
 
     name: str  # component instance name
     type_name: str  # component type name
     fields: List[TestField]
+    addresses: List[TestAddress]
 
 
 def generate_test_patterns(field: FieldNode) -> List[TestPattern]:
@@ -134,6 +142,7 @@ class TestScanner(RDLListener):
     def __init__(self, top_node: Union[AddrmapNode, RegfileNode]) -> None:
         self.top_node = top_node
         self.test_fields: List[TestField] = []
+        self.test_addrs: List[TestAddress] = []
 
     def run(self) -> None:
         RDLWalker(unroll=True).walk(self.top_node, self)
@@ -142,7 +151,7 @@ class TestScanner(RDLListener):
         self.test_fields.append(
             TestField(
                 name=kw_filter(snakecase(node.inst_name)),
-                reg_method=utils.reg_access_method(node.parent),
+                reg_method=utils.dut_access_method(node.parent),
                 has_encoding=node.get_property("encode") is not None,
                 primitive=utils.field_primitive(node, allow_bool=False),
                 address=node.parent.absolute_address,
@@ -153,6 +162,21 @@ class TestScanner(RDLListener):
                 test_patterns=generate_test_patterns(node),
             )
         )
+        return WalkerAction.Continue
+
+    def enter_AddressableComponent(
+        self, node: AddressableNode
+    ) -> Optional[WalkerAction]:
+        if node is self.top_node:
+            return WalkerAction.Continue
+
+        self.test_addrs.append(
+            TestAddress(
+                dut_method=utils.dut_access_method(node),
+                absolute_addr=node.absolute_address,
+            )
+        )
+
         return WalkerAction.Continue
 
 
@@ -175,6 +199,7 @@ def write_tests(top_nodes: List[Union[AddrmapNode, RegfileNode]], ds: DesignStat
             name=kw_filter(snakecase(top.inst_name)),
             type_name=pascalcase(top.type_name),
             fields=scanner.test_fields,
+            addresses=scanner.test_addrs,
         )
 
         # Write the test file
