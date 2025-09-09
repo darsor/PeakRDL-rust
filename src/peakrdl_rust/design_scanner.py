@@ -135,13 +135,15 @@ class DesignScanner(RDLListener):
                 scoped_module = "::".join(["crate", "components"] + module_names)
                 named_type_instances.append((inst_name, scoped_module))
 
+        comp_type_name = "Addrmap" if isinstance(node, AddrmapNode) else "Regfile"
         self.ds.components[file] = Addrmap(
             file=file,
+            module_comment=f"{comp_type_name}: {node.get_property('name')}",
+            comment=utils.doc_comment(node),
             use_statements=[],
             anon_instances=anon_instances,
             named_type_instances=named_type_instances,
             named_type_declarations=[],
-            comment=utils.doc_comment(node),
             type_name=pascalcase(node.inst_name),
             registers=registers,
             submaps=submaps,
@@ -189,6 +191,7 @@ class DesignScanner(RDLListener):
 
         self.ds.components[file] = Register(
             file=file,
+            module_comment=f"Register: {node.get_property('name')}",
             comment=utils.doc_comment(node),
             anon_instances=[],
             named_type_instances=[],
@@ -288,6 +291,7 @@ class DesignScanner(RDLListener):
 
         self.ds.components[file] = Enum(
             file=file,
+            module_comment=f"Field Enum: {node.get_property('name')}",
             comment=comment,
             anon_instances=[],
             named_type_declarations=[],

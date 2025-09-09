@@ -4,8 +4,6 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import ClassVar, List, Optional, Tuple, Union
 
-from caseconverter import snakecase
-from systemrdl import component
 from systemrdl.node import (
     AddrmapNode,
     MemNode,
@@ -22,6 +20,7 @@ class Component(abc.ABC):
     template: ClassVar[str]  # Jinja template path
 
     file: Path  # Rust module file path
+    module_comment: str
     comment: str
     # anonymous components used in the body of this addrmap
     anon_instances: List[str]

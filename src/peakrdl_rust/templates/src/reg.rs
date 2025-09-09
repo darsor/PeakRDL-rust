@@ -1,11 +1,16 @@
+//! Register abstraction used to read, write, and modify register values
+
 use core::marker::PhantomData;
 
+/// Read-write register access token
 #[derive(Copy, Clone, PartialEq, Eq)]
 pub struct RW;
 
+/// Read-only register access token
 #[derive(Copy, Clone, PartialEq, Eq)]
 pub struct R;
 
+/// Write-only register access token
 #[derive(Copy, Clone, PartialEq, Eq)]
 pub struct W;
 
@@ -31,6 +36,7 @@ pub trait Write: Access {}
 impl Write for RW {}
 impl Write for W {}
 
+/// Register abstraction used to read, write, and modify register values
 #[derive(Copy, Clone, PartialEq, Eq)]
 pub struct Reg<T: Copy, A: Access> {
     ptr: *mut u8,
@@ -96,6 +102,7 @@ impl<T: Copy, A: Write> Reg<T, A> {
         unsafe { (self.ptr as *mut T).write_volatile(val) }
     }
 }
+
 impl<T: Default + Copy, A: Write> Reg<T, A> {
     /// Write a register.
     ///

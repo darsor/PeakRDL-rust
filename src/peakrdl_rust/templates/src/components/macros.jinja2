@@ -24,7 +24,7 @@ pub mod {{mod}};
 {% endfor %}
 
 {% if ctx.named_type_declarations|length > 0 %}
-// named component type declarations
+/// Named types defined within this component's body
 pub mod named_types {
     {% for mod in ctx.named_type_declarations %}
     pub mod {{mod}};

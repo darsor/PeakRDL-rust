@@ -1,4 +1,6 @@
 {% import 'src/components/macros.jinja2' as macros %}
+//! {{ctx.module_comment}}
+
 {{macros.includes(ctx)}}
 
 {{ctx.comment}}
