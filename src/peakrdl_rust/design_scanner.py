@@ -85,9 +85,11 @@ class DesignScanner(RDLListener):
                 assert stride is not None
 
                 arr_type = "{}"
+                for dim in dims[::-1]:
+                    arr_type = f"[{arr_type}; {dim}]"
+
                 addr_offset = "i0"
                 for i, dim in enumerate(dims):
-                    arr_type = f"[{arr_type}; {dim}]"
                     if i != 0:
                         addr_offset = f"({addr_offset} * {dim}) + i{i}"
 
