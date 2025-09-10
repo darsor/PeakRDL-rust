@@ -13,6 +13,7 @@ This is a work in progress. Check back later.
 - [x] Test generator
 - [ ] Add field constants (width, offset, etc.)
 - [ ] Impl Debug for components
+- [ ] Regwidth > native integer types
 - [ ] Mem components
 - [ ] More efficient field tests
 - [ ] Fixedpoint

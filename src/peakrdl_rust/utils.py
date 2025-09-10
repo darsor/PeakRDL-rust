@@ -148,10 +148,10 @@ def field_access(node: FieldNode) -> Union[str, None]:
 def field_primitive(node: FieldNode, allow_bool: bool = True) -> str:
     if node.width == 1 and allow_bool:
         return "bool"
-    for w in (8, 16, 32, 64):
+    for w in (8, 16, 32, 64, 128):
         if w >= node.width:
             return f"u{w}"
-    raise RuntimeError("Field widths > 64 are not supported")
+    raise RuntimeError("Field widths > 128 are not supported")
 
 
 def field_reset_value(field: FieldNode) -> int:
