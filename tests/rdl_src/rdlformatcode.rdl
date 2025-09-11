@@ -1,0 +1,55 @@
+addrmap rdlformatcode {
+    reg reg_t {
+        field {} f;
+    };
+
+    reg_t r0, r1, r2, r3, r4, r5, r6, r7, r8, r9, r10, r11, r12, r13, r14;
+
+    r0->desc = "[p]asdf[/p]";
+    r1->desc = "[b]asdf[/b]";
+    r2->desc = "[i]asdf[/i]";
+    r3->desc = "[u]asdf[/u]";
+    r4->desc = "[color=red]asdf[/color]";
+    r5->desc = "[size=12]asdf[/size]";
+    r6->desc = "[url]github.com[/url]";
+    r7->desc = "[url=github.com]asdf[/url]";
+    r8->desc = "[email]asdf@example.com[/email]";
+    r9->desc = "[img]image.png[/img]";
+    r10->desc = "[code]asdf[/code]";
+    r11->desc = "[quote]asdf[/quote]";
+    r12->desc = "[br][lb][rb][sp]";
+    r13->desc = "[name]";
+    r14->desc = "[instname]";
+
+    reg_t r15[3];
+    r15->desc = "[index]";
+    r15.f->desc = "[index_parent]";
+
+    reg_t r16, r17, r18, r19;
+    r16->desc = "";
+    r17->desc = "
+    ";
+    r18->desc = "[list][*]a[*]b[*]c[/list]";
+    r19->desc = "[list=a][*]a[*]b[*]c[/list]";
+
+    reg_t r20, r21;
+    r20->desc = "[index]";
+    r21->desc = "[index_parent]";
+
+
+    r1->name = "[b]asdf[/b]";
+    r2->name = "[i]asdf[/i]";
+    r3->name = "[u]asdf[/u]";
+    r4->name = "[color=red]asdf[/color]";
+    r5->name = "[size=12]asdf[/size]";
+    r6->name = "[url]github.com[/url]";
+    r7->name = "[url=github.com]asdf[/url]";
+    r8->name = "[email]asdf@example.com[/email]";
+    r10->name = "[code]asdf[/code]";
+    r11->name = "[quote]asdf[/quote]";
+    r12->name = "[lb][rb][sp]";
+    r14->name = "[instname]";
+    r16->name = "";
+    r17->name = "
+    ";
+};

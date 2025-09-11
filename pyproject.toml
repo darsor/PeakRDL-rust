@@ -24,6 +24,12 @@ dependencies = [
     "systemrdl-compiler>=1.29.3",
 ]
 
+[dependency-groups]
+dev = [
+    "pytest>=8.4.2",
+    "pytest-xdist>=3.8.0",
+]
+
 [project.optional-dependencies]
 dependencies = ["peakrdl-cli>=1.4.0"]
 
@@ -34,6 +40,11 @@ build-backend = "hatchling.build"
 [tool.pyright]
 typeCheckingMode = "standard"
 include = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = [
+    "tests",
+]
 
 [project.entry-points."peakrdl.exporters"]
 rust = "peakrdl_rust.__peakrdl__:Exporter"
