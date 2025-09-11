@@ -33,11 +33,11 @@ impl {{ctx.type_name}} {
     pub const {{field.inst_name|upper}}_WIDTH: usize = {{field.width}};
     pub const {{field.inst_name|upper}}_MASK: u{{ctx.regwidth}} = 0x{{"%X" % field.mask}};
 
-    {% if "R" in field.access %}
     {{field.comment | indent()}}
     #[inline(always)]
     {% set return_type = "Option<" ~ field.encoding ~ ">" if field.encoding else field.primitive %}
-    pub const fn {{field.inst_name}}(&self) -> {{return_type}} {
+    {% if "R" in field.access %}pub {% endif -%}
+    const fn {{field.inst_name}}(&self) -> {{return_type}} {
         let val = (self.0 >> Self::{{field.inst_name|upper}}_OFFSET) & Self::{{field.inst_name|upper}}_MASK;
         {% if field.encoding is not none %}
         {{field.encoding}}::from_bits(val as {{field.primitive}})
@@ -49,7 +49,6 @@ impl {{ctx.type_name}} {
         val
         {% endif %}
     }
-    {% endif %}
 
     {% if "W" in field.access %}
     {{field.comment | indent()}}
@@ -66,4 +65,14 @@ impl {{ctx.type_name}} {
     {% endif %}
 
 {% endfor %}
+}
+
+impl core::fmt::Debug for {{ctx.type_name}} {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("{{ctx.type_name}}")
+            {% for field in ctx.fields %}
+            .field("{{field.inst_name}}", &self.{{field.inst_name}}())
+            {% endfor %}
+            .finish()
+    }
 }

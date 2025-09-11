@@ -12,7 +12,7 @@ This is a work in progress. Check back later.
 - [x] Impl Default for registers
 - [x] Test generator
 - [x] Add field constants (width, offset, etc.)
-- [ ] Impl Debug for components
+- [x] Impl Debug for registers
 - [ ] Add ARCHITECTURE.md
 - [ ] Find/generate additional test input
 - [ ] Automatically run tests
