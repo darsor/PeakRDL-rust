@@ -13,7 +13,7 @@ This is a work in progress. Check back later.
 - [x] Test generator
 - [x] Add field constants (width, offset, etc.)
 - [x] Impl Debug for registers
-- [ ] Add ARCHITECTURE.md
+- [x] Add ARCHITECTURE.md
 - [ ] Find/generate additional test input
 - [ ] Automatically run tests
 - [ ] Regwidth > native integer types
