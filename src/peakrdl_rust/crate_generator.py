@@ -87,6 +87,7 @@ class RegFieldInst(Instantiation):
     primitive: str  # which unsigned rust type is used to represent
     encoding: Optional[str]  # encoding enum
     bit_offset: int  # lowest bit index
+    width: int  # bit width
     mask: int  # bitmask of the width of the field
 
 

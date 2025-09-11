@@ -10,7 +10,7 @@ pub struct {{ctx.type_name}}(u{{ctx.regwidth}});
 
 impl core::default::Default for {{ctx.type_name}} {
     fn default() -> Self {
-        Self(0x{{"%x" % ctx.reset_val}})
+        Self(0x{{"%X" % ctx.reset_val}})
     }
 }
 
@@ -29,12 +29,16 @@ impl crate::reg::Register for {{ctx.type_name}} {
 
 impl {{ctx.type_name}} {
 {% for field in ctx.fields %}
+    pub const {{field.inst_name|upper}}_OFFSET: usize = {{field.bit_offset}};
+    pub const {{field.inst_name|upper}}_WIDTH: usize = {{field.width}};
+    pub const {{field.inst_name|upper}}_MASK: u{{ctx.regwidth}} = 0x{{"%X" % field.mask}};
+
     {% if "R" in field.access %}
     {{field.comment | indent()}}
     #[inline(always)]
     {% set return_type = "Option<" ~ field.encoding ~ ">" if field.encoding else field.primitive %}
     pub const fn {{field.inst_name}}(&self) -> {{return_type}} {
-        let val = (self.0 >> {{field.bit_offset}}usize) & 0x{{"%x" % field.mask}};
+        let val = (self.0 >> Self::{{field.inst_name|upper}}_OFFSET) & Self::{{field.inst_name|upper}}_MASK;
         {% if field.encoding is not none %}
         {{field.encoding}}::from_bits(val as {{field.primitive}})
         {% elif field.primitive == "bool" %}
@@ -57,7 +61,7 @@ impl {{ctx.type_name}} {
         {% else %}
         let val = val as u{{ctx.regwidth}};
         {% endif %}
-        self.0 = (self.0 & !(0x{{"%x" % field.mask}} << {{field.bit_offset}}usize)) | ((val & 0x{{"%x" % field.mask}}) << {{field.bit_offset}}usize);
+        self.0 = (self.0 & !(Self::{{field.inst_name|upper}}_MASK << Self::{{field.inst_name|upper}}_OFFSET)) | ((val & Self::{{field.inst_name|upper}}_MASK) << Self::{{field.inst_name|upper}}_OFFSET);
     }
     {% endif %}
 

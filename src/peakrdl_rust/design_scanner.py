@@ -195,6 +195,7 @@ class DesignScanner(RDLListener):
                     ),
                     encoding=encoding,
                     bit_offset=field.low,
+                    width=field.width,
                     mask=(1 << field.width) - 1,
                 )
             )
