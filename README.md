@@ -13,7 +13,11 @@ This is a work in progress. Check back later.
 - [x] Test generator
 - [ ] Add field constants (width, offset, etc.)
 - [ ] Impl Debug for components
+- [ ] Add ARCHITECTURE.md
+- [ ] Find/generate additional test input
+- [ ] Automatically run tests
 - [ ] Regwidth > native integer types
 - [ ] Mem components
 - [ ] More efficient field tests
-- [ ] Fixedpoint
+- [ ] Fixedpoint/signed UDPs
+- [ ] Set up github actions/PyPI publishing
