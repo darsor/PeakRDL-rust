@@ -1,3 +1,4 @@
+import os
 import re
 import subprocess
 from pathlib import Path
@@ -49,7 +50,10 @@ def do_export(rdl_file: Path) -> Path:
 
 
 def do_cargo_test(crate_dir: Path):
-    subprocess.run(["cargo", "test"], cwd=crate_dir, check=True)
+    # shared target directory to cache compiled dependencies
+    env = os.environ.copy()
+    env["CARGO_TARGET_DIR"] = str(Path(__file__).parent / "output" / "target")
+    subprocess.run(["cargo", "test"], cwd=crate_dir, check=True, env=env)
 
 
 @pytest.mark.parametrize("rdl_file", get_rdl_files(), ids=lambda file: file.stem)
