@@ -77,7 +77,8 @@ class DesignScanner(RDLListener):
         named_type_instances: List[Tuple[str, str]] = []
 
         for child in node.children():
-            assert isinstance(child, AddressableNode)
+            if not isinstance(child, AddressableNode):
+                continue
             inst_name = kw_filter(snakecase(child.inst_name))
             if child.is_array:
                 dims = child.array_dimensions
@@ -109,13 +110,15 @@ class DesignScanner(RDLListener):
                 addr_offset = child.address_offset
 
             if isinstance(child, RegNode):
-                if (access := utils.reg_access(child)) is None:
+                if not (access := utils.reg_access(child)):
                     continue
                 registers.append(
                     AddrmapRegInst(
                         comment=utils.doc_comment(child),
                         inst_name=inst_name,
-                        type_name=inst_name + "::" + pascalcase(child.type_name),
+                        type_name=inst_name
+                        + "::"
+                        + pascalcase(utils.rust_type_name(child)),
                         array=array,
                         addr_offset=addr_offset,
                         access=access,
@@ -126,7 +129,9 @@ class DesignScanner(RDLListener):
                     AddrmapSubmapInst(
                         comment=utils.doc_comment(child),
                         inst_name=inst_name,
-                        type_name=inst_name + "::" + pascalcase(child.type_name),
+                        type_name=inst_name
+                        + "::"
+                        + pascalcase(utils.rust_type_name(child)),
                         array=array,
                         addr_offset=addr_offset,
                     )
@@ -150,7 +155,7 @@ class DesignScanner(RDLListener):
             anon_instances=anon_instances,
             named_type_instances=named_type_instances,
             named_type_declarations=[],
-            type_name=pascalcase(node.inst_name),
+            type_name=pascalcase(utils.rust_type_name(node)),
             registers=registers,
             submaps=submaps,
             size=node.size,
@@ -209,7 +214,7 @@ class DesignScanner(RDLListener):
             named_type_instances=[],
             named_type_declarations=[],
             use_statements=[],
-            type_name=pascalcase(node.type_name),
+            type_name=pascalcase(utils.rust_type_name(node)),
             regwidth=node.get_property("regwidth"),
             accesswidth=node.get_property("accesswidth"),
             reset_val=reg_reset_val,
@@ -222,9 +227,7 @@ class DesignScanner(RDLListener):
         if utils.is_anonymous(node) or isinstance(node, FieldNode):
             return WalkerAction.Continue
 
-        type_name = node.type_name
-        assert type_name is not None
-        type_name = kw_filter(snakecase(type_name))
+        type_name = kw_filter(snakecase(utils.rust_type_name(node)))
 
         parent = utils.parent_scope(node)
         assert parent is not None

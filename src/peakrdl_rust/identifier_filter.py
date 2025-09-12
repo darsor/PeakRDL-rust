@@ -1,17 +1,61 @@
 RUST_KEYWORDS = {
     # Base
-    "as", "break", "const", "continue", "crate", "else", "enum", "extern", "false",
-    "fn", "for", "if", "impl", "in", "let", "loop", "match", "mod", "move", "mut",
-    "pub", "ref", "return", "self", "Self", "static", "struct", "super", "trait",
-    "true", "type", "unsafe", "use", "where", "while",
-
+    "as",
+    "break",
+    "const",
+    "continue",
+    "crate",
+    "else",
+    "enum",
+    "extern",
+    "false",
+    "fn",
+    "for",
+    "if",
+    "impl",
+    "in",
+    "let",
+    "loop",
+    "match",
+    "mod",
+    "move",
+    "mut",
+    "pub",
+    "ref",
+    "return",
+    "self",
+    "Self",
+    "static",
+    "struct",
+    "super",
+    "trait",
+    "true",
+    "type",
+    "unsafe",
+    "use",
+    "where",
+    "while",
     # 2018 edition
-    "async", "await", "dyn",
-
+    "async",
+    "await",
+    "dyn",
     # Reserved keywords
-    "abstract", "become", "box", "do", "final", "macro", "override", "priv", "typeof",
-    "unsized", "virtual", "yield", "try", "gen",
+    "abstract",
+    "become",
+    "box",
+    "do",
+    "final",
+    "macro",
+    "override",
+    "priv",
+    "typeof",
+    "unsized",
+    "virtual",
+    "yield",
+    "try",
+    "gen",
 }
+
 
 def kw_filter(s: str) -> str:
     """
@@ -21,5 +65,5 @@ def kw_filter(s: str) -> str:
     If a Rust keyword is encountered, add an underscore suffix
     """
     if s in RUST_KEYWORDS:
-        s += "_"
+        s = f"r#{s}"
     return s

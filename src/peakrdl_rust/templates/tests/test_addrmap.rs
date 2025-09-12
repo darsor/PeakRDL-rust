@@ -40,8 +40,12 @@ fn test_{{ctx.name}}() {
     // Test {{field.name}} with pattern: {{pattern.description}}
     {% if pattern.raw_write %}
     memory.at_mut(0x{{"%X" % field.address}}).write_field::<{{field.primitive}}>(field_range.clone(), {{pattern.raw_value}});
-    {% else %}
+    {% elif "R" in field.reg_access %}
     dut.{{field.reg_method}}.modify(|r| {
+        r.set_{{field.name}}({{pattern.value}});
+    });
+    {% else %}
+    dut.{{field.reg_method}}.write(|r| {
         r.set_{{field.name}}({{pattern.value}});
     });
     {% endif %}

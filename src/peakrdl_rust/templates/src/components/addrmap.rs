@@ -53,7 +53,7 @@ impl {{ctx.type_name}} {
     #[inline(always)]
     {% if node.array is none %}
     pub const fn {{node.inst_name}}(&self) -> {{node.type_name}} {
-        unsafe { node.type_name::from_ptr(self.ptr.byte_add(0x{{"%x" % node.addr_offset}}) as _) }
+        unsafe { {{node.type_name}}::from_ptr(self.ptr.byte_add(0x{{"%x" % node.addr_offset}}) as _) }
     }
     {% else %}
     pub const fn {{node.inst_name}}(&self) -> {{node.array.type.format(node.type_name)}} {

@@ -56,6 +56,18 @@ def parent_scope(node: Node) -> Union[Node, None]:
         current_parent_node = current_parent_node.parent
 
 
+def rust_type_name(node: Node) -> str:
+    """The SystemRDL compiler adds unique identifiers to any type name
+    if properties are dynamically set. But anonymous instances can not be
+    reused, and don't need to be uniquified. If the node is anonymously defined,
+    use the instance name as the type name (ignoring the unique suffix)."""
+    if is_anonymous(node):
+        return node.inst_name
+    else:
+        assert node.type_name is not None
+        return node.type_name
+
+
 def enum_parent_scope(node: FieldNode, encoding: type[UserEnum]) -> Union[Node, None]:
     """Get the node within which a field's enum type is declared."""
     assert node.get_property("encode") is encoding
@@ -80,8 +92,7 @@ def enum_parent_scope(node: FieldNode, encoding: type[UserEnum]) -> Union[Node, 
 def crate_module_path(node: Node) -> List[str]:
     parent = parent_scope(node)
     assert parent is not None
-    assert node.type_name is not None
-    type_name = kw_filter(snakecase(node.type_name))
+    type_name = kw_filter(snakecase(rust_type_name(node)))
     if isinstance(parent, RootNode):
         return [type_name]
     parent_path = crate_module_path(parent)
@@ -119,7 +130,7 @@ def crate_enum_module_path(field: FieldNode, enum: type[UserEnum]) -> List[str]:
         return parent_modules + ["named_types", module_name]
 
 
-def reg_access(node: RegNode) -> Union[str, None]:
+def reg_access(node: RegNode) -> str:
     if node.has_sw_readable:
         if node.has_sw_writable:
             return "RW"
@@ -129,7 +140,7 @@ def reg_access(node: RegNode) -> Union[str, None]:
         if node.has_sw_writable:
             return "W"
         else:
-            return None
+            return ""
 
 
 def field_access(node: FieldNode) -> Union[str, None]:
@@ -192,7 +203,8 @@ def dut_access_method(node: AddressableNode) -> str:
         idx = seg.find("[")
         if idx == -1:
             # not an array
-            called_segments.append(seg + "()")
+            called_segments.append(kw_filter(snakecase(seg)) + "()")
         else:
-            called_segments.append(seg[:idx] + "()" + seg[idx:])
+            name = kw_filter(snakecase(seg[:idx]))
+            called_segments.append(name + "()" + seg[idx:])
     return ".".join(called_segments)

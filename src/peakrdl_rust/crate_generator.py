@@ -4,12 +4,6 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import ClassVar, List, Optional, Tuple, Union
 
-from systemrdl.node import (
-    AddrmapNode,
-    MemNode,
-    RegfileNode,
-)
-
 from .design_state import DesignState
 
 

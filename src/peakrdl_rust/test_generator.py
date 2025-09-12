@@ -39,6 +39,7 @@ class TestField:
     bit_offset: int  # low bit within register
     width: int  # bit width
     reg_width: int
+    reg_access: str
     is_readable: bool
     test_patterns: List[TestPattern]
 
@@ -158,6 +159,7 @@ class TestScanner(RDLListener):
                 bit_offset=node.low,
                 width=node.width,
                 reg_width=node.parent.get_property("regwidth"),
+                reg_access=utils.reg_access(node.parent),
                 is_readable=node.is_sw_readable,
                 test_patterns=generate_test_patterns(node),
             )
@@ -197,7 +199,7 @@ def write_tests(ds: DesignState):
 
         component = TestComponent(
             name=kw_filter(snakecase(top.inst_name)),
-            type_name=pascalcase(top.type_name),
+            type_name=pascalcase(utils.rust_type_name(top)),
             fields=scanner.test_fields,
             addresses=scanner.test_addrs,
         )
