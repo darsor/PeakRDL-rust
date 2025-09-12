@@ -1,12 +1,15 @@
 import re
 import subprocess
 from pathlib import Path
-from typing import List
+from typing import TYPE_CHECKING, List
 
 import pytest
 from systemrdl.compiler import RDLCompiler
 
 from peakrdl_rust.exporter import RustExporter
+
+if TYPE_CHECKING:
+    from systemrdl.node import AddrmapNode
 
 
 def get_rdl_files() -> List[Path]:
@@ -30,14 +33,14 @@ def do_export(rdl_file: Path) -> Path:
     rdlc = RDLCompiler()
     rdlc.compile_file(str(rdl_file))
 
-    top_nodes = []
+    top_nodes: List[AddrmapNode] = []
     for name in addrmap_names:
         root_node = rdlc.elaborate(top_def_name=name)
         top_nodes.append(root_node.top)
 
     x = RustExporter()
     x.export(
-        top_nodes[0],
+        top_nodes,
         path=str(crate_dir),
         force=True,
     )

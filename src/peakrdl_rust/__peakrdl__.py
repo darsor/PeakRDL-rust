@@ -32,20 +32,6 @@ class Exporter(ExporterSubcommandPlugin):
         )
 
         arg_group.add_argument(
-            "-x",
-            "--explode-top",
-            action="store_true",
-            default=False,
-            help="""
-            If set, the top-level hierarchy is skipped. Instead, definitions for
-            all the direct children are generated.
-
-            Note that only block-like definitions are generated.
-            i.e: children that are registers are skipped.
-            """,
-        )
-
-        arg_group.add_argument(
             "-i",
             "--instantiate",
             action="store_true",
@@ -84,7 +70,6 @@ class Exporter(ExporterSubcommandPlugin):
             top_node,
             path=options.output,
             force=options.force,
-            explode_top=options.explode_top,
             instantiate=options.instantiate,
             inst_offset=options.inst_offset,
             no_fmt=options.no_fmt,

@@ -1,6 +1,6 @@
 import shutil
 import subprocess
-from typing import Any, Union
+from typing import Any, List, Union
 
 from systemrdl.node import AddrmapNode, MemNode, RegfileNode, RootNode
 
@@ -9,12 +9,13 @@ from .design_scanner import DesignScanner
 from .design_state import DesignState
 from .test_generator import write_tests
 
-# from .design_scanner import DesignScanner
-
 
 class RustExporter:
     def export(
-        self, node: Union[RootNode, AddrmapNode], path: str, **kwargs: Any
+        self,
+        node: Union[RootNode, AddrmapNode, List[AddrmapNode]],
+        path: str,
+        **kwargs: Any,
     ) -> None:
         """
         Parameters
@@ -25,12 +26,6 @@ class RustExporter:
             Output directory for generated crate.
         force: bool
             Overwrite the contents of the output directory if it already exists.
-        explode_top: bool
-            If set, the top-level hiearchy is skipped. Instead, definitions for
-            all the direct children are generated.
-
-            Note that only block-like definitons are generated.
-            i.e: children that are registers are skipped.
         instantiate: bool
             If set, header will also include a macro that instantiates each top-level
             block at a defined hardware address, allowing for direct access.
@@ -41,11 +36,13 @@ class RustExporter:
         """
         # If it is the root node, skip to top addrmap
         if isinstance(node, RootNode):
-            top_node = node.top
+            top_nodes = [node.top]
+        elif isinstance(node, AddrmapNode):
+            top_nodes = [node]
         else:
-            top_node = node
+            top_nodes = node
 
-        ds = DesignState(top_node, path, kwargs)
+        ds = DesignState(top_nodes, path, kwargs)
 
         # Check for stray kwargs
         if kwargs:
@@ -66,14 +63,6 @@ class RustExporter:
         # Collect info for export
         DesignScanner(ds).run()
 
-        top_nodes = []
-        if ds.explode_top:
-            for child in top_node.children():
-                if isinstance(child, (AddrmapNode, MemNode, RegfileNode)):
-                    top_nodes.append(child)
-        else:
-            top_nodes.append(top_node)
-
         if ds.output_dir.exists() and (
             not ds.output_dir.is_dir() or any(ds.output_dir.iterdir())
         ):
@@ -84,10 +73,10 @@ class RustExporter:
                 ds.output_dir.unlink()
 
         # Write crate modules
-        write_crate(top_nodes, ds)
+        write_crate(ds)
 
         # Generate integration tests
-        write_tests(top_nodes, ds)
+        write_tests(ds)
 
         if not ds.no_fmt:
             result = subprocess.run(["cargo", "fmt"], cwd=ds.output_dir)

@@ -133,9 +133,7 @@ class Enum(Component):
     variants: List[EnumVariant]
 
 
-def write_crate(
-    top_nodes: List[Union[AddrmapNode, MemNode, RegfileNode]], ds: DesignState
-):
+def write_crate(ds: DesignState):
     # Cargo.toml
     cargo_toml_path = ds.output_dir / "Cargo.toml"
     cargo_toml_path.parent.mkdir(parents=True, exist_ok=True)
@@ -155,7 +153,9 @@ def write_crate(
     reg_rs_path.parent.mkdir(parents=True, exist_ok=True)
     with reg_rs_path.open("w") as f:
         context = {
-            "endianness": "le" if ds.top_node.get_property("littleendian") else "be",
+            "endianness": "le"
+            if ds.top_nodes[0].get_property("littleendian")
+            else "be",
         }
         template = ds.jj_env.get_template("src/reg.rs")
         template.stream(context).dump(f)  # type: ignore # jinja incorrectly typed

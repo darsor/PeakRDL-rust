@@ -32,14 +32,15 @@ from .identifier_filter import kw_filter
 class DesignScanner(RDLListener):
     def __init__(self, ds: DesignState) -> None:
         self.ds = ds
-        self.msg = ds.top_node.env.msg
+        self.msg = ds.top_nodes[0].env.msg
 
     @property
-    def top_node(self) -> AddrmapNode:
-        return self.ds.top_node
+    def top_nodes(self) -> List[AddrmapNode]:
+        return self.ds.top_nodes
 
     def run(self) -> None:
-        RDLWalker().walk(self.top_node, self)
+        for node in self.top_nodes:
+            RDLWalker().walk(node, self)
         if self.msg.had_error:
             self.msg.fatal("Unable to export due to previous errors")
 

@@ -10,7 +10,7 @@ if TYPE_CHECKING:
 
 
 class DesignState:
-    def __init__(self, top_node: AddrmapNode, path: str, kwargs: Any) -> None:
+    def __init__(self, top_nodes: List[AddrmapNode], path: str, kwargs: Any) -> None:
         loader = jj.FileSystemLoader(
             os.path.join(os.path.dirname(__file__), "templates")
         )
@@ -21,7 +21,7 @@ class DesignState:
             lstrip_blocks=True,
         )
 
-        self.top_node = top_node
+        self.top_nodes = top_nodes
         self.output_dir = Path(path)
         self.template_dir = Path(__file__).parent / "templates"
 
@@ -44,9 +44,6 @@ class DesignState:
         # ------------------------
         self.force: bool
         self.force = kwargs.pop("force", False)
-
-        self.explode_top: bool
-        self.explode_top = kwargs.pop("explode_top", False)
 
         self.instantiate: bool
         self.instantiate = kwargs.pop("instantiate", False)

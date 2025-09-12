@@ -180,7 +180,7 @@ class TestScanner(RDLListener):
         return WalkerAction.Continue
 
 
-def write_tests(top_nodes: List[Union[AddrmapNode, RegfileNode]], ds: DesignState):
+def write_tests(ds: DesignState):
     """Generate test files for the top-level components"""
     tests_dir = ds.output_dir / "tests"
 
@@ -191,7 +191,7 @@ def write_tests(top_nodes: List[Union[AddrmapNode, RegfileNode]], ds: DesignStat
         tests_dir / "memory" / "mod.rs",
     )
 
-    for top in top_nodes:
+    for top in ds.top_nodes:
         scanner = TestScanner(top)
         scanner.run()
 
