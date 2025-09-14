@@ -55,7 +55,7 @@ class Array:
 
 
 @dataclass
-class AddrmapRegInst(Instantiation):
+class RegisterInst(Instantiation):
     """Register instantiated within an Addrmap"""
 
     # address offset from parent component, only used if array is None
@@ -65,7 +65,7 @@ class AddrmapRegInst(Instantiation):
 
 
 @dataclass
-class AddrmapSubmapInst(Instantiation):
+class SubmapInst(Instantiation):
     """Addrmap or Regfile instantiated within an Addrmap"""
 
     # address offset from parent component, only used if array is None
@@ -74,7 +74,16 @@ class AddrmapSubmapInst(Instantiation):
 
 
 @dataclass
-class RegFieldInst(Instantiation):
+class MemoryInst(Instantiation):
+    """Memory instantiated within an Addrmap"""
+
+    # address offset from parent component, only used if array is None
+    addr_offset: Optional[int]
+    array: Optional[Array]
+
+
+@dataclass
+class FieldInst(Instantiation):
     """Field instantiated within a Register"""
 
     access: Union[str, None]  # "R", "W", "RW", or None
@@ -92,8 +101,22 @@ class Addrmap(Component):
 
     template: ClassVar[str] = "src/components/addrmap.rs"
 
-    registers: List[AddrmapRegInst]
-    submaps: List[AddrmapSubmapInst]
+    registers: List[RegisterInst]
+    submaps: List[SubmapInst]
+    memories: List[MemoryInst]
+    size: int
+
+
+@dataclass
+class Memory(Component):
+    """Memory component, defined in its own Rust module."""
+
+    template: ClassVar[str] = "src/components/memory.rs"
+
+    mementries: int
+    memwidth: int
+    primitive: str
+    registers: List[RegisterInst]
     size: int
 
 
@@ -101,12 +124,12 @@ class Addrmap(Component):
 class Register(Component):
     """Register component, defined in its own Rust module"""
 
-    template: ClassVar[str] = "src/components/reg.rs"
+    template: ClassVar[str] = "src/components/register.rs"
 
     regwidth: int
     accesswidth: int
     reset_val: int
-    fields: List[RegFieldInst]
+    fields: List[FieldInst]
 
 
 @dataclass
@@ -142,6 +165,11 @@ def write_crate(ds: DesignState):
 
     # .gitignore
     shutil.copyfile(ds.template_dir / ".gitignore", ds.output_dir / ".gitignore")
+
+    # src/mem.rs
+    mem_rs_path = ds.output_dir / "src" / "mem.rs"
+    mem_rs_path.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copyfile(ds.template_dir / "src" / "mem.rs", mem_rs_path)
 
     # src/reg.rs
     reg_rs_path = ds.output_dir / "src" / "reg.rs"

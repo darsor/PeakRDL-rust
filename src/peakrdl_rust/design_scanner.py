@@ -1,3 +1,4 @@
+import math
 from pathlib import Path
 from typing import List, Optional, Tuple, Union
 
@@ -6,6 +7,7 @@ from systemrdl.node import (
     AddressableNode,
     AddrmapNode,
     FieldNode,
+    MemNode,
     Node,
     RegfileNode,
     RegNode,
@@ -17,13 +19,15 @@ from systemrdl.walker import RDLListener, RDLWalker, WalkerAction
 from . import utils
 from .crate_generator import (
     Addrmap,
-    AddrmapRegInst,
-    AddrmapSubmapInst,
     Array,
     Enum,
     EnumVariant,
-    RegFieldInst,
+    FieldInst,
+    Memory,
+    MemoryInst,
     Register,
+    RegisterInst,
+    SubmapInst,
 )
 from .design_state import DesignState
 from .identifier_filter import kw_filter
@@ -63,16 +67,17 @@ class DesignScanner(RDLListener):
             / Path(*module_names).with_suffix(".rs")
         )
 
-    def enter_addrmap_or_regfile(
-        self, node: Union[AddrmapNode, RegfileNode]
+    def enter_addrmap_or_regfile_or_memory(
+        self, node: Union[AddrmapNode, RegfileNode, MemNode]
     ) -> Optional[WalkerAction]:
         file = self.get_node_module_file(node)
         if file in self.ds.components:
             # already handled
             return WalkerAction.SkipDescendants
 
-        registers: List[AddrmapRegInst] = []
-        submaps: List[AddrmapSubmapInst] = []
+        registers: List[RegisterInst] = []
+        submaps: List[SubmapInst] = []
+        memories: List[MemoryInst] = []
         anon_instances: List[str] = []
         named_type_instances: List[Tuple[str, str]] = []
 
@@ -113,7 +118,7 @@ class DesignScanner(RDLListener):
                 if not (access := utils.reg_access(child)):
                     continue
                 registers.append(
-                    AddrmapRegInst(
+                    RegisterInst(
                         comment=utils.doc_comment(child),
                         inst_name=inst_name,
                         type_name=inst_name
@@ -126,7 +131,19 @@ class DesignScanner(RDLListener):
                 )
             elif isinstance(child, (AddrmapNode, RegfileNode)):
                 submaps.append(
-                    AddrmapSubmapInst(
+                    SubmapInst(
+                        comment=utils.doc_comment(child),
+                        inst_name=inst_name,
+                        type_name=inst_name
+                        + "::"
+                        + pascalcase(utils.rust_type_name(child)),
+                        array=array,
+                        addr_offset=addr_offset,
+                    )
+                )
+            elif isinstance(child, MemNode):
+                memories.append(
+                    MemoryInst(
                         comment=utils.doc_comment(child),
                         inst_name=inst_name,
                         type_name=inst_name
@@ -146,38 +163,61 @@ class DesignScanner(RDLListener):
                 scoped_module = "::".join(["crate", "components"] + module_names)
                 named_type_instances.append((inst_name, scoped_module))
 
-        comp_type_name = "Addrmap" if isinstance(node, AddrmapNode) else "Regfile"
-        self.ds.components[file] = Addrmap(
-            file=file,
-            module_comment=f"{comp_type_name}: {node.get_property('name')}",
-            comment=utils.doc_comment(node),
-            use_statements=[],
-            anon_instances=anon_instances,
-            named_type_instances=named_type_instances,
-            named_type_declarations=[],
-            type_name=pascalcase(utils.rust_type_name(node)),
-            registers=registers,
-            submaps=submaps,
-            size=node.size,
-        )
+        if isinstance(node, (AddrmapNode, RegfileNode)):
+            comp_type_name = "Addrmap" if isinstance(node, AddrmapNode) else "Regfile"
+            self.ds.components[file] = Addrmap(
+                file=file,
+                module_comment=f"{comp_type_name}: {node.get_property('name')}",
+                comment=utils.doc_comment(node),
+                use_statements=[],
+                anon_instances=anon_instances,
+                named_type_instances=named_type_instances,
+                named_type_declarations=[],
+                type_name=pascalcase(utils.rust_type_name(node)),
+                registers=registers,
+                submaps=submaps,
+                memories=memories,
+                size=node.size,
+            )
+        else:
+            assert len(submaps) == 0
+            assert len(memories) == 0
+            memwidth = node.get_property("memwidth")
+            primitive_width = 2 ** int(math.ceil(math.log2(memwidth)))
+            self.ds.components[file] = Memory(
+                file=file,
+                module_comment=f"Memory: {node.get_property('name')}",
+                comment=utils.doc_comment(node),
+                use_statements=[],
+                anon_instances=anon_instances,
+                named_type_instances=named_type_instances,
+                named_type_declarations=[],
+                type_name=pascalcase(utils.rust_type_name(node)),
+                mementries=node.get_property("mementries"),
+                memwidth=memwidth,
+                primitive=f"u{primitive_width}",
+                registers=registers,
+                size=node.size,
+            )
         return WalkerAction.Continue
 
     def enter_Addrmap(self, node: AddrmapNode) -> Optional[WalkerAction]:
-        return self.enter_addrmap_or_regfile(node)
+        return self.enter_addrmap_or_regfile_or_memory(node)
 
     def enter_Regfile(self, node: RegfileNode) -> Optional[WalkerAction]:
-        return self.enter_addrmap_or_regfile(node)
+        return self.enter_addrmap_or_regfile_or_memory(node)
+
+    def enter_Mem(self, node: MemNode) -> Optional[WalkerAction]:
+        return self.enter_addrmap_or_regfile_or_memory(node)
 
     def enter_Reg(self, node: RegNode) -> Optional[WalkerAction]:
-        # TODO: enforce max regwidth of 64
-
         file = self.get_node_module_file(node)
         if file in self.ds.components:
             # already handled
             return WalkerAction.SkipDescendants
 
         reg_reset_val = 0
-        fields: List[RegFieldInst] = []
+        fields: List[FieldInst] = []
         for field in node.fields():
             encoding = field.get_property("encode")
             if encoding is not None:
@@ -215,7 +255,7 @@ class DesignScanner(RDLListener):
                     reset_val = "true" if reset_val else "false"
 
             fields.append(
-                RegFieldInst(
+                FieldInst(
                     comment=utils.doc_comment(field),
                     inst_name=snakecase(field.inst_name),
                     type_name="TODO",
@@ -278,7 +318,7 @@ class DesignScanner(RDLListener):
 
         if declaring_parent is field:
             # Enum used in the same field where it's defined. Its definition can't
-            # be reused, so it's consider an anonymous type even though it has a name.
+            # be reused, so consider it an anonymous type even though it has a name.
             owning_reg = self.file_from_modules(module_names[:-1])
             assert owning_reg in self.ds.components
             utils.append_unique(

@@ -36,4 +36,28 @@ addrmap memories {
         sw = rw;
     } mem_5_64_rw;
 
+    external mem {
+        mementries = 5;
+        memwidth = 64;
+        sw = rw;
+    } mem_array[3] += 0x100;
+
+    reg virt_reg {
+        field {} a;
+        field {} b[31:1];
+    };
+
+    external mem {
+        mementries = 5;
+        memwidth = 32;
+        sw = rw;
+        reg virt1_t {
+            regwidth = 32;
+            accesswidth = 32;
+            field {} a;
+            field {} b[31:1];
+        };
+        virt1_t virt;
+        virt_reg virt2[4];
+    } mem_virt_registers;
 };

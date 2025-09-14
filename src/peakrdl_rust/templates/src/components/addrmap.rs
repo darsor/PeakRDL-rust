@@ -69,4 +69,26 @@ impl {{ctx.type_name}} {
     {% endif %}
 
 {% endfor %}
+
+{% for mem in ctx.memories %}
+    {{mem.comment | indent()}}
+    #[inline(always)]
+    {% if mem.array is none %}
+    pub const fn {{mem.inst_name}}(&self) -> {{mem.type_name}} {
+        unsafe { {{mem.type_name}}::from_ptr(self.ptr.byte_add(0x{{"%x" % mem.addr_offset}}) as _) }
+    }
+    {% else %}
+    pub const fn {{mem.inst_name}}(&self) -> {{mem.array.type.format(mem.type_name)}} {
+        // SAFETY: We will initialize every element before using the array
+        let mut array = {{mem.array.type.format("core::mem::MaybeUninit::uninit()")}};
+
+        {% set expr = "unsafe { " ~ mem.type_name ~ "::from_ptr(self.ptr.byte_add(" ~ mem.array.addr_offset ~ ") as _) }"  %}
+        {{ macros.loop(0, mem.array.dims, expr) | indent(8) }}
+
+        // SAFETY: All elements have been initialized above
+        unsafe { core::mem::transmute(array) }
+    }
+    {% endif %}
+
+{% endfor %}
 }

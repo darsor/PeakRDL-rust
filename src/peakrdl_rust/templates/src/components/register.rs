@@ -8,6 +8,9 @@
 #[derive(Copy, Clone, Eq, PartialEq)]
 pub struct {{ctx.type_name}}(u{{ctx.regwidth}});
 
+unsafe impl Send for {{ctx.type_name}} {}
+unsafe impl Sync for {{ctx.type_name}} {}
+
 impl core::default::Default for {{ctx.type_name}} {
     fn default() -> Self {
         Self(0x{{"%X" % ctx.reset_val}})
