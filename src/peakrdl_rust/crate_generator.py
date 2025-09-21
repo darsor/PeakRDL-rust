@@ -148,9 +148,9 @@ def write_crate(ds: DesignState):
     reg_rs_path.parent.mkdir(parents=True, exist_ok=True)
     with reg_rs_path.open("w") as f:
         context = {
-            "endianness": "le"
-            if ds.top_nodes[0].get_property("littleendian")
-            else "be",
+            "endianness": "be"
+            if ds.top_nodes[0].get_property("bigendian")
+            else "le",
         }
         template = ds.jj_env.get_template("src/reg.rs")
         template.stream(context).dump(f)  # type: ignore # jinja incorrectly typed
