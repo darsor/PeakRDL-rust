@@ -76,3 +76,16 @@ impl core::fmt::Debug for {{ctx.type_name}} {
             .finish()
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_default() {
+        let reg = {{ctx.type_name}}::default();
+        {% for field in ctx.fields %}
+        assert_eq!(reg.{{field.inst_name}}(), {{field.reset_val}});
+        {% endfor %}
+    }
+}

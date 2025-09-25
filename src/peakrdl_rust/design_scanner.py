@@ -181,14 +181,38 @@ class DesignScanner(RDLListener):
         for field in node.fields():
             encoding = field.get_property("encode")
             if encoding is not None:
-                encoding = (
+                encoding_name = (
                     kw_filter(snakecase(field.inst_name))
                     + "::"
                     + pascalcase(encoding.type_name)
                 )
+            else:
+                encoding_name = None
+
+            primitive = utils.field_primitive(field, allow_bool=(encoding is None))
 
             reset_val = utils.field_reset_value(field)
             reg_reset_val |= reset_val << field.low
+            if encoding is not None:
+                for variant_name, variant_value in encoding.members.items():
+                    if int(variant_value) == reset_val:
+                        reset_val = (
+                            "Some("
+                            + kw_filter(snakecase(field.inst_name))
+                            + "::"
+                            + pascalcase(encoding.type_name)
+                            + "::"
+                            + pascalcase(variant_name)
+                            + ")"
+                        )
+                        break
+                if isinstance(reset_val, int):
+                    # specified (or unspecified default 0) reset value is not a valid
+                    # encoding
+                    reset_val = "None"
+            else:
+                if primitive == "bool":
+                    reset_val = "true" if reset_val else "false"
 
             fields.append(
                 RegFieldInst(
@@ -196,13 +220,12 @@ class DesignScanner(RDLListener):
                     inst_name=snakecase(field.inst_name),
                     type_name="TODO",
                     access=utils.field_access(field),
-                    primitive=utils.field_primitive(
-                        field, allow_bool=(encoding is None)
-                    ),
-                    encoding=encoding,
+                    primitive=primitive,
+                    encoding=encoding_name,
                     bit_offset=field.low,
                     width=field.width,
                     mask=(1 << field.width) - 1,
+                    reset_val=reset_val,
                 )
             )
 
