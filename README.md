@@ -14,10 +14,10 @@ This is a work in progress. Check back later.
 - [x] Add field constants (width, offset, etc.)
 - [x] Impl Debug for registers
 - [x] Add ARCHITECTURE.md
-- [ ] Find/generate additional test input
+- [x] Find/generate additional test input
+- [x] Mem components
+- [x] More efficient field tests
+- [ ] Set up github actions/PyPI publishing
 - [ ] Automatically run tests
 - [ ] Regwidth > native integer types
-- [ ] Mem components
-- [ ] More efficient field tests
 - [ ] Fixedpoint/signed UDPs
-- [ ] Set up github actions/PyPI publishing
