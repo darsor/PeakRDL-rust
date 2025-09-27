@@ -1,4 +1,3 @@
-import os
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
@@ -11,9 +10,7 @@ if TYPE_CHECKING:
 
 class DesignState:
     def __init__(self, top_nodes: list[AddrmapNode], path: str, kwargs: Any) -> None:
-        loader = jj.FileSystemLoader(
-            os.path.join(os.path.dirname(__file__), "templates")
-        )
+        loader = jj.FileSystemLoader(Path(__file__).resolve().parent / "templates")
         self.jj_env = jj.Environment(
             loader=loader,
             undefined=jj.StrictUndefined,
@@ -22,8 +19,8 @@ class DesignState:
         )
 
         self.top_nodes = top_nodes
-        self.output_dir = Path(path)
-        self.template_dir = Path(__file__).parent / "templates"
+        self.output_dir = Path(path).resolve()
+        self.template_dir = Path(__file__).resolve().parent / "templates"
 
         # ------------------------
         # Info about the design

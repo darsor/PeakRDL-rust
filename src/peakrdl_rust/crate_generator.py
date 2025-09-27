@@ -92,7 +92,7 @@ class FieldInst(Instantiation):
     bit_offset: int  # lowest bit index
     width: int  # bit width
     mask: int  # bitmask of the width of the field
-    reset_val: str
+    reset_val: Union[int, str]
 
 
 @dataclass
