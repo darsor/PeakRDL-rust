@@ -2,7 +2,7 @@ import os
 import re
 import subprocess
 from pathlib import Path
-from typing import TYPE_CHECKING, List
+from typing import TYPE_CHECKING, list
 
 import pytest
 from systemrdl.compiler import RDLCompiler
@@ -13,7 +13,7 @@ if TYPE_CHECKING:
     from systemrdl.node import AddrmapNode
 
 
-def get_rdl_files() -> List[Path]:
+def get_rdl_files() -> list[Path]:
     rdl_src_dir = Path(__file__).parent / "rdl_src"
     return [file for file in rdl_src_dir.glob("*.rdl")]
 
@@ -23,7 +23,7 @@ def do_export(rdl_file: Path) -> Path:
     crate_dir.mkdir(exist_ok=True)
 
     # Read the file to find top-level addrmap definitions
-    with open(rdl_file, "r") as f:
+    with open(rdl_file) as f:
         content = f.read()
 
     # Use regex to find top-level addrmap names
@@ -34,7 +34,7 @@ def do_export(rdl_file: Path) -> Path:
     rdlc = RDLCompiler()
     rdlc.compile_file(str(rdl_file))
 
-    top_nodes: List[AddrmapNode] = []
+    top_nodes: list[AddrmapNode] = []
     for name in addrmap_names:
         root_node = rdlc.elaborate(top_def_name=name)
         top_nodes.append(root_node.top)

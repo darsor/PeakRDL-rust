@@ -2,7 +2,7 @@ import abc
 import shutil
 from dataclasses import dataclass
 from pathlib import Path
-from typing import ClassVar, List, Optional, Tuple, Union
+from typing import ClassVar, Optional, Union
 
 from .design_state import DesignState
 
@@ -17,16 +17,16 @@ class Component(abc.ABC):
     module_comment: str
     comment: str
     # anonymous components used in the body of this addrmap
-    anon_instances: List[str]
+    anon_instances: list[str]
     # component types declared in the body of this addrmap
-    named_type_declarations: List[str]
+    named_type_declarations: list[str]
     # named component types used in the body of this addrmap
     # (instance name, full type module path)
-    named_type_instances: List[Tuple[str, str]]
-    use_statements: List[str]
+    named_type_instances: list[tuple[str, str]]
+    use_statements: list[str]
     type_name: str
 
-    def render(self, ds: DesignState):
+    def render(self, ds: DesignState) -> None:
         self.file.parent.mkdir(parents=True, exist_ok=True)
         with self.file.open("w") as f:
             template = ds.jj_env.get_template(self.template)
@@ -92,7 +92,7 @@ class FieldInst(Instantiation):
     bit_offset: int  # lowest bit index
     width: int  # bit width
     mask: int  # bitmask of the width of the field
-    reset_val: Union[int, str]
+    reset_val: str
 
 
 @dataclass
@@ -101,9 +101,9 @@ class Addrmap(Component):
 
     template: ClassVar[str] = "src/components/addrmap.rs"
 
-    registers: List[RegisterInst]
-    submaps: List[SubmapInst]
-    memories: List[MemoryInst]
+    registers: list[RegisterInst]
+    submaps: list[SubmapInst]
+    memories: list[MemoryInst]
     size: int
 
 
@@ -116,7 +116,7 @@ class Memory(Component):
     mementries: int
     memwidth: int
     primitive: str
-    registers: List[RegisterInst]
+    registers: list[RegisterInst]
     size: int
 
 
@@ -129,7 +129,7 @@ class Register(Component):
     regwidth: int
     accesswidth: int
     reset_val: int
-    fields: List[FieldInst]
+    fields: list[FieldInst]
 
 
 @dataclass
@@ -148,10 +148,10 @@ class Enum(Component):
     template: ClassVar[str] = "src/components/enum.rs"
 
     primitive: str  # which unsigned rust type is used to represent
-    variants: List[EnumVariant]
+    variants: list[EnumVariant]
 
 
-def write_crate(ds: DesignState):
+def write_crate(ds: DesignState) -> None:
     # Cargo.toml
     cargo_toml_path = ds.output_dir / "Cargo.toml"
     cargo_toml_path.parent.mkdir(parents=True, exist_ok=True)

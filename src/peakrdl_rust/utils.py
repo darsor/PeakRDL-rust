@@ -1,4 +1,4 @@
-from typing import Any, List, Union
+from typing import Any, Union
 
 from caseconverter import snakecase
 from systemrdl.node import (
@@ -17,7 +17,7 @@ from peakrdl_rust.identifier_filter import kw_filter
 
 def doc_comment(node: Union[Node, UserEnum]) -> str:
     if isinstance(node, Node):
-        name = node.get_property("name")
+        name: Union[str, None] = node.get_property("name")
         desc = node.get_property("desc")
     else:
         name = node.rdl_name
@@ -54,6 +54,7 @@ def parent_scope(node: Node) -> Union[Node, None]:
             return current_parent_node
 
         current_parent_node = current_parent_node.parent
+    return None
 
 
 def rust_type_name(node: Node) -> str:
@@ -77,7 +78,7 @@ def enum_parent_scope(node: FieldNode, encoding: type[UserEnum]) -> Union[Node, 
     # Due to namespace nesting properties, it is guaranteed that the parent
     # scope definition is also going to be one of the node's ancestors.
     # Seek up and find it
-    current_parent_node = node
+    current_parent_node: Union[Node, None] = node
     while current_parent_node:
         if current_parent_node.inst.original_def is None:
             # Original def reference is unknown
@@ -87,9 +88,10 @@ def enum_parent_scope(node: FieldNode, encoding: type[UserEnum]) -> Union[Node, 
             return current_parent_node
 
         current_parent_node = current_parent_node.parent
+    return None
 
 
-def crate_module_path(node: Node) -> List[str]:
+def crate_module_path(node: Node) -> list[str]:
     parent = parent_scope(node)
     assert parent is not None
     type_name = kw_filter(snakecase(rust_type_name(node)))
@@ -102,7 +104,7 @@ def crate_module_path(node: Node) -> List[str]:
         return parent_path + ["named_types", type_name]
 
 
-def crate_enum_module_path(field: FieldNode, enum: type[UserEnum]) -> List[str]:
+def crate_enum_module_path(field: FieldNode, enum: type[UserEnum]) -> list[str]:
     assert field.get_property("encode") is enum
     declaring_parent = enum_parent_scope(field, enum)
     assert declaring_parent is not None
@@ -177,19 +179,21 @@ def field_reset_value(field: FieldNode) -> int:
             return reset
         else:
             print(
-                f"Warning: could not determine reset value for field {field.get_path()}. Defaulting to 0"
+                "Warning: could not determine reset value for field "
+                f"{field.get_path()}. Defaulting to 0"
             )
             return 0
     elif isinstance(reset, SignalNode):
         print(
-            f"Warning: reset value for {field.get_path()} is driven by a hardware signal. Defaulting to 0"
+            f"Warning: reset value for {field.get_path()} is driven by a hardware "
+            "signal. Defaulting to 0"
         )
         return 0
     else:
         return 0
 
 
-def append_unique(list: List, obj: Any):
+def append_unique(list: list, obj: Any) -> None:
     """Append an object to a list only if it's not already present"""
     if obj not in list:
         list.append(obj)

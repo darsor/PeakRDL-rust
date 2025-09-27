@@ -1,8 +1,8 @@
 import shutil
 import subprocess
-from typing import Any, List, Union
+from typing import Any, Union
 
-from systemrdl.node import AddrmapNode, MemNode, RegfileNode, RootNode
+from systemrdl.node import AddrmapNode, RootNode
 
 from .crate_generator import write_crate
 from .design_scanner import DesignScanner
@@ -13,7 +13,7 @@ from .test_generator import write_tests
 class RustExporter:
     def export(
         self,
-        node: Union[RootNode, AddrmapNode, List[AddrmapNode]],
+        node: Union[RootNode, AddrmapNode, list[AddrmapNode]],
         path: str,
         **kwargs: Any,
     ) -> None:

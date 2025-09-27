@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import List, Optional, Union
+from typing import Optional, Union
 
 from caseconverter import pascalcase, snakecase
 from systemrdl.node import (
@@ -26,13 +26,13 @@ class TestComponent:
 
     name: str  # component instance name
     type_name: str  # component type name
-    addresses: List[TestAddress]
+    addresses: list[TestAddress]
 
 
 class TestScanner(RDLListener):
     def __init__(self, top_node: Union[AddrmapNode, RegfileNode]) -> None:
         self.top_node = top_node
-        self.test_addrs: List[TestAddress] = []
+        self.test_addrs: list[TestAddress] = []
 
     def run(self) -> None:
         RDLWalker(unroll=True).walk(self.top_node, self)
@@ -53,7 +53,7 @@ class TestScanner(RDLListener):
         return WalkerAction.Continue
 
 
-def write_tests(ds: DesignState):
+def write_tests(ds: DesignState) -> None:
     """Generate test files for the top-level components"""
     tests_dir = ds.output_dir / "tests"
     tests_dir.mkdir(exist_ok=True)

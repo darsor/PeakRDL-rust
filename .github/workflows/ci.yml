@@ -39,7 +39,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest]
-        python-version: ["3.9", "3.10", "3.11", "3.12"]
+        python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
 
     steps:
       - uses: actions/checkout@v4
@@ -96,7 +96,7 @@ jobs:
 
   deploy:
     runs-on: ubuntu-latest
-    needs: [build, build-sdist]
+    needs: [build]
     if: github.event_name == 'release'
     environment: pypi
     permissions:

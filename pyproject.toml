@@ -18,6 +18,22 @@ keywords = [
     "PAC",
     "embedded",
 ]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Environment :: Plugins",
+    "License :: OSI Approved :: GNU Lesser General Public License v2 (LGPLv2)",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Rust",
+    "Topic :: Scientific/Engineering :: Electronic Design Automation (EDA)",
+    "Typing :: Typed",
+]
 dependencies = [
     "case-converter>=1.2.0",
     "jinja2>=3.1.6",
@@ -30,6 +46,7 @@ dev = [
     "pytest-xdist>=3.8.0",
     "mypy>=1.8.0",
     "ruff>=0.3.0",
+    "peakrdl>=1.4.0",
 ]
 
 [project.optional-dependencies]
@@ -82,6 +99,11 @@ warn_unused_ignores = true
 warn_no_return = true
 warn_unreachable = true
 strict_equality = true
+
+# ignore missing type information for caseconverter dependency
+[[tool.mypy.overrides]]
+module = ["caseconverter.*"]
+ignore_missing_imports = true
 
 [project.entry-points."peakrdl.exporters"]
 rust = "peakrdl_rust.__peakrdl__:Exporter"

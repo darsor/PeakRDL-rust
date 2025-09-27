@@ -1,6 +1,6 @@
 import math
 from pathlib import Path
-from typing import List, Optional, Tuple, Union
+from typing import Optional, Union
 
 from caseconverter import pascalcase, snakecase
 from systemrdl.node import (
@@ -39,7 +39,7 @@ class DesignScanner(RDLListener):
         self.msg = ds.top_nodes[0].env.msg
 
     @property
-    def top_nodes(self) -> List[AddrmapNode]:
+    def top_nodes(self) -> list[AddrmapNode]:
         return self.ds.top_nodes
 
     def run(self) -> None:
@@ -58,7 +58,7 @@ class DesignScanner(RDLListener):
         module_names = utils.crate_enum_module_path(field, enum)
         return self.file_from_modules(module_names)
 
-    def file_from_modules(self, module_names: List[str]) -> Path:
+    def file_from_modules(self, module_names: list[str]) -> Path:
         """Construct a filename from a list of module names in the hierarchy"""
         return (
             self.ds.output_dir
@@ -75,11 +75,11 @@ class DesignScanner(RDLListener):
             # already handled
             return WalkerAction.SkipDescendants
 
-        registers: List[RegisterInst] = []
-        submaps: List[SubmapInst] = []
-        memories: List[MemoryInst] = []
-        anon_instances: List[str] = []
-        named_type_instances: List[Tuple[str, str]] = []
+        registers: list[RegisterInst] = []
+        submaps: list[SubmapInst] = []
+        memories: list[MemoryInst] = []
+        anon_instances: list[str] = []
+        named_type_instances: list[tuple[str, str]] = []
 
         for child in node.children():
             if not isinstance(child, AddressableNode):
@@ -95,20 +95,20 @@ class DesignScanner(RDLListener):
                 for dim in dims[::-1]:
                     arr_type = f"[{arr_type}; {dim}]"
 
-                addr_offset = "i0"
+                addr_calc = "i0"
                 for i, dim in enumerate(dims):
                     if i != 0:
-                        addr_offset = f"({addr_offset} * {dim}) + i{i}"
+                        addr_calc = f"({addr_calc} * {dim}) + i{i}"
 
                 if len(dims) > 1:
-                    addr_offset = f"({addr_offset}) * {hex(stride)}"
+                    addr_calc = f"({addr_calc}) * {hex(stride)}"
                 else:
-                    addr_offset = f"{addr_offset} * {hex(stride)}"
+                    addr_calc = f"{addr_calc} * {hex(stride)}"
 
                 if child.raw_absolute_address != 0:
-                    addr_offset = f"{hex(child.raw_address_offset)} + {addr_offset}"
+                    addr_calc = f"{hex(child.raw_address_offset)} + {addr_calc}"
 
-                array = Array(type=arr_type, dims=dims, addr_offset=addr_offset)
+                array = Array(type=arr_type, dims=dims, addr_offset=addr_calc)
                 addr_offset = None
             else:
                 array = None
@@ -217,7 +217,7 @@ class DesignScanner(RDLListener):
             return WalkerAction.SkipDescendants
 
         reg_reset_val = 0
-        fields: List[FieldInst] = []
+        fields: list[FieldInst] = []
         for field in node.fields():
             encoding = field.get_property("encode")
             if encoding is not None:
@@ -231,11 +231,14 @@ class DesignScanner(RDLListener):
 
             primitive = utils.field_primitive(field, allow_bool=(encoding is None))
 
-            reset_val = utils.field_reset_value(field)
-            reg_reset_val |= reset_val << field.low
+            reset_val_int = utils.field_reset_value(field)
+            reg_reset_val |= reset_val_int << field.low
+            reset_val = str(reset_val_int)
             if encoding is not None:
+                is_valid_variant = False
                 for variant_name, variant_value in encoding.members.items():
-                    if int(variant_value) == reset_val:
+                    if int(variant_value) == reset_val_int:
+                        is_valid_variant = True
                         reset_val = (
                             "Some("
                             + kw_filter(snakecase(field.inst_name))
@@ -246,7 +249,7 @@ class DesignScanner(RDLListener):
                             + ")"
                         )
                         break
-                if isinstance(reset_val, int):
+                if not is_valid_variant:
                     # specified (or unspecified default 0) reset value is not a valid
                     # encoding
                     reset_val = "None"
@@ -329,8 +332,8 @@ class DesignScanner(RDLListener):
             # Enum is a reusable, named type. The module defining it is a submodule
             # of the "named_types" submodule of its declaring parent.
             #
-            # Components that use this module have a "pub use" to re-export the submodule
-            # as the name of the field that uses it.
+            # Components that use this module have a "pub use" to re-export the
+            # submodule as the name of the field that uses it.
 
             # 1. Add to the declaring parent's named_type_declarations
             if isinstance(declaring_parent, RootNode):
