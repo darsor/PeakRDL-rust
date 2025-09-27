@@ -1,0 +1,4 @@
+include README.md
+include LICENSE
+include ARCHITECTURE.md
+recursive-include src/peakrdl_rust/templates *
