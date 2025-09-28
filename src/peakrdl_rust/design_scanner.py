@@ -255,7 +255,7 @@ class DesignScanner(RDLListener):
                     reset_val = "None"
             else:
                 if primitive == "bool":
-                    reset_val = "true" if reset_val else "false"
+                    reset_val = "true" if reset_val_int else "false"
 
             fields.append(
                 FieldInst(

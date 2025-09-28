@@ -2,7 +2,7 @@ import os
 import re
 import subprocess
 from pathlib import Path
-from typing import TYPE_CHECKING, list
+from typing import TYPE_CHECKING
 
 import pytest
 from systemrdl.compiler import RDLCompiler
@@ -15,7 +15,7 @@ if TYPE_CHECKING:
 
 def get_rdl_files() -> list[Path]:
     rdl_src_dir = Path(__file__).parent / "rdl_src"
-    return [file for file in rdl_src_dir.glob("*.rdl")]
+    return list(rdl_src_dir.glob("*.rdl"))
 
 
 def do_export(rdl_file: Path) -> Path:
