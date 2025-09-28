@@ -62,7 +62,22 @@ jobs:
           uv sync --locked --dev
 
       - name: Run tests
-        run: uv run pytest tests/ -n auto
+        run: uv run pytest tests/ -n auto --cov=peakrdl_rust
+
+      - name: Report coverage
+        uses: coverallsapp/github-action@v2
+        with:
+          flag-name: run-${{ join(matrix.*, '-') }}
+          parallel: true
+
+  coverage:
+    needs: [test]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Coveralls Finished
+        uses: coverallsapp/github-action@v2
+        with:
+          parallel-finished: true
 
   deploy:
     needs: [lint-and-type-check, test]
