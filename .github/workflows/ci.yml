@@ -44,10 +44,11 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
-      - name: Set up Rust
-        uses: dtolnay/rust-toolchain@stable
+      - name: Install Rust toolchain
+        uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
           toolchain: stable
+          components: rustfmt
 
       - name: Install uv
         uses: astral-sh/setup-uv@v6
