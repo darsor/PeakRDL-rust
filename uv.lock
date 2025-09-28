@@ -371,7 +371,7 @@ dependencies = [
 ]
 
 [package.optional-dependencies]
-dependencies = [
+cli = [
     { name = "peakrdl-cli" },
 ]
 
@@ -388,10 +388,10 @@ dev = [
 requires-dist = [
     { name = "case-converter", specifier = ">=1.2.0" },
     { name = "jinja2", specifier = ">=3.1.6" },
-    { name = "peakrdl-cli", marker = "extra == 'dependencies'", specifier = ">=1.4.0" },
+    { name = "peakrdl-cli", marker = "extra == 'cli'", specifier = ">=1.4.0" },
     { name = "systemrdl-compiler", specifier = ">=1.29.3" },
 ]
-provides-extras = ["dependencies"]
+provides-extras = ["cli"]
 
 [package.metadata.requires-dev]
 dev = [

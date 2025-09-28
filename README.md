@@ -2,7 +2,24 @@
 
 Generate Rust code for accessing control/status registers from a SystemRDL description.
 
-This is a work in progress. Check back later.
+This is currently in an alpha state. Feel free to try it out and report any bugs
+encountered.
+
+## Installation
+
+It can be installed from PyPI using
+
+```bash
+pip install peakrdl-rust[cli]
+```
+
+## Usage
+
+For usage available options, use
+
+```bash
+peakrdl rust --help
+```
 
 ## TODO
 

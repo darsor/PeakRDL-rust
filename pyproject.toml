@@ -50,7 +50,9 @@ dev = [
 ]
 
 [project.optional-dependencies]
-dependencies = ["peakrdl-cli>=1.4.0"]
+cli = [
+    "peakrdl-cli>=1.4.0"
+]
 
 [build-system]
 requires = ["uv_build"]
