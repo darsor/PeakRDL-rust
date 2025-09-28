@@ -46,7 +46,9 @@ class DesignState:
         self.crate_name: str
         top_name = top_nodes[-1].orig_type_name or top_nodes[-1].type_name
         assert top_name is not None
-        self.crate_name = kwargs.pop("crate_name", None) or snakecase(top_name)
+        default_crate_name = snakecase(top_name)
+        self.crate_name = kwargs.pop("crate_name", None) or default_crate_name
+        self.crate_name = self.crate_name.replace("-", "_")
         self.output_dir = output_dir / self.crate_name
 
         self.crate_version: str

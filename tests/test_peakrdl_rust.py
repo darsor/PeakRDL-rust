@@ -39,15 +39,17 @@ def do_export(rdl_file: Path) -> Path:
         root_node = rdlc.elaborate(top_def_name=name)
         top_nodes.append(root_node.top)
 
+    crate_name = rdl_file.stem.replace("-", "_")
+
     x = RustExporter()
     x.export(
         top_nodes,
         path=str(crate_dir),
-        crate_name=rdl_file.stem,
+        crate_name=crate_name,
         force=True,
     )
 
-    return crate_dir / rdl_file.stem
+    return crate_dir / crate_name
 
 
 def do_cargo_test(crate_dir: Path) -> None:
