@@ -2,6 +2,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
 import jinja2 as jj
+from caseconverter import snakecase
 from systemrdl.node import AddrmapNode
 
 if TYPE_CHECKING:
@@ -19,7 +20,7 @@ class DesignState:
         )
 
         self.top_nodes = top_nodes
-        self.output_dir = Path(path).resolve()
+        output_dir = Path(path).resolve()
         self.template_dir = Path(__file__).resolve().parent / "templates"
 
         # ------------------------
@@ -42,11 +43,20 @@ class DesignState:
         self.force: bool
         self.force = kwargs.pop("force", False)
 
-        self.instantiate: bool
-        self.instantiate = kwargs.pop("instantiate", False)
+        self.crate_name: str
+        top_name = top_nodes[-1].orig_type_name or top_nodes[-1].type_name
+        assert top_name is not None
+        self.crate_name = kwargs.pop("crate_name", None) or snakecase(top_name)
+        self.output_dir = output_dir / self.crate_name
 
-        self.inst_offset: int
-        self.inst_offset = kwargs.pop("inst_offset", 0)
+        self.crate_version: str
+        self.crate_version = kwargs.pop("crate_version", "0.1.0")
+
+        # self.instantiate: bool
+        # self.instantiate = kwargs.pop("instantiate", False)
+
+        # self.inst_offset: int
+        # self.inst_offset = kwargs.pop("inst_offset", 0)
 
         self.no_fmt: bool
         self.no_fmt = kwargs.pop("no_fmt", False)

@@ -24,6 +24,7 @@ class TestAddress:
 class TestComponent:
     """Top-level component information for test generation"""
 
+    crate_name: str
     name: str  # component instance name
     type_name: str  # component type name
     addresses: list[TestAddress]
@@ -63,6 +64,7 @@ def write_tests(ds: DesignState) -> None:
         scanner.run()
 
         component = TestComponent(
+            crate_name=ds.crate_name,
             name=kw_filter(snakecase(top.inst_name)),
             type_name=pascalcase(utils.rust_type_name(top)),
             addresses=scanner.test_addrs,

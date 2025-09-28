@@ -23,6 +23,25 @@ class Exporter(ExporterSubcommandPlugin):
 
     def add_exporter_arguments(self, arg_group: "argparse._ActionsContainer") -> None:
         arg_group.add_argument(
+            "-n",
+            "--crate-name",
+            help="""
+            Name of the generated crate. Should be snake_case. Derived from the root
+            addrmap if not given. The rust crate is generated under a directory of
+            this name.
+            """,
+        )
+
+        arg_group.add_argument(
+            "-v",
+            "--crate-version",
+            default="0.1.0",
+            help="""
+            Semantic version of the generated crate. Default is "0.1.0".
+            """,
+        )
+
+        arg_group.add_argument(
             "--force",
             action="store_true",
             default=False,
@@ -31,29 +50,31 @@ class Exporter(ExporterSubcommandPlugin):
             """,
         )
 
-        arg_group.add_argument(
-            "-i",
-            "--instantiate",
-            action="store_true",
-            default=False,
-            help="""
-            If set, header will also include a macro that instantiates each top-level
-            block at a defined hardware address, allowing for direct access.
-            """,
-        )
+        # TODO
+        # arg_group.add_argument(
+        #     "-i",
+        #     "--instantiate",
+        #     action="store_true",
+        #     default=False,
+        #     help="""
+        #     If set, header will also include a macro that instantiates each top-level
+        #     block at a defined hardware address, allowing for direct access.
+        #     """,
+        # )
 
         # Wrap constructor to allow hex strings
         def integer(n: Union[int, str]) -> int:
             return int(n, 0)  # type: ignore # bogus error
 
-        arg_group.add_argument(
-            "--inst-offset",
-            type=integer,
-            default=0,
-            help="""
-            Apply an additional address offset to instance definitions.
-            """,
-        )
+        # TODO
+        # arg_group.add_argument(
+        #     "--inst-offset",
+        #     type=integer,
+        #     default=0,
+        #     help="""
+        #     Apply an additional address offset to instance definitions.
+        #     """,
+        # )
 
         arg_group.add_argument(
             "--no-fmt",
@@ -70,7 +91,9 @@ class Exporter(ExporterSubcommandPlugin):
             top_node,
             path=options.output,
             force=options.force,
-            instantiate=options.instantiate,
-            inst_offset=options.inst_offset,
+            crate_name=options.crate_name,
+            crate_version=options.crate_version,
+            # instantiate=options.instantiate,
+            # inst_offset=options.inst_offset,
             no_fmt=options.no_fmt,
         )

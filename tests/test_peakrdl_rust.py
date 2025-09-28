@@ -19,8 +19,8 @@ def get_rdl_files() -> list[Path]:
 
 
 def do_export(rdl_file: Path) -> Path:
-    crate_dir = Path(__file__).parent / "output" / rdl_file.stem
-    crate_dir.mkdir(exist_ok=True)
+    crate_dir = Path(__file__).parent / "output"
+    crate_dir.mkdir(exist_ok=True, parents=True)
 
     # Read the file to find top-level addrmap definitions
     with open(rdl_file) as f:
@@ -43,13 +43,14 @@ def do_export(rdl_file: Path) -> Path:
     x.export(
         top_nodes,
         path=str(crate_dir),
+        crate_name=rdl_file.stem,
         force=True,
     )
 
-    return crate_dir
+    return crate_dir / rdl_file.stem
 
 
-def do_cargo_test(crate_dir: Path):
+def do_cargo_test(crate_dir: Path) -> None:
     # shared target directory to cache compiled dependencies
     env = os.environ.copy()
     env["CARGO_TARGET_DIR"] = str(Path(__file__).parent / "output" / "target")
@@ -57,6 +58,6 @@ def do_cargo_test(crate_dir: Path):
 
 
 @pytest.mark.parametrize("rdl_file", get_rdl_files(), ids=lambda file: file.stem)
-def test_generated_rust(rdl_file: Path):
+def test_generated_rust(rdl_file: Path) -> None:
     crate_dir = do_export(rdl_file)
     do_cargo_test(crate_dir)

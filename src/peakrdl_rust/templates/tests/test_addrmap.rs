@@ -1,4 +1,4 @@
-use TODO::components::{{ctx.name}};
+use {{ctx.crate_name}}::components::{{ctx.name}};
 
 /// Test all generated component addresses against the SystemRDL assigned address
 #[test]

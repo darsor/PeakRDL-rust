@@ -157,8 +157,8 @@ def write_crate(ds: DesignState) -> None:
     cargo_toml_path.parent.mkdir(parents=True, exist_ok=True)
     with cargo_toml_path.open("w") as f:
         context = {
-            "package_name": "TODO",
-            "package_version": "0.1.0+TODO",
+            "package_name": ds.crate_name,
+            "package_version": ds.crate_version,
         }
         template = ds.jj_env.get_template("Cargo.toml.tmpl")
         template.stream(context).dump(f)  # type: ignore # jinja incorrectly typed

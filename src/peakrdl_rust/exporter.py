@@ -26,11 +26,11 @@ class RustExporter:
             Output directory for generated crate.
         force: bool
             Overwrite the contents of the output directory if it already exists.
-        instantiate: bool
-            If set, header will also include a macro that instantiates each top-level
-            block at a defined hardware address, allowing for direct access.
-        inst_offset: int
-            Apply an additional address offset to instance definitions.
+        crate_name: Optional[str]
+            Name of the generated crate. Should be in snake_case. If not set, derived
+            from the root addrmap name.
+        crate_version: str
+            Semantic version number for the generated crate.
         no_fmt: bool
             Don't attempt to format the generated rust code using `cargo fmt`.
         """
@@ -77,6 +77,8 @@ class RustExporter:
 
         # Generate integration tests
         write_tests(ds)
+
+        print(f"Generated Rust crate at {ds.output_dir}")
 
         if not ds.no_fmt:
             result = subprocess.run(["cargo", "fmt"], cwd=ds.output_dir)

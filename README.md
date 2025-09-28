@@ -17,7 +17,7 @@ This is a work in progress. Check back later.
 - [x] Find/generate additional test input
 - [x] Mem components
 - [x] More efficient field tests
-- [ ] Set up github actions/PyPI publishing
+- [x] Set up github actions/PyPI publishing
 - [ ] Automatically run tests
 - [ ] Regwidth > native integer types
 - [ ] Fixedpoint/signed UDPs
