@@ -12,7 +12,7 @@ jobs:
   lint-and-type-check:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Install uv
         uses: astral-sh/setup-uv@v6
@@ -42,7 +42,7 @@ jobs:
         python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Set up Rust
         uses: dtolnay/rust-toolchain@stable
@@ -63,22 +63,21 @@ jobs:
       - name: Run tests
         run: uv run pytest tests/ -n auto
 
-  build:
+  deploy:
     needs: [lint-and-type-check, test]
     if: github.event_name == 'release' || github.ref == 'refs/heads/main'
-    strategy:
-      matrix:
-        os: [ubuntu-latest]
-        python-version: ["3.9"]
-    runs-on: ${{ matrix.os }}
+    environment: pypi
+    permissions:
+      id-token: write
+    runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Install uv
         uses: astral-sh/setup-uv@v6
         with:
-          python-version: ${{ matrix.python-version }}
+          python-version: "3.9"
           version: "0.8.22"
           enable-cache: true
 
@@ -86,30 +85,6 @@ jobs:
         run: |
           uv build
 
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: dist
-          path: |
-            dist/*.whl
-            dist/*.tar.gz
-
-  deploy:
-    runs-on: ubuntu-latest
-    needs: [build]
-    if: github.event_name == 'release'
-    environment: pypi
-    permissions:
-      id-token: write
-
-    steps:
-      - name: Download all artifacts
-        uses: actions/download-artifact@v4
-        with:
-          path: dist/
-          merge-multiple: true
-
       - name: Publish to PyPI
-        uses: pypa/gh-action-pypi-publish@release/v1
-        with:
-          password: ${{ secrets.PYPI_API_TOKEN }}
+        if: github.event_name == 'release'
+        run: uv publish
