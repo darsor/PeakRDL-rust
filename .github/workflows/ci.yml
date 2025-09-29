@@ -62,11 +62,12 @@ jobs:
           uv sync --locked --dev
 
       - name: Run tests
-        run: uv run pytest tests/ -n auto --cov=peakrdl_rust
+        run: uv run pytest tests/ -n auto --cov=peakrdl_rust --cov-report=xml
 
       - name: Report coverage
         uses: coverallsapp/github-action@v2
         with:
+          file: coverage.xml
           flag-name: run-${{ join(matrix.*, '-') }}
           parallel: true
 
@@ -74,7 +75,7 @@ jobs:
     needs: [test]
     runs-on: ubuntu-latest
     steps:
-      - name: Coveralls Finished
+      - name: Finish Coveralls
         uses: coverallsapp/github-action@v2
         with:
           parallel-finished: true
