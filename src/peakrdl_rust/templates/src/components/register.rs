@@ -35,6 +35,9 @@ impl {{ctx.type_name}} {
     pub const {{field.inst_name|upper}}_OFFSET: usize = {{field.bit_offset}};
     pub const {{field.inst_name|upper}}_WIDTH: usize = {{field.width}};
     pub const {{field.inst_name|upper}}_MASK: u{{ctx.regwidth}} = 0x{{"%X" % field.mask}};
+    {% if field.is_signed is not none %}
+    pub const {{field.inst_name|upper}}_SIGNED: bool = {{ field.is_signed|lower }};
+    {% endif %}
 
     {{field.comment | indent()}}
     #[inline(always)]
@@ -46,6 +49,15 @@ impl {{ctx.type_name}} {
         {{field.encoding}}::from_bits(val as {{field.primitive}})
         {% elif field.primitive == "bool" %}
         val != 0
+        {% elif field.is_signed %}
+            {% set primitive_width = field.primitive[1:]|int %}
+            {% set num_extra_bits = primitive_width - field.width %}
+            {% if num_extra_bits == 0 %}
+        val as {{field.primitive}}
+            {% else %}
+        // sign extend
+        (val as {{field.primitive}}).wrapping_shl({{num_extra_bits}}).wrapping_shr({{num_extra_bits}})
+            {% endif %}
         {% elif field.primitive != "u" ~ ctx.regwidth %}
         val as {{field.primitive}}
         {% else %}

@@ -93,6 +93,7 @@ class FieldInst(Instantiation):
     width: int  # bit width
     mask: int  # bitmask of the width of the field
     reset_val: Union[int, str]
+    is_signed: Optional[bool]
 
 
 @dataclass

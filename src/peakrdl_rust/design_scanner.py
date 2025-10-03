@@ -253,9 +253,11 @@ class DesignScanner(RDLListener):
                     # specified (or unspecified default 0) reset value is not a valid
                     # encoding
                     reset_val = "None"
-            else:
-                if primitive == "bool":
-                    reset_val = "true" if reset_val_int else "false"
+            elif primitive == "bool":
+                reset_val = "true" if reset_val_int else "false"
+            elif field.get_property("is_signed"):
+                if reset_val_int >= 2 ** (field.width - 1):
+                    reset_val = str(reset_val_int - 2**field.width)
 
             fields.append(
                 FieldInst(
@@ -269,6 +271,7 @@ class DesignScanner(RDLListener):
                     width=field.width,
                     mask=(1 << field.width) - 1,
                     reset_val=reset_val,
+                    is_signed=field.get_property("is_signed"),
                 )
             )
 

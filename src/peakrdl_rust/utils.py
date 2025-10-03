@@ -159,11 +159,13 @@ def field_access(node: FieldNode) -> Union[str, None]:
 
 
 def field_primitive(node: FieldNode, allow_bool: bool = True) -> str:
-    if node.width == 1 and allow_bool:
+    is_signed = node.get_property("is_signed")
+    if node.width == 1 and is_signed is None and allow_bool:
         return "bool"
+    signedness = "i" if is_signed else "u"
     for w in (8, 16, 32, 64, 128):
         if w >= node.width:
-            return f"u{w}"
+            return f"{signedness}{w}"
     raise RuntimeError("Field widths > 128 are not supported")
 
 
