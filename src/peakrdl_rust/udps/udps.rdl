@@ -1,0 +1,24 @@
+/*
+ * This file defines the property extensions that are understood by the
+ * PeakRDL-rust code generator.
+ *
+ * Compile this file prior to your other SystemRDL sources.
+ *
+ * For more details, see: https://peakrdl-regblock.readthedocs.io/en/latest/udps/intro.html
+ */
+
+property is_signed {
+    type = boolean;
+    component = field;
+    default = true;
+};
+
+property intwidth {
+    type = longint unsigned;
+    component = field;
+};
+
+property fracwidth {
+    type = longint unsigned;
+    component = field;
+};

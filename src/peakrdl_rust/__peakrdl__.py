@@ -4,6 +4,7 @@ from typing import TYPE_CHECKING, Union
 from peakrdl.plugins.exporter import ExporterSubcommandPlugin
 
 from .exporter import RustExporter
+from .udps import ALL_UDPS
 
 if TYPE_CHECKING:
     import argparse
@@ -13,6 +14,8 @@ if TYPE_CHECKING:
 
 class Exporter(ExporterSubcommandPlugin):
     short_desc = "Generate a Rust crate for accessing SystemRDL registers"
+
+    udp_definitions = ALL_UDPS
 
     # cfg_schema = {
     #     "std": schema.Choice(list(CStandard.__members__.keys())),

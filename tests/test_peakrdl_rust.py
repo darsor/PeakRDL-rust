@@ -8,6 +8,7 @@ import pytest
 from systemrdl.compiler import RDLCompiler
 
 from peakrdl_rust.exporter import RustExporter
+from peakrdl_rust.udps import ALL_UDPS
 
 if TYPE_CHECKING:
     from systemrdl.node import AddrmapNode
@@ -32,6 +33,14 @@ def do_export(rdl_file: Path) -> Path:
     assert len(addrmap_names) > 0
 
     rdlc = RDLCompiler()
+
+    # Load the UDPs
+    for udp in ALL_UDPS:
+        rdlc.register_udp(udp)
+    # ... including the definition
+    udp_file = Path(__file__).parent / "../src/peakrdl_rust/udps/udps.rdl"
+    rdlc.compile_file(str(udp_file))
+
     rdlc.compile_file(str(rdl_file))
 
     top_nodes: list[AddrmapNode] = []
