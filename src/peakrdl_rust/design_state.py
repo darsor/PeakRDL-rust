@@ -6,6 +6,7 @@ from caseconverter import snakecase
 from systemrdl.node import AddrmapNode
 
 from .component_context import ContextScanner
+from .design_scanner import DesignScanner
 
 if TYPE_CHECKING:
     from peakrdl_rust.component_context import Component
@@ -24,17 +25,6 @@ class DesignState:
         self.top_nodes = top_nodes
         output_dir = Path(path).resolve()
         self.template_dir = Path(__file__).resolve().parent / "templates"
-
-        # ------------------------
-        # Info about the design
-        # ------------------------
-        # Each reg that has overlapping fields generates an entry:
-        #   reg_path : list of field names involved in overlap
-        self.overlapping_fields: dict[str, list[str]] = {}
-
-        # Pairs of overlapping registers
-        #   first_reg_path : partner_register_name
-        self.overlapping_reg_pairs: dict[str, str] = {}
 
         # ------------------------
         # Extract compiler args
@@ -65,6 +55,10 @@ class DesignState:
         # ------------------------
         # Collect info for export
         # ------------------------
+        scanner = DesignScanner(self.top_nodes)
+        scanner.run()
+        self.has_fixedpoint: bool = scanner.has_fixedpoint
+
         component_context = ContextScanner(self.top_nodes)
         component_context.run()
         self.top_component_modules: list[str] = component_context.top_component_modules

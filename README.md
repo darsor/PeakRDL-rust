@@ -35,6 +35,7 @@ peakrdl rust --help
 - [x] Mem components
 - [x] More efficient field tests
 - [x] Set up github actions/PyPI publishing
+- [x] Fixedpoint/signed UDPs
 - [ ] Automatically run tests
 - [ ] Regwidth > native integer types
-- [ ] Fixedpoint/signed UDPs
+- [ ] Rust keyword conflict test

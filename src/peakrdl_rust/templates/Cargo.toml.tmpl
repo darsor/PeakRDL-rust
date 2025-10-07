@@ -1,11 +1,15 @@
 [package]
-name = "{{package_name}}"
-version = "{{package_version}}"
+name = "{{ctx.package_name}}"
+version = "{{ctx.package_version}}"
 edition = "2024"
 
 [features]
 default = []
-fixedpoint = []
 
 [dependencies]
-num-traits = { version = "0.2.19", default-features = false }
+{% if ctx.has_fixedpoint %}
+heapless = { version = "0.9.1" }
+{% endif %}
+num-traits = { version = "0.2.19", default-features = false
+{%- if ctx.has_fixedpoint %}, features=["libm"] {% endif -%}
+}

@@ -1,0 +1,51 @@
+addrmap top {
+    default accesswidth = 64;
+    default regwidth = 64;
+    reg {
+        field {
+            sw = rw; hw = r;
+            intwidth = 8;
+            fracwidth = 8;
+        } f_Q8_8[16] = 16'd12;
+        field {
+            sw = rw; hw = w;
+            intwidth = 32;
+        } f_Q32_n12[20] = 20'd12;
+        field {
+            sw = rw; hw = r;
+            fracwidth = 32;
+            is_signed;
+        } f_SQn8_32[24] = 24'd12;
+        field {
+            sw = rw; hw = r;
+            fracwidth = 7;
+            is_signed;
+        } f_SQn6_7 = 1'd1;
+    } r1 @ 0x0;
+
+    reg {
+        field {
+            sw = rw; hw = w;
+            intwidth = 4;
+            is_signed;
+        } f_single_bit_sfixed = 1'd1;
+
+        field {
+            sw = rw; hw = r;
+            fracwidth = 4;
+            is_signed = false;
+        } f_single_bit_ufixed = 1'd1;
+
+        field {
+            sw = rw; hw = r;
+            intwidth = 1;
+            is_signed;
+        } f_constant_sfixed[3] = 3'd4;
+
+        field {
+            sw = rw; hw = r;
+            intwidth = 1;
+            is_signed = false;
+        } f_constant_ufixed[3] = 3'd4;
+    } r2 @ 0x8;
+};

@@ -7,13 +7,14 @@ def write_crate(ds: DesignState) -> None:
     # Cargo.toml
     cargo_toml_path = ds.output_dir / "Cargo.toml"
     cargo_toml_path.parent.mkdir(parents=True, exist_ok=True)
+    context = {
+        "has_fixedpoint": ds.has_fixedpoint,
+        "package_name": ds.crate_name,
+        "package_version": ds.crate_version,
+    }
     with cargo_toml_path.open("w") as f:
-        context = {
-            "package_name": ds.crate_name,
-            "package_version": ds.crate_version,
-        }
         template = ds.jj_env.get_template("Cargo.toml.tmpl")
-        template.stream(context).dump(f)  # type: ignore # jinja incorrectly typed
+        template.stream(ctx=context).dump(f)  # type: ignore # jinja incorrectly typed
 
     # .gitignore
     shutil.copyfile(ds.template_dir / ".gitignore", ds.output_dir / ".gitignore")
@@ -26,27 +27,43 @@ def write_crate(ds: DesignState) -> None:
     # src/reg.rs
     reg_rs_path = ds.output_dir / "src" / "reg.rs"
     reg_rs_path.parent.mkdir(parents=True, exist_ok=True)
+    context = {
+        "endianness": "be" if ds.top_nodes[0].get_property("bigendian") else "le",
+    }
     with reg_rs_path.open("w") as f:
-        context = {
-            "endianness": "be" if ds.top_nodes[0].get_property("bigendian") else "le",
-        }
         template = ds.jj_env.get_template("src/reg.rs")
-        template.stream(context).dump(f)  # type: ignore # jinja incorrectly typed
+        template.stream(ctx=context).dump(f)  # type: ignore # jinja incorrectly typed
+
+    # src/fixedpoint.rs
+    if ds.has_fixedpoint:
+        fixedpoint_rs_path = ds.output_dir / "src" / "fixedpoint.rs"
+        fixedpoint_rs_path.parent.mkdir(parents=True, exist_ok=True)
+        context = {
+            "crate_name": ds.crate_name,
+        }
+        with fixedpoint_rs_path.open("w") as f:
+            template = ds.jj_env.get_template("src/fixedpoint.rs")
+            template.stream(ctx=context).dump(f)  # type: ignore # jinja incorrectly typed
 
     # src/lib.rs
     lib_rs_path = ds.output_dir / "src" / "lib.rs"
     lib_rs_path.parent.mkdir(parents=True, exist_ok=True)
-    context = {}
+    context = {
+        "has_fixedpoint": ds.has_fixedpoint,
+    }
     with lib_rs_path.open("w") as f:
         template = ds.jj_env.get_template("src/lib.rs")
-        template.stream(context).dump(f)  # type: ignore # jinja incorrectly typed
+        template.stream(ctx=context).dump(f)  # type: ignore # jinja incorrectly typed
 
     # src/components.rs
     components_rs_path = ds.output_dir / "src" / "components.rs"
     components_rs_path.parent.mkdir(parents=True, exist_ok=True)
+    context = {
+        "components": ds.top_component_modules,
+    }
     with components_rs_path.open("w") as f:
         template = ds.jj_env.get_template("src/components.rs")
-        template.stream(components=ds.top_component_modules).dump(f)  # type: ignore # jinja incorrectly typed
+        template.stream(ctx=context).dump(f)  # type: ignore # jinja incorrectly typed
 
     for comp in ds.components.values():
         comp.render(ds.output_dir, ds.jj_env)

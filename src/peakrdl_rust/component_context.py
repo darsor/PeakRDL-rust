@@ -111,6 +111,8 @@ class FieldInst(Instantiation):
     mask: int  # bitmask of the width of the field
     reset_val: Union[int, str]
     is_signed: Optional[bool]
+    fracwidth: Optional[int]
+    intwidth: Optional[int]
 
 
 @dataclass
@@ -390,13 +392,18 @@ class ContextScanner(RDLListener):
                 reset_val = "true" if reset_val_int else "false"
             elif field.get_property("is_signed"):
                 if reset_val_int >= 2 ** (field.width - 1):
-                    reset_val = str(reset_val_int - 2**field.width)
+                    reset_val_int = reset_val_int - 2**field.width
+                reset_val = str(reset_val_int)
+
+            fracwidth: Union[int, None] = field.get_property("fracwidth")
+            if fracwidth is not None:
+                reset_val = f"{reset_val_int * 2**-fracwidth:.32g}_f64"
 
             fields.append(
                 FieldInst(
                     comment=utils.doc_comment(field),
                     inst_name=snakecase(field.inst_name),
-                    type_name="TODO",
+                    type_name=pascalcase(field.inst_name),
                     access=utils.field_access(field),
                     primitive=primitive,
                     encoding=encoding_name,
@@ -405,6 +412,8 @@ class ContextScanner(RDLListener):
                     mask=(1 << field.width) - 1,
                     reset_val=reset_val,
                     is_signed=field.get_property("is_signed"),
+                    fracwidth=field.get_property("fracwidth"),
+                    intwidth=field.get_property("intwidth"),
                 )
             )
 

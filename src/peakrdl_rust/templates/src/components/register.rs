@@ -3,6 +3,12 @@
 
 {{macros.includes(ctx)}}
 
+{% for field in ctx.fields %}
+    {% if field.fracwidth is not none %}
+pub type {{field.type_name}}FixedPoint = crate::fixedpoint::FixedPoint<{{field.primitive}}, {{field.intwidth}}, {{field.fracwidth}}>;
+    {% endif %}
+{% endfor %}
+
 {{ctx.comment}}
 #[repr(transparent)]
 #[derive(Copy, Clone, Eq, PartialEq)]
@@ -38,12 +44,19 @@ impl {{ctx.type_name}} {
     {% if field.is_signed is not none %}
     pub const {{field.inst_name|upper}}_SIGNED: bool = {{ field.is_signed|lower }};
     {% endif %}
+    {% if field.fracwidth is not none %}
+    pub const {{field.inst_name|upper}}_INTWIDTH: isize = {{ field.intwidth }};
+    pub const {{field.inst_name|upper}}_FRACWIDTH: isize = {{ field.fracwidth }};
+    {% endif %}
 
+    {# Field Getter #}
     {{field.comment | indent()}}
     #[inline(always)]
     {% set return_type = "Option<" ~ field.encoding ~ ">" if field.encoding else field.primitive %}
-    {% if "R" in field.access %}pub {% endif -%}
-    const fn {{field.inst_name}}(&self) -> {{return_type}} {
+    {% if "R" in field.access and field.fracwidth is none %}pub {% endif -%}
+    const fn {{field.inst_name}}
+    {%- if field.fracwidth is not none %}_raw_{% endif -%}
+    (&self) -> {{return_type}} {
         let val = (self.0 >> Self::{{field.inst_name|upper}}_OFFSET) & Self::{{field.inst_name|upper}}_MASK;
         {% if field.encoding is not none %}
         {{field.encoding}}::from_bits(val as {{field.primitive}})
@@ -65,17 +78,40 @@ impl {{ctx.type_name}} {
         {% endif %}
     }
 
+    {# Field Fixed-Point Getter #}
+    {% if field.fracwidth is not none %}
+    {{field.comment | indent()}}
+    #[inline(always)]
+    {% if "R" in field.access %}pub {% endif -%}
+    fn {{field.inst_name}}(&self) -> {{field.type_name}}FixedPoint {
+        {{field.type_name}}FixedPoint::from_bits(self.{{field.inst_name}}_raw_())
+    }
+    {% endif %}
+
+    {# Field Setter #}
     {% if "W" in field.access %}
     {{field.comment | indent()}}
     #[inline(always)]
     {% set input_type = field.encoding if field.encoding else field.primitive %}
-    pub const fn set_{{field.inst_name}}(&mut self, val: {{input_type}}) {
+    {% if field.fracwidth is none %}pub {% endif -%}
+    const fn set_{{field.inst_name}}
+    {%- if field.fracwidth is not none %}_raw_{% endif -%}
+    (&mut self, val: {{input_type}}) {
         {% if field.encoding %}
         let val = val.bits() as u{{ctx.regwidth}};
         {% else %}
         let val = val as u{{ctx.regwidth}};
         {% endif %}
         self.0 = (self.0 & !(Self::{{field.inst_name|upper}}_MASK << Self::{{field.inst_name|upper}}_OFFSET)) | ((val & Self::{{field.inst_name|upper}}_MASK) << Self::{{field.inst_name|upper}}_OFFSET);
+    }
+    {% endif %}
+
+    {# Field Fixed-Point Setter #}
+    {% if field.fracwidth is not none %}
+    {{field.comment | indent()}}
+    #[inline(always)]
+    pub const fn set_{{field.inst_name}}(&mut self, val: {{field.type_name}}FixedPoint) {
+        self.set_{{field.inst_name}}_raw_(val.to_bits());
     }
     {% endif %}
 
@@ -100,7 +136,7 @@ mod tests {
     fn test_default() {
         let reg = {{ctx.type_name}}::default();
         {% for field in ctx.fields %}
-        assert_eq!(reg.{{field.inst_name}}(), {{field.reset_val}});
+        assert_eq!(reg.{{field.inst_name}}(){% if field.fracwidth is not none %}.to_f64(){% endif %}, {{field.reset_val}});
         {% endfor %}
     }
 }

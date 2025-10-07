@@ -62,7 +62,7 @@ def kw_filter(s: str) -> str:
     Make all user identifiers 'safe' and ensure they do not collide with
     Rust keywords.
 
-    If a Rust keyword is encountered, add an underscore suffix
+    If a Rust keyword is encountered, create a raw identifier
     """
     if s in RUST_KEYWORDS:
         s = f"r#{s}"

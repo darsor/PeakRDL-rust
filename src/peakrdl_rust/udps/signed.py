@@ -31,6 +31,9 @@ class IsSigned(UDPDefinition):
         """
         No unassigned default.
 
-        VHDL treats no sign (std_logic_vector) different than unsigned (unsigned).
+        Treat no sign different than unsigned.
         """
+        if node.get_property("fracwidth") is not None:
+            # fixedpoint fields are unsigned by default
+            return False
         return None

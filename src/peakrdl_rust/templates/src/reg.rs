@@ -21,7 +21,7 @@ pub trait Register: Copy {
         // read one subword at a time, starting at the lowest address
         let mut result = Self::Regwidth::ZERO;
         for i in 0..num_subwords {
-            let raw_val = Self::Accesswidth::from_{{endianness}}(unsafe { ptr.add(i).read_volatile() });
+            let raw_val = Self::Accesswidth::from_{{ctx.endianness}}(unsafe { ptr.add(i).read_volatile() });
             result = result | raw_val.as_() << ((num_subwords - 1 - i) * accesswidth);
         }
         unsafe { Self::from_raw(result) }
@@ -40,7 +40,7 @@ pub trait Register: Copy {
         for i in 0..num_subwords {
             let subword = (raw_value >> ((num_subwords - 1 - i) * accesswidth)) & mask;
             unsafe {
-                ptr.add(i).write_volatile(subword.as_().to_{{endianness}}());
+                ptr.add(i).write_volatile(subword.as_().to_{{ctx.endianness}}());
             }
         }
     }

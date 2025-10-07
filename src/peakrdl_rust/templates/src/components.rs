@@ -1,5 +1,5 @@
 //! SystemRDL component definitions
 
-{% for component in components %}
+{% for component in ctx.components %}
 pub mod {{component}};
 {% endfor %}
