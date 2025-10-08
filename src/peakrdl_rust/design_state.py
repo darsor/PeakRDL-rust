@@ -5,8 +5,10 @@ import jinja2 as jj
 from caseconverter import snakecase
 from systemrdl.node import AddrmapNode
 
+from .component_context import ContextScanner
+
 if TYPE_CHECKING:
-    from peakrdl_rust.crate_generator import Component
+    from peakrdl_rust.component_context import Component
 
 
 class DesignState:
@@ -26,9 +28,6 @@ class DesignState:
         # ------------------------
         # Info about the design
         # ------------------------
-        self.top_component_modules: list[str] = []
-        self.components: dict[Path, Component] = {}
-
         # Each reg that has overlapping fields generates an entry:
         #   reg_path : list of field names involved in overlap
         self.overlapping_fields: dict[str, list[str]] = {}
@@ -62,3 +61,11 @@ class DesignState:
 
         self.no_fmt: bool
         self.no_fmt = kwargs.pop("no_fmt", False)
+
+        # ------------------------
+        # Collect info for export
+        # ------------------------
+        component_context = ContextScanner(self.top_nodes)
+        component_context.run()
+        self.top_component_modules: list[str] = component_context.top_component_modules
+        self.components: dict[Path, Component] = component_context.components

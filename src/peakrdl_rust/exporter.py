@@ -5,7 +5,6 @@ from typing import Any, Union
 from systemrdl.node import AddrmapNode, RootNode
 
 from .crate_generator import write_crate
-from .design_scanner import DesignScanner
 from .design_state import DesignState
 from .test_generator import write_tests
 
@@ -59,9 +58,6 @@ class RustExporter:
             raise FileExistsError(
                 f"'{ds.output_dir}' already exists (use --force to overwrite)"
             )
-
-        # Collect info for export
-        DesignScanner(ds).run()
 
         if ds.output_dir.exists() and (
             not ds.output_dir.is_dir() or any(ds.output_dir.iterdir())
