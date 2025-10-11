@@ -18,7 +18,7 @@ jobs:
         uses: astral-sh/setup-uv@v6
         with:
           python-version: "3.9"
-          version: "0.8.22"
+          version: "0.9.2"
           enable-cache: true
 
       - name: Install dependencies
@@ -39,7 +39,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest]
-        python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
+        python-version: ["3.9", "3.10", "3.11", "3.12", "3.13", "3.14"]
 
     steps:
       - uses: actions/checkout@v5
@@ -54,7 +54,7 @@ jobs:
         uses: astral-sh/setup-uv@v6
         with:
           python-version: ${{ matrix.python-version }}
-          version: "0.8.22"
+          version: "0.9.2"
           enable-cache: true
 
       - name: Install dependencies
@@ -95,7 +95,7 @@ jobs:
         uses: astral-sh/setup-uv@v6
         with:
           python-version: "3.9"
-          version: "0.8.22"
+          version: "0.9.2"
           enable-cache: true
 
       - name: Build wheel and sdist
