@@ -1,0 +1,20 @@
+# Sphinx build artifacts
+_build/
+.doctrees/
+
+# Generated files
+*.pyc
+__pycache__/
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Editor files
+*.swp
+*.swo
+*~
+
+# Temporary files
+*.tmp
+*.bak

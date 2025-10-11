@@ -21,6 +21,19 @@ For usage available options, use
 peakrdl rust --help
 ```
 
+## Documentation
+
+For comprehensive documentation including API reference, configuration options, and detailed examples, visit:
+
+**📖 [PeakRDL-rust Documentation on Read the Docs](https://peakrdl-rust.readthedocs.io/)**
+
+The documentation includes:
+- Getting started guide with examples
+- Detailed description of generated Rust code
+- Configuration options and customization
+- Python API reference
+- Best practices and advanced usage
+
 ## TODO
 
 - [x] Arrays

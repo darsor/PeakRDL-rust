@@ -42,7 +42,7 @@ dependencies = [
 ]
 
 [project.urls]
-Documentation = "https://github.com/darsor/PeakRDL-rust/blob/main/README.md"
+Documentation = "https://peakrdl-rust.readthedocs.io/"
 Source = "https://github.com/darsor/PeakRDL-rust"
 Tracker = "https://github.com/darsor/PeakRDL-rust/issues"
 Changelog = "https://github.com/darsor/PeakRDL-rust/blob/main/CHANGELOG.md"
@@ -55,6 +55,13 @@ dev = [
     "pytest-xdist>=3.8.0",
     "pytest>=8.4.2",
     "ruff>=0.3.0",
+]
+docs = [
+    "pygments-systemrdl>=1.3.0",
+    "sphinx>=4.0.0",
+    "sphinx-autobuild>=2024.10.3",
+    "sphinx-book-theme>=0.3.0",
+    "sphinxcontrib-spelling>=8.0.0",
 ]
 
 [project.optional-dependencies]
