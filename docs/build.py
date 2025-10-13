@@ -12,6 +12,7 @@ import os
 import shutil
 import subprocess
 import webbrowser
+from importlib.util import find_spec
 from pathlib import Path
 
 
@@ -28,15 +29,10 @@ def run_command(cmd, cwd=None):
 
 def check_dependencies():
     """Check if required dependencies are installed."""
-    try:
-        import sphinx
-        import sphinx_book_theme
-
-        return True
-    except ImportError as e:
-        print(f"Missing dependency: {e}")
+    if not (find_spec("sphinx") and find_spec("sphinx_book_theme")):
         print("Install dependencies with: uv sync --group docs")
         return False
+    return True
 
 
 def clean_build():
@@ -82,9 +78,7 @@ def build_docs(format_type="html", verbose=False):
 def serve_docs(port=8000, auto_build=False):
     """Serve documentation with local HTTP server."""
     if auto_build:
-        try:
-            import sphinx_autobuild
-        except ImportError:
+        if not find_spec("sphinx_autobuild"):
             print("sphinx-autobuild not installed. Install with: uv sync --group docs")
             return False
 
@@ -141,10 +135,8 @@ def check_links():
 
 def spell_check():
     """Run spell check on documentation."""
-    try:
-        import sphinxcontrib.spelling
-    except ImportError:
-        print("Spell checking requires sphinxcontrib.spelling")
+    if not find_spec("sphinxcontrib.spelling"):
+        print("sphinxcontrib.spelling not installed.")
         print("Install with: uv sync --group docs")
         return False
 
