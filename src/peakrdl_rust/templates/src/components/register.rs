@@ -104,7 +104,6 @@ impl {{ctx.type_name}} {
         {% endif %}
         self.0 = (self.0 & !(Self::{{field.inst_name|upper}}_MASK << Self::{{field.inst_name|upper}}_OFFSET)) | ((val & Self::{{field.inst_name|upper}}_MASK) << Self::{{field.inst_name|upper}}_OFFSET);
     }
-    {% endif %}
 
     {# Field Fixed-Point Setter #}
     {% if field.fracwidth is not none %}
@@ -113,6 +112,7 @@ impl {{ctx.type_name}} {
     pub const fn set_{{field.inst_name}}(&mut self, val: {{field.type_name}}FixedPoint) {
         self.set_{{field.inst_name}}_raw_(val.to_bits());
     }
+    {% endif %}
     {% endif %}
 
 {% endfor %}

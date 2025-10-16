@@ -17,7 +17,7 @@ addrmap top {
             is_signed;
         } f_SQn8_32[24] = 24'd12;
         field {
-            sw = rw; hw = r;
+            sw = r; hw = r;
             fracwidth = 7;
             is_signed;
         } f_SQn6_7 = 1'd1;
