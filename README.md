@@ -1,5 +1,7 @@
 # PeakRDL-rust
 
+[![Coverage Status](https://coveralls.io/repos/github/darsor/PeakRDL-rust/badge.svg?branch=main)](https://coveralls.io/github/darsor/PeakRDL-rust?branch=main)
+
 Generate Rust code for accessing control/status registers from a SystemRDL description.
 
 This is currently in a beta state. Feel free to try it out and report any bugs encountered.
