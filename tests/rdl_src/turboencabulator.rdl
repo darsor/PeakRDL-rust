@@ -1,0 +1,123 @@
+addrmap turbo_encab {
+    name = "Turbo-Encabulator";
+    desc = "
+        Configuration & status address space for the state-of-the-art Turbo Encabulator.
+        It is strongly recommended that users of the Turbo Encabulator watch the
+        [training video](https://www.youtube.com/watch?v=rLDgQg6bq7o) prior to attempting
+        to supply inverse reactive current. The product brief for Rockwell Automation's
+        [Retro Encabulator](https://www.youtube.com/watch?v=RXJKdh1KZ0w) is also a sufficient substitute.
+    ";
+    reg {
+        name = "System Control Register";
+
+        field {
+            sw=rw; hw=r;
+        } reset;
+
+        field {
+            name = "Magneto-reluctance";
+            desc = "Set the absolute magneto-reluctance.";
+            sw=rw; hw=r;
+            intwidth = 1;
+            fracwidth = 7;
+            is_signed;
+        } reluctance[8] = 0x42;
+
+        field {
+            name = "Capactive diractance";
+            desc = "
+                Capacitive diractance relative to the lunar waneshaft.
+
+                The amount of energy that can be stored in a capacitor is E = 1/2 CV^2,
+                but that is irrelevant because nobody knows what 'diractance' is, so we'll leave
+                that as an exercise to the reader.
+            ";
+            sw=rw; hw=r;
+        } diractance[8];
+        diractance->reset = reluctance;
+    } ctrl @ 0x0000;
+
+    reg {
+        name = "Encabulator Status";
+
+        field {
+            desc = "
+                Degree of waneshaft side fumbling.
+
+                If this reads as non-zero, immediately reduce differential girdle spring tension.
+            ";
+            sw=r; hw=w;
+        } side_fumbling[12];
+
+        field {
+            name = "Stator revolutions per month";
+            sw=r; hw=w;
+        } stator_rpm[31:16];
+    } status;
+
+    regfile {
+        name = "Cardinal Grammeter";
+        desc = "
+            The Turbo Encabulator contains twelve cardinal grammeters.
+            Each has the following features:
+
+            - Automatically synchronizing.
+            - Fully independent of the five dingle arms.
+            - Produces reliable entropic measurements.
+        ";
+
+        reg {
+            field {sw=rw; hw=r;} sync_en;
+            field {sw=rw; hw=r;} disable;
+        } control;
+
+        reg {
+            field {
+                name = "Grammeter State";
+                desc = "Indicates the state of the cardinal grammeter";
+
+                enum grammeter_state_e {
+                    RESET = 2'd0 {
+                        desc = "Grammeter is in reset state and *not* ready to be used.";
+                    };
+                    SYNC = 2'd1 {
+                        desc = "Automatic synchronization in progress.";
+                    };
+                    READY = 2'd2 {
+                        desc = "Grammeter has successfully synchronized with the stator";
+                    };
+                    SYNC_FAIL = 2'd3 {
+                        desc = "
+                            Synchronization error!
+
+                            It is likely that the differential girdlespring is not on the 'up' position.
+                        ";
+                    };
+                };
+                sw=r; hw=w;
+                encode = grammeter_state_e;
+            } state[3];
+
+            field {
+                desc = "Sticky-bit indicating whether sync failed";
+                sw=r; hw=w;
+                rclr; hwset;
+            } sync_failed;
+        } status;
+
+        reg {
+            name = "Grammeter measurement register";
+            field {
+                desc = "
+                    Current grammeter measurement.
+
+                    Units are in Amperes per foot-liter (A/F-L)
+                ";
+                sw=r; hw=w;
+                intwidth = 12;
+                fracwidth = 20;
+                is_signed;
+            } value[31:0];
+        } meter;
+    } grammeter[12] @ 0x1000 += 0x200;
+};
