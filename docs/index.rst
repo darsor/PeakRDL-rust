@@ -6,12 +6,13 @@ for accessing control/status registers from a SystemRDL definition.
 
 Features:
 
-* Generates Rust ``struct`` definitions and accessor methods for your hardware registers
+* Generates Rust types and accessor methods representing your hardware registers
 * Preserves the hierarchical structure of SystemRDL
 * Supports complex nested regfiles, arrays, and memory components
 * Supports enumerated field types
 * Supports signed and fixed-point field types
 * Type-safe field access with compile-time guarantees
+* Includes component names and descriptions as doc comments in the generated code
 * Embedded-friendly code generation with ``no_std`` support
 * Generates comprehensive test suites to validate register functionality
 * Implements ``Debug`` and ``Default`` traits for generated register types
@@ -36,7 +37,7 @@ The easiest way to use PeakRDL-rust is via the `PeakRDL command line tool <https
 .. code-block:: bash
 
     # Install the command line tool
-    python3 -m pip install peakrdl
+    python3 -m pip install peakrdl peakrdl-rust
 
     # Generate a Rust crate in the example/ directory
     peakrdl rust example.rdl -o example/
@@ -46,35 +47,32 @@ For example, the tool transforms this SystemRDL:
 
 .. code-block:: systemrdl
 
-    // TODO
+    addrmap my_addrmap {
+        reg {
+            default sw = rw;
+            default hw = r;
+            field {} my_field1[15:0];
+            field {} my_field2;
+        } my_reg;
+    };
 
 Into a Rust crate you can use like:
 
 .. code-block:: rust
 
-    // TODO
+    registers: MyAddrmap = unsafe { MyAddrmap::from_ptr(/* some pointer */ as _) };
 
-For more in-depth examples, see TODO.
+    // read the register and print the values of its fields
+    let reg_value: MyReg = my_addrmap.my_reg().read();
+    println!("Register fields: {reg_value:?}");
+    let field1_value: u16 = reg_value.my_field1();
 
+    // read-modify-write to update a single field
+    my_addrmap.my_reg().modify(|value: &mut MyReg| {
+        value.set_my_field2(1);
+    });
 
-Key Benefits
-------------
-
-**Type Safety**
-    All register and field accesses are checked at compile time, preventing
-    common errors like writing to a read-only field or accessing non-existent registers or fields.
-
-**Zero-Cost Abstractions**
-    The generated code compiles down to direct memory accesses with no runtime overhead.
-
-**Embedded Friendly**
-    Compatible with ``no_std`` environments and embedded development workflows.
-
-**Comprehensive Testing**
-    Optionally generates test suites that validate register behavior and field access.
-
-**Rich Metadata**
-    Preserves SystemRDL documentation, field properties, and semantic information.
+For more in-depth examples, see :doc:`examples`.
 
 
 Getting Started
@@ -82,9 +80,10 @@ Getting Started
 
 Ready to dive in? Here are the next steps:
 
-1. :doc:`output` - Learn about the generated Rust code structure
-2. :doc:`configuring` - Customize the code generation to your needs
-3. :doc:`api` - Use PeakRDL-rust in your own Python scripts
+1. :doc:`examples` - View generated Rust code for example inputs
+2. :doc:`output` - Learn about the generated Rust code structure
+3. :doc:`configuring` - Customize the code generation to your needs
+4. :doc:`api` - Use PeakRDL-rust in your own Python scripts
 
 For questions or issues, visit our `issue tracker <https://github.com/darsor/PeakRDL-rust/issues>`_.
 
@@ -117,6 +116,7 @@ Links
 .. toctree::
     :hidden:
 
+    examples
     output
     configuring
     api

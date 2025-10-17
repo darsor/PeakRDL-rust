@@ -66,7 +66,7 @@ The exporter generates a ``FixedPoint`` type with const generics for the number
 of integer bits and fractional bits. This type is returned/accepted by the
 field's getter and setter methods. The purpose of this type is to enforce type
 safety (i.e., not accidentally setting the field to a normal integer value) and
-provide convenient converion functions between float types and fixedpoint numbers.
+provide convenient conversion functions between float types and fixed-point numbers.
 
 The `fixed`_ crate is not used because it has two limitations with respect to
 SystemRDL:

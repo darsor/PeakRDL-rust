@@ -1,3 +1,4 @@
+//! Control/Status Register crate generated with PeakRDL-rust
 #![no_std]
 #![allow(clippy::cast_lossless)]
 #![allow(clippy::cast_possible_wrap)]

@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Tests now treat pedantic clippy lints as errors
 - Derive common traits for `MemEntry` struct
+- Examples including generated crate's cargo docs in sphinx documentation
 
 ### Changed
 
@@ -53,6 +54,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   primitive type
 
 ## [0.2.2] - 2025-10-15
+
+### Added
+
+- Sphinx documentation hosted on readthedocs.org
 
 ### Fixed
 

@@ -24,7 +24,7 @@ the Rust code using the Python API.
 
     # generate the Rust code
     exporter = RustExporter()
-    exporter.export(node=top, path='registers.rs')
+    exporter.export(node=top, path='registers')
 
 
 Exporter Class
@@ -33,26 +33,4 @@ Exporter Class
 .. autoclass:: peakrdl_rust.exporter.RustExporter
     :members:
 
-
-Configuration Options
----------------------
-
-The exporter supports various configuration options that can be passed to customize
-the generated Rust code:
-
-.. code-block:: python
-
-    from peakrdl_rust.exporter import RustExporter
-
-    # Create exporter with custom configuration
-    exporter = RustExporter(
-        crate_name="my_registers",
-        generate_tests=True,
-        no_std=True,
-        volatile_access=True,
-    )
-
-    exporter.export(node=top, path='registers.rs')
-
-
-For a complete list of available configuration options, see the :doc:`configuring` page.
+For more information about configuration options, see the :doc:`configuring` page.

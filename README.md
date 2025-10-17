@@ -44,6 +44,6 @@ peakrdl rust --help
 - [x] Rust keyword conflict test
 - [x] Unwrap encoded field enums if exhaustive
 - [x] Restrict read/write to memories
-- [ ] Add examples to docs
+- [x] Add examples to docs
 - [ ] Regwidth > native integer types
 - [ ] Public const component instances

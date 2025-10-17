@@ -1,9 +1,10 @@
-//! Traits and types for memory components
+//! Memory abstraction used to read, write, and iterate over memory entries
 
 use crate::access::{self, Access};
 use core::marker::PhantomData;
 use num_traits::PrimInt;
 
+/// Behaviors common to all SystemRDL memories
 pub trait Memory: Sized {
     /// Primitive integer type used to represented a memory entry
     type Memwidth: PrimInt;
@@ -34,7 +35,7 @@ pub trait Memory: Sized {
         }
     }
 
-    /// Get an iterator over a range of memory entries
+    /// Iterate over a range of memory entries
     #[must_use]
     fn slice(
         &self,
@@ -57,7 +58,7 @@ pub trait Memory: Sized {
         }
     }
 
-    /// Get an iterator over all memory entries
+    /// Iterate over all memory entries
     #[must_use]
     fn iter(&self) -> MemEntryIter<Self::Memwidth, Self::Access> {
         self.slice(..)
@@ -91,6 +92,7 @@ impl<T: PrimInt, A: Access> MemEntry<T, A> {
 }
 
 impl<T: PrimInt, A: access::Read> MemEntry<T, A> {
+    /// Read the value of the hardware memory entry.
     #[must_use]
     pub fn read(&self) -> T {
         // SAFETY: MemEntry can only be constructed through from_ptr(),
@@ -101,6 +103,7 @@ impl<T: PrimInt, A: access::Read> MemEntry<T, A> {
 }
 
 impl<T: PrimInt, A: access::Write> MemEntry<T, A> {
+    /// Write the provided value to the hardware memory entry.
     pub fn write(&mut self, value: T) {
         // SAFETY: MemEntry can only be constructed through from_ptr(),
         // which means the user has guaranteed the address points to

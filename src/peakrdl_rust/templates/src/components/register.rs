@@ -104,7 +104,8 @@ impl {{ctx.type_name|kw_filter}} {
     {{field.comment | indent()}}
     #[inline(always)]
     {% set input_type = field.encoding if field.encoding else field.primitive %}
-    {% if field.fracwidth is none %}pub {% endif -%}
+    {% if field.fracwidth is none %}
+    pub {% endif -%}
     fn set_{{field.inst_name}}
     {%- if field.fracwidth is not none %}_raw_{% endif -%}
     (&mut self, val: {{input_type}}) {

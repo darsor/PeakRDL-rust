@@ -22,7 +22,8 @@ class RustExporter:
         node: AddrmapNode
             Top-level SystemRDL node to export.
         path: str
-            Output directory for generated crate.
+            Output directory for generated crate. A subfolder with the name of
+            the crate is generated in this directory.
         force: bool
             Overwrite the contents of the output directory if it already exists.
         crate_name: Optional[str]

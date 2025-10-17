@@ -1,5 +1,5 @@
-Generated Rust Code Contents
-============================
+Generated Rust Code
+===================
 
 The generated Rust code is inspired by `chiptool`_ and adapted to work for
 SystemRDL. The chiptool README has a good explanation of some if its design
@@ -15,7 +15,8 @@ Synchronization between subsystems using the same register is required, and
 is best performed at a higher level for maximum flexibility.
 
 The best documentation for the generated Rust code is generated with the
-crate as doc comments and can be compiled using ``cargo doc``. The purpose
+crate as doc comments and can be compiled using ``cargo doc``. Examples of that
+documentation can be found on the :doc:`examples` page. The purpose
 of this page is to provide a high-level overview of architectural decisions
 and how the various pieces fit together.
 
@@ -170,8 +171,10 @@ for getting/setting the field value. These can include:
 * i8, i16, i32, etc.: for signed integer fields (sign-extended to the primitive width)
 * A custom Rust ``enum`` type for fields with the ``encode`` property set
 
-  * The return type for these fields' getters is ``Option<SomeEnum>``, and will
-    return None if the field's bit pattern doesn't match any enum variant.
+  * If the encoding is not exhaustive, the return type for these fields'
+    getters is ``Result<SomeEnum, UnknownVariant>``. If the field's bit
+    pattern doesn't match any defined enum variant, the Err type is returned
+    containing the value of the field.
 
 * An instance of the ``FixedPoint`` type for fields with the ``intwidth``
   or ``fracwidth`` properties defined.
