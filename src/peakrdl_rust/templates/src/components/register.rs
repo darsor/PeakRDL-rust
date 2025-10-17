@@ -12,18 +12,18 @@ pub type {{field.type_name}}FixedPoint = crate::fixedpoint::FixedPoint<{{field.p
 {{ctx.comment}}
 #[repr(transparent)]
 #[derive(Copy, Clone, Eq, PartialEq)]
-pub struct {{ctx.type_name}}(u{{ctx.regwidth}});
+pub struct {{ctx.type_name|kw_filter}}(u{{ctx.regwidth}});
 
-unsafe impl Send for {{ctx.type_name}} {}
-unsafe impl Sync for {{ctx.type_name}} {}
+unsafe impl Send for {{ctx.type_name|kw_filter}} {}
+unsafe impl Sync for {{ctx.type_name|kw_filter}} {}
 
-impl core::default::Default for {{ctx.type_name}} {
+impl core::default::Default for {{ctx.type_name|kw_filter}} {
     fn default() -> Self {
         Self(0x{{"%X" % ctx.reset_val}})
     }
 }
 
-impl crate::reg::Register for {{ctx.type_name}} {
+impl crate::reg::Register for {{ctx.type_name|kw_filter}} {
     type Regwidth = u{{ctx.regwidth}};
     type Accesswidth = u{{ctx.accesswidth}};
 
@@ -36,7 +36,7 @@ impl crate::reg::Register for {{ctx.type_name}} {
     }
 }
 
-impl {{ctx.type_name}} {
+impl {{ctx.type_name|kw_filter}} {
 {% for field in ctx.fields %}
     pub const {{field.inst_name|upper}}_OFFSET: usize = {{field.bit_offset}};
     pub const {{field.inst_name|upper}}_WIDTH: usize = {{field.width}};
@@ -53,10 +53,12 @@ impl {{ctx.type_name}} {
     {{field.comment | indent()}}
     #[inline(always)]
     {% set return_type = "Option<" ~ field.encoding ~ ">" if field.encoding else field.primitive %}
-    {% if "R" in field.access and field.fracwidth is none %}pub {% endif -%}
-    const fn {{field.inst_name}}
-    {%- if field.fracwidth is not none %}_raw_{% endif -%}
-    (&self) -> {{return_type}} {
+    {% if field.fracwidth is not none %}
+    const fn {{field.inst_name}}_raw_(&self) -> {{return_type}} {
+    {% else %}
+    {% if "R" in field.access %}pub {% endif -%}
+    const fn {{field.inst_name|kw_filter}}(&self) -> {{return_type}} {
+    {% endif %}
         let val = (self.0 >> Self::{{field.inst_name|upper}}_OFFSET) & Self::{{field.inst_name|upper}}_MASK;
         {% if field.encoding is not none %}
         {{field.encoding}}::from_bits(val as {{field.primitive}})
@@ -83,7 +85,7 @@ impl {{ctx.type_name}} {
     {{field.comment | indent()}}
     #[inline(always)]
     {% if "R" in field.access %}pub {% endif -%}
-    fn {{field.inst_name}}(&self) -> {{field.type_name}}FixedPoint {
+    fn {{field.inst_name|kw_filter}}(&self) -> {{field.type_name}}FixedPoint {
         {{field.type_name}}FixedPoint::from_bits(self.{{field.inst_name}}_raw_())
     }
     {% endif %}
@@ -118,11 +120,11 @@ impl {{ctx.type_name}} {
 {% endfor %}
 }
 
-impl core::fmt::Debug for {{ctx.type_name}} {
+impl core::fmt::Debug for {{ctx.type_name|kw_filter}} {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("{{ctx.type_name}}")
+        f.debug_struct("{{ctx.type_name|kw_filter}}")
             {% for field in ctx.fields %}
-            .field("{{field.inst_name}}", &self.{{field.inst_name}}())
+            .field("{{field.inst_name|kw_filter}}", &self.{{field.inst_name|kw_filter}}())
             {% endfor %}
             .finish()
     }
@@ -134,9 +136,9 @@ mod tests {
 
     #[test]
     fn test_default() {
-        let reg = {{ctx.type_name}}::default();
+        let reg = {{ctx.type_name|kw_filter}}::default();
         {% for field in ctx.fields %}
-        assert_eq!(reg.{{field.inst_name}}(){% if field.fracwidth is not none %}.to_f64(){% endif %}, {{field.reset_val}});
+        assert_eq!(reg.{{field.inst_name|kw_filter}}(){% if field.fracwidth is not none %}.to_f64(){% endif %}, {{field.reset_val}});
         {% endfor %}
     }
 }

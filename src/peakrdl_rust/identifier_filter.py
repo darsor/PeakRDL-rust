@@ -56,14 +56,41 @@ RUST_KEYWORDS = {
     "gen",
 }
 
+# these are reserved words that cannot be used as raw identifiers
+# https://internals.rust-lang.org/t/raw-identifiers-dont-work-for-all-identifiers/9094
+PATH_IDENTIFIERS = {
+    "super",
+    "self",
+    "Self",
+    "extern",
+    "crate",
+}
+
 
 def kw_filter(s: str) -> str:
     """
     Make all user identifiers 'safe' and ensure they do not collide with
     Rust keywords.
 
-    If a Rust keyword is encountered, create a raw identifier
+    If a Rust keyword is encountered, create a raw identifier or add a "_"
+    suffix if a raw identifier is not possible.
     """
+    if s in PATH_IDENTIFIERS:
+        return s + "_"
     if s in RUST_KEYWORDS:
-        s = f"r#{s}"
+        return "r#" + s
+    return s
+
+
+def kw_filter_path(s: str) -> str:
+    """
+    Make all user identifiers 'safe' as module path names.
+
+    In Rust, if a module is named "r#<keyword>", the file path is still
+    expected to be "<keyword>". However, some keywords such as "self"
+    can not be used as raw identifiers and are instead suffixed with a "_",
+    in which case the file path is expected to be "<keyword>_".
+    """
+    if s in PATH_IDENTIFIERS:
+        return s + "_"
     return s

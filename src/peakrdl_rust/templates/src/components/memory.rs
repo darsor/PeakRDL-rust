@@ -5,14 +5,14 @@
 
 {{ctx.comment}}
 #[derive(Copy, Clone, Eq, PartialEq)]
-pub struct {{ctx.type_name}} {
+pub struct {{ctx.type_name|kw_filter}} {
     ptr: *mut {{ctx.primitive}},
 }
 
-unsafe impl Send for {{ctx.type_name}} {}
-unsafe impl Sync for {{ctx.type_name}} {}
+unsafe impl Send for {{ctx.type_name|kw_filter}} {}
+unsafe impl Sync for {{ctx.type_name|kw_filter}} {}
 
-impl crate::mem::Memory for {{ctx.type_name}} {
+impl crate::mem::Memory for {{ctx.type_name|kw_filter}} {
     type Memwidth = {{ctx.primitive}};
 
     fn first_entry_ptr(&self) -> *mut Self::Memwidth {
@@ -28,7 +28,7 @@ impl crate::mem::Memory for {{ctx.type_name}} {
     }
 }
 
-impl {{ctx.type_name}} {
+impl {{ctx.type_name|kw_filter}} {
     /// Size in bytes of the memory
     pub const SIZE: usize = 0x{{"%x" % ctx.size}};
 
@@ -43,18 +43,19 @@ impl {{ctx.type_name}} {
     }
 
 {% for reg in ctx.registers %}
+    {% set reg_type_name = reg.type_name|kw_filter %}
     {{reg.comment | indent()}}
     #[inline(always)]
     {% if reg.array is none %}
-    pub const fn {{reg.inst_name}}(&self) -> crate::reg::Reg<{{reg.type_name}}, crate::reg::{{reg.access}}> {
+    pub const fn {{reg.inst_name|kw_filter}}(&self) -> crate::reg::Reg<{{reg_type_name}}, crate::reg::{{reg.access}}> {
         unsafe { crate::reg::Reg::from_ptr(self.ptr.byte_add(0x{{"%x" % reg.addr_offset}}) as _) }
     }
     {% else %}
-    pub const fn {{reg.inst_name}}(&self) -> {{reg.array.type.format("crate::reg::Reg<" ~ reg.type_name ~ ", crate::reg::" ~ reg.access ~ ">")}} {
+    pub const fn {{reg.inst_name|kw_filter}}(&self) -> {{reg.array.type.format("crate::reg::Reg<" ~ reg_type_name ~ ", crate::reg::" ~ reg.access ~ ">")}} {
         // SAFETY: We will initialize every element before using the array
         let mut array = {{reg.array.type.format("core::mem::MaybeUninit::uninit()")}};
 
-        {% set expr = "unsafe { crate::reg::Reg::<" ~ reg.type_name ~ ", crate::reg::" ~ reg.access ~ ">::from_ptr(self.ptr.byte_add(" ~ reg.array.addr_offset ~ ") as _) }"  %}
+        {% set expr = "unsafe { crate::reg::Reg::<" ~ reg_type_name ~ ", crate::reg::" ~ reg.access ~ ">::from_ptr(self.ptr.byte_add(" ~ reg.array.addr_offset ~ ") as _) }"  %}
         {{ macros.loop(0, reg.array.dims, expr) | indent(8) }}
 
         // SAFETY: All elements have been initialized above

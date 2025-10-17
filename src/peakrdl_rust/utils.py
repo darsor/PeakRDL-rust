@@ -94,7 +94,7 @@ def enum_parent_scope(node: FieldNode, encoding: type[UserEnum]) -> Union[Node, 
 def crate_module_path(node: Node) -> list[str]:
     parent = parent_scope(node)
     assert parent is not None
-    type_name = kw_filter(snakecase(rust_type_name(node)))
+    type_name = snakecase(rust_type_name(node))
     if isinstance(parent, RootNode):
         return [type_name]
     parent_path = crate_module_path(parent)
@@ -109,7 +109,7 @@ def crate_enum_module_path(field: FieldNode, enum: type[UserEnum]) -> list[str]:
     declaring_parent = enum_parent_scope(field, enum)
     assert declaring_parent is not None
 
-    module_name = kw_filter(snakecase(enum.type_name))
+    module_name = snakecase(enum.type_name)
 
     if isinstance(declaring_parent, RootNode):
         return [module_name]

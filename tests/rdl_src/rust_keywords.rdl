@@ -1,0 +1,52 @@
+reg trait { field {} return; };
+
+addrmap const {
+
+    default sw = rw;
+    default hw = r;
+
+    reg self { field {} use; };
+
+    enum dyn {
+        fn;
+        pub;
+        let;
+    };
+
+    reg {
+        field {} as[31:0];
+    } break;
+
+    reg {
+        field {} impl[15:0];
+    } loop;
+
+    reg {
+        field {
+            encode = dyn;
+        } match[2:1];
+    } move;
+
+    trait while;
+    self unsafe;
+
+    regfile {
+        reg mut { field {} async; };
+        mut yield;
+        trait while;
+        self self;
+    } self;
+
+    external mem {
+        mementries = 5;
+        memwidth = 32;
+        sw = rw;
+        trait while;
+        self unsafe;
+        reg {
+            field {
+                encode = dyn;
+            } extern[2:1];
+        } in;
+    } if;
+};

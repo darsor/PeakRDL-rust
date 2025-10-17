@@ -11,7 +11,6 @@ from systemrdl.walker import RDLListener, RDLWalker, WalkerAction
 
 from . import utils
 from .design_state import DesignState
-from .identifier_filter import kw_filter
 
 
 @dataclass
@@ -65,7 +64,7 @@ def write_tests(ds: DesignState) -> None:
 
         component = TestComponent(
             crate_name=ds.crate_name,
-            name=kw_filter(snakecase(top.inst_name)),
+            name=snakecase(top.inst_name),
             type_name=pascalcase(utils.rust_type_name(top)),
             addresses=scanner.test_addrs,
         )

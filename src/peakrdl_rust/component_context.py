@@ -20,7 +20,7 @@ from systemrdl.rdltypes.user_enum import UserEnum
 from systemrdl.walker import RDLListener, RDLWalker, WalkerAction
 
 from . import utils
-from .identifier_filter import kw_filter
+from .identifier_filter import kw_filter, kw_filter_path
 
 
 @dataclass
@@ -200,7 +200,8 @@ class ContextScanner(RDLListener):
 
     def file_from_modules(self, module_names: list[str]) -> Path:
         """Construct a filename from a list of module names in the hierarchy"""
-        return Path("src") / "components" / Path(*module_names).with_suffix(".rs")
+        escaped_names = list(map(kw_filter_path, module_names))
+        return Path("src") / "components" / Path(*escaped_names).with_suffix(".rs")
 
     def enter_addrmap_or_regfile_or_memory(
         self, node: Union[AddrmapNode, RegfileNode, MemNode]
@@ -219,7 +220,7 @@ class ContextScanner(RDLListener):
         for child in node.children():
             if not isinstance(child, AddressableNode):
                 continue
-            inst_name = kw_filter(snakecase(child.inst_name))
+            inst_name = snakecase(child.inst_name)
             if child.is_array:
                 dims = child.array_dimensions
                 assert dims is not None
@@ -256,9 +257,9 @@ class ContextScanner(RDLListener):
                     RegisterInst(
                         comment=utils.doc_comment(child),
                         inst_name=inst_name,
-                        type_name=inst_name
+                        type_name=kw_filter(inst_name)
                         + "::"
-                        + pascalcase(utils.rust_type_name(child)),
+                        + kw_filter(pascalcase(utils.rust_type_name(child))),
                         array=array,
                         addr_offset=addr_offset,
                         access=access,
@@ -269,9 +270,9 @@ class ContextScanner(RDLListener):
                     SubmapInst(
                         comment=utils.doc_comment(child),
                         inst_name=inst_name,
-                        type_name=inst_name
+                        type_name=kw_filter(inst_name)
                         + "::"
-                        + pascalcase(utils.rust_type_name(child)),
+                        + kw_filter(pascalcase(utils.rust_type_name(child))),
                         array=array,
                         addr_offset=addr_offset,
                     )
@@ -281,9 +282,9 @@ class ContextScanner(RDLListener):
                     MemoryInst(
                         comment=utils.doc_comment(child),
                         inst_name=inst_name,
-                        type_name=inst_name
+                        type_name=kw_filter(inst_name)
                         + "::"
-                        + pascalcase(utils.rust_type_name(child)),
+                        + kw_filter(pascalcase(utils.rust_type_name(child))),
                         array=array,
                         addr_offset=addr_offset,
                     )
@@ -295,7 +296,9 @@ class ContextScanner(RDLListener):
                 anon_instances.append(inst_name)
             else:
                 module_names = utils.crate_module_path(child)
-                scoped_module = "::".join(["crate", "components"] + module_names)
+                scoped_module = "::".join(
+                    ["crate", "components"] + list(map(kw_filter, module_names))
+                )
                 named_type_instances.append((inst_name, scoped_module))
 
         if isinstance(node, (AddrmapNode, RegfileNode)):
@@ -359,7 +362,7 @@ class ContextScanner(RDLListener):
                 encoding_name = (
                     kw_filter(snakecase(field.inst_name))
                     + "::"
-                    + pascalcase(encoding.type_name)
+                    + kw_filter(pascalcase(encoding.type_name))
                 )
             else:
                 encoding_name = None
@@ -378,9 +381,9 @@ class ContextScanner(RDLListener):
                             "Some("
                             + kw_filter(snakecase(field.inst_name))
                             + "::"
-                            + pascalcase(encoding.type_name)
+                            + kw_filter(pascalcase(encoding.type_name))
                             + "::"
-                            + pascalcase(variant_name)
+                            + kw_filter(pascalcase(variant_name))
                             + ")"
                         )
                         break
@@ -469,7 +472,9 @@ class ContextScanner(RDLListener):
             # be reused, so consider it an anonymous type even though it has a name.
             owning_reg = self.file_from_modules(module_names[:-1])
             assert owning_reg in self.components
-            utils.append_unique(self.components[owning_reg].anon_instances, module_name)
+            utils.append_unique(
+                self.components[owning_reg].anon_instances, kw_filter(module_name)
+            )
             comment = utils.doc_comment(field)
         else:
             # Enum is a reusable, named type. The module defining it is a submodule
@@ -480,22 +485,25 @@ class ContextScanner(RDLListener):
 
             # 1. Add to the declaring parent's named_type_declarations
             if isinstance(declaring_parent, RootNode):
-                utils.append_unique(self.top_component_modules, module_name)
+                utils.append_unique(self.top_component_modules, kw_filter(module_name))
             else:
                 assert module_names[-2] == "named_types"
                 parent_path = self.file_from_modules(module_names[:-2])
                 assert parent_path in self.components
                 utils.append_unique(
-                    self.components[parent_path].named_type_declarations, module_name
+                    self.components[parent_path].named_type_declarations,
+                    kw_filter(module_name),
                 )
 
             # 2. Add to the instantiating node's named_type_instances
             instantiating_node = field.parent
             instantiating_file = self.get_node_module_file(instantiating_node)
             assert instantiating_file in self.components
-            scoped_module = "::".join(["crate", "components"] + module_names)
+            scoped_module = "::".join(
+                ["crate", "components"] + list(map(kw_filter, module_names))
+            )
             self.components[instantiating_file].named_type_instances.append(
-                (kw_filter(snakecase(field.inst_name)), scoped_module)
+                (snakecase(field.inst_name), scoped_module)
             )
 
         file = self.get_enum_module_file(field, encoding)

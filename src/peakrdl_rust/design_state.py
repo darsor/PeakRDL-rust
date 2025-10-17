@@ -7,6 +7,7 @@ from systemrdl.node import AddrmapNode
 
 from .component_context import ContextScanner
 from .design_scanner import DesignScanner
+from .utils import kw_filter
 
 if TYPE_CHECKING:
     from peakrdl_rust.component_context import Component
@@ -21,6 +22,7 @@ class DesignState:
             trim_blocks=True,
             lstrip_blocks=True,
         )
+        self.jj_env.filters["kw_filter"] = kw_filter
 
         self.top_nodes = top_nodes
         output_dir = Path(path).resolve()
