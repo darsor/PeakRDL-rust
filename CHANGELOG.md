@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Getters for enum-encoded fields unwrap the returned Option<Enum> if every bit pattern is represented
+
 ### Fixed
 
 - Several instances of improper or missing rust keyword escaping

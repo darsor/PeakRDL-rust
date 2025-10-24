@@ -42,6 +42,6 @@ peakrdl rust --help
 - [x] Set up github actions/PyPI publishing
 - [x] Fixedpoint/signed UDPs
 - [x] Rust keyword conflict test
+- [x] Unwrap encoded field enums if exhaustive
 - [ ] Add examples to docs
-- [ ] Unwrap encoded field enums if exhaustive
 - [ ] Regwidth > native integer types

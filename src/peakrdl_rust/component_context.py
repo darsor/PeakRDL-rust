@@ -106,6 +106,7 @@ class FieldInst(Instantiation):
     access: Union[str, None]  # "R", "W", "RW", or None
     primitive: str  # which unsigned rust type is used to represent
     encoding: Optional[str]  # encoding enum
+    exhaustive: bool  # True if the encoding is exhaustive (covers all bit patterns)
     bit_offset: int  # lowest bit index
     width: int  # bit width
     mask: int  # bitmask of the width of the field
@@ -364,8 +365,12 @@ class ContextScanner(RDLListener):
                     + "::"
                     + kw_filter(pascalcase(encoding.type_name))
                 )
+                num_encodings = len(encoding.members)
+                # encoded values must be unique within an enum per 6.2.5.1-b-3
+                exhaustive = bool(num_encodings == 2**field.width)
             else:
                 encoding_name = None
+                exhaustive = True
 
             primitive = utils.field_primitive(field, allow_bool=(encoding is None))
 
@@ -378,14 +383,14 @@ class ContextScanner(RDLListener):
                     if int(variant_value) == reset_val_int:
                         is_valid_variant = True
                         reset_val = (
-                            "Some("
-                            + kw_filter(snakecase(field.inst_name))
+                            kw_filter(snakecase(field.inst_name))
                             + "::"
                             + kw_filter(pascalcase(encoding.type_name))
                             + "::"
                             + kw_filter(pascalcase(variant_name))
-                            + ")"
                         )
+                        if not exhaustive:
+                            reset_val = f"Some({reset_val})"
                         break
                 if not is_valid_variant:
                     # specified (or unspecified default 0) reset value is not a valid
@@ -410,6 +415,7 @@ class ContextScanner(RDLListener):
                     access=utils.field_access(field),
                     primitive=primitive,
                     encoding=encoding_name,
+                    exhaustive=exhaustive,
                     bit_offset=field.low,
                     width=field.width,
                     mask=(1 << field.width) - 1,

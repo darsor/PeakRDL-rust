@@ -52,7 +52,8 @@ impl {{ctx.type_name|kw_filter}} {
     {# Field Getter #}
     {{field.comment | indent()}}
     #[inline(always)]
-    {% set return_type = "Option<" ~ field.encoding ~ ">" if field.encoding else field.primitive %}
+    {% set return_type = field.encoding if field.encoding else field.primitive %}
+    {% set return_type = "Option<" ~ return_type ~ ">" if not field.exhaustive else return_type %}
     {% if field.fracwidth is not none %}
     const fn {{field.inst_name}}_raw_(&self) -> {{return_type}} {
     {% else %}
@@ -62,6 +63,7 @@ impl {{ctx.type_name|kw_filter}} {
         let val = (self.0 >> Self::{{field.inst_name|upper}}_OFFSET) & Self::{{field.inst_name|upper}}_MASK;
         {% if field.encoding is not none %}
         {{field.encoding}}::from_bits(val as {{field.primitive}})
+            {%- if field.exhaustive %}.expect("All field values represented by enum"){% endif %}
         {% elif field.primitive == "bool" %}
         val != 0
         {% elif field.is_signed %}
