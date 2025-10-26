@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Memories now have an access attribute to restrict reads/writes for write-only
+  and read-only memories
+
 ### Changed
 
 - Getters for enum-encoded fields unwrap the returned Option<Enum> if every bit pattern is represented

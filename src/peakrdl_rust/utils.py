@@ -4,6 +4,7 @@ from caseconverter import snakecase
 from systemrdl.node import (
     AddressableNode,
     FieldNode,
+    MemNode,
     Node,
     RegNode,
     RootNode,
@@ -132,7 +133,7 @@ def crate_enum_module_path(field: FieldNode, enum: type[UserEnum]) -> list[str]:
         return parent_modules + ["named_types", module_name]
 
 
-def reg_access(node: RegNode) -> str:
+def reg_access(node: RegNode) -> Union[str, None]:
     if node.has_sw_readable:
         if node.has_sw_writable:
             return "RW"
@@ -142,10 +143,10 @@ def reg_access(node: RegNode) -> str:
         if node.has_sw_writable:
             return "W"
         else:
-            return ""
+            return None
 
 
-def field_access(node: FieldNode) -> Union[str, None]:
+def field_access(node: Union[FieldNode, MemNode]) -> Union[str, None]:
     if node.is_sw_readable:
         if node.is_sw_writable:
             return "RW"

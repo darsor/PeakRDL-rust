@@ -77,7 +77,7 @@ class RegisterInst(Instantiation):
 
     # address offset from parent component, only used if array is None
     addr_offset: Optional[int]
-    access: Union[str, None]  # "R", "W", "RW", or None
+    access: str  # "R", "W", or "RW"
     array: Optional[Array]
 
 
@@ -139,6 +139,7 @@ class Memory(Component):
     primitive: str
     registers: list[RegisterInst]
     size: int
+    access: str  # "R", "W", or "RW"
 
 
 @dataclass
@@ -321,6 +322,8 @@ class ContextScanner(RDLListener):
         else:
             assert len(submaps) == 0
             assert len(memories) == 0
+            if not (access := utils.field_access(node)):
+                return WalkerAction.Continue
             memwidth = node.get_property("memwidth")
             primitive_width = 2 ** int(math.ceil(math.log2(memwidth)))
             self.components[file] = Memory(
@@ -337,6 +340,7 @@ class ContextScanner(RDLListener):
                 primitive=f"u{primitive_width}",
                 registers=registers,
                 size=node.size,
+                access=access,
             )
         return WalkerAction.Continue
 

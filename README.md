@@ -43,5 +43,6 @@ peakrdl rust --help
 - [x] Fixedpoint/signed UDPs
 - [x] Rust keyword conflict test
 - [x] Unwrap encoded field enums if exhaustive
+- [x] Restrict read/write to memories
 - [ ] Add examples to docs
 - [ ] Regwidth > native integer types

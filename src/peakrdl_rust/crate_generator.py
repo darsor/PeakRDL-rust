@@ -19,6 +19,11 @@ def write_crate(ds: DesignState) -> None:
     # .gitignore
     shutil.copyfile(ds.template_dir / ".gitignore", ds.output_dir / ".gitignore")
 
+    # src/access.rs
+    access_rs_path = ds.output_dir / "src" / "access.rs"
+    access_rs_path.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copyfile(ds.template_dir / "src" / "access.rs", access_rs_path)
+
     # src/mem.rs
     mem_rs_path = ds.output_dir / "src" / "mem.rs"
     mem_rs_path.parent.mkdir(parents=True, exist_ok=True)

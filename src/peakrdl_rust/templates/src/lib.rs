@@ -1,5 +1,6 @@
 #![no_std]
 
+pub mod access;
 #[cfg(not(doctest))]
 pub mod components;
 {% if ctx.has_fixedpoint %}

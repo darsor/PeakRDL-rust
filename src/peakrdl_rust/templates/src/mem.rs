@@ -1,6 +1,10 @@
+use crate::access::{self, Access};
+use core::marker::PhantomData;
+
 pub trait Memory {
     /// Primitive integer type used to represented a memory entry
-    type Memwidth;
+    type Memwidth: num_traits::PrimInt;
+    type Access: Access;
 
     fn first_entry_ptr(&self) -> *mut Self::Memwidth;
 
@@ -11,12 +15,9 @@ pub trait Memory {
     fn width(&self) -> usize;
 
     /// Access the memory entry at a specific index. Panics if out of bounds.
-    fn index(&mut self, idx: usize) -> MemEntry<Self::Memwidth> {
+    fn index(&mut self, idx: usize) -> MemEntry<Self::Memwidth, Self::Access> {
         if idx < self.len() {
-            MemEntry {
-                ptr: unsafe { self.first_entry_ptr().add(idx) },
-                width: self.width(),
-            }
+            unsafe { MemEntry::from_ptr(self.first_entry_ptr().add(idx), self.width()) }
         } else {
             panic!(
                 "Tried to index {} in a memory with only {} entries",
@@ -55,17 +56,22 @@ pub trait Memory {
 }
 
 /// Representation of a single memory entry
-pub struct MemEntry<T> {
+pub struct MemEntry<T, A: Access> {
     ptr: *mut T,
     width: usize,
+    phantom: PhantomData<A>,
 }
 
-impl<T> MemEntry<T>
+impl<T, A: Access> MemEntry<T, A>
 where
     T: num_traits::PrimInt,
 {
     pub const unsafe fn from_ptr(ptr: *mut T, width: usize) -> Self {
-        Self { ptr, width }
+        Self {
+            ptr,
+            width,
+            phantom: PhantomData,
+        }
     }
 
     pub const fn as_ptr(&self) -> *mut T {
@@ -80,12 +86,22 @@ where
     pub fn mask(&self) -> T {
         (T::one() << self.width) - T::one()
     }
+}
 
+impl<T, A: access::Read> MemEntry<T, A>
+where
+    T: num_traits::PrimInt,
+{
     pub fn read(&self) -> T {
         let value = unsafe { self.ptr.read_volatile() };
         value & self.mask()
     }
+}
 
+impl<T, A: access::Write> MemEntry<T, A>
+where
+    T: num_traits::PrimInt,
+{
     pub fn write(&mut self, value: T) {
         let value = value & self.mask();
         unsafe { self.ptr.write_volatile(value) }
@@ -93,7 +109,7 @@ where
 }
 
 /// Iterator over memory entries
-pub struct MemEntryIter<'a, M>
+pub struct MemEntryIter<'a, M: Memory>
 where
     M: ?Sized,
 {
@@ -102,11 +118,8 @@ where
     high_idx: usize,
 }
 
-impl<'a, M> Iterator for MemEntryIter<'a, M>
-where
-    M: Memory,
-{
-    type Item = MemEntry<M::Memwidth>;
+impl<'a, M: Memory> Iterator for MemEntryIter<'a, M> {
+    type Item = MemEntry<M::Memwidth, M::Access>;
 
     fn next(&mut self) -> Option<Self::Item> {
         if self.low_idx > self.high_idx {
