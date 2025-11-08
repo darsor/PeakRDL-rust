@@ -1,3 +1,5 @@
+//! Marker types for read/write access
+
 trait Sealed {}
 
 #[allow(private_bounds)]

@@ -175,14 +175,10 @@ class Enum(Component):
 
 class ContextScanner(RDLListener):
     def __init__(self, top_nodes: list[AddrmapNode]) -> None:
-        self._top_nodes = top_nodes
+        self.top_nodes = top_nodes
         self.top_component_modules: list[str] = []
         self.components: dict[Path, Component] = {}
         self.msg = top_nodes[0].env.msg
-
-    @property
-    def top_nodes(self) -> list[AddrmapNode]:
-        return self._top_nodes
 
     def run(self) -> None:
         for node in self.top_nodes:
@@ -394,12 +390,14 @@ class ContextScanner(RDLListener):
                             + kw_filter(pascalcase(variant_name))
                         )
                         if not exhaustive:
-                            reset_val = f"Some({reset_val})"
+                            reset_val = f"Ok({reset_val})"
                         break
                 if not is_valid_variant:
                     # specified (or unspecified default 0) reset value is not a valid
                     # encoding
-                    reset_val = "None"
+                    reset_val = (
+                        f"Err(crate::encode::UnknownVariant::new({reset_val_int}))"
+                    )
             elif primitive == "bool":
                 reset_val = "true" if reset_val_int else "false"
             elif field.get_property("is_signed"):

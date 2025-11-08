@@ -1,3 +1,5 @@
+//! Types for numeric fixed-point field representations
+
 /// A fixed-point number implementation using an underlying primitive integer type.
 ///
 /// # Type Parameters

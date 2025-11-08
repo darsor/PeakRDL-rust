@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.3.0] - 2025-11-09
 
 ### Added
 
@@ -14,14 +14,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Little-endian accesses follow industry standards rather than SystemRDL spec (see the [errata](https://systemrdl-compiler.readthedocs.io/en/latest/dev_notes/rdl_spec_errata.html#byte-ordering-example-of-littleendian-mode-in-17-3-2-is-incorrect))
-- Getters for enum-encoded fields unwrap the returned `Option<Enum>` if every bit pattern is represented
+- Little-endian accesses follow industry standards rather than SystemRDL
+  spec (see the [errata](https://systemrdl-compiler.readthedocs.io/en/latest/dev_notes/rdl_spec_errata.html#byte-ordering-example-of-littleendian-mode-in-17-3-2-is-incorrect))
+- Getters for enum-encoded fields return a `Result` instead of an `Option`,
+  with the error variant containing the unknown field value.
+- Getters for enum-encoded fields unwrap the returned `Result` if every bit
+  pattern is represented
 - Register methods for getting and setting fields are no longer `const`
 - `Debug` impl for registers no longer prints the values of write-only fields
 
 ### Fixed
 
 - Several instances of improper or missing rust keyword escaping
+- Enum-encoded field `bits()` method returned `u8` instead of the field's
+  primitive type
 
 ## [0.2.2] - 2025-10-15
 

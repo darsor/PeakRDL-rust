@@ -3,6 +3,7 @@
 pub mod access;
 #[cfg(not(doctest))]
 pub mod components;
+pub mod encode;
 {% if ctx.has_fixedpoint %}
 pub mod fixedpoint;
 {% endif %}

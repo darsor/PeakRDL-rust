@@ -24,6 +24,11 @@ def write_crate(ds: DesignState) -> None:
     access_rs_path.parent.mkdir(parents=True, exist_ok=True)
     shutil.copyfile(ds.template_dir / "src" / "access.rs", access_rs_path)
 
+    # src/encode.rs
+    encode_rs_path = ds.output_dir / "src" / "encode.rs"
+    encode_rs_path.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copyfile(ds.template_dir / "src" / "encode.rs", encode_rs_path)
+
     # src/mem.rs
     mem_rs_path = ds.output_dir / "src" / "mem.rs"
     mem_rs_path.parent.mkdir(parents=True, exist_ok=True)

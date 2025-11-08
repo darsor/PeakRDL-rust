@@ -1,3 +1,5 @@
+//! Traits and types for memory components
+
 use crate::access::{self, Access};
 use core::marker::PhantomData;
 

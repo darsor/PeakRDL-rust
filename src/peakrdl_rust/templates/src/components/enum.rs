@@ -16,18 +16,19 @@ pub enum {{ctx.type_name|kw_filter}} {
 }
 
 impl {{ctx.type_name|kw_filter}} {
-    /// Generate an instance of this field from a bit pattern. If the bit
-    /// pattern is not a valid variant, return None.
-    pub const fn from_bits(bits: {{ctx.primitive}}) -> Option<Self> {
+    /// Decode a bit pattern into an encoded enum variant. Returns an Err
+    /// if the bit pattern does not match any encoded variants.
+    pub const fn from_bits(bits: {{ctx.primitive}}) -> Result<Self, crate::encode::UnknownVariant<{{ctx.primitive}}>> {
         match bits {
             {% for variant in ctx.variants %}
-            {{variant.value}} => Some(Self::{{variant.name|kw_filter}}),
+            {{variant.value}} => Ok(Self::{{variant.name|kw_filter}}),
             {% endfor %}
-            _ => None,
+            bits => Err(crate::encode::UnknownVariant::new(bits)),
         }
     }
 
-    pub const fn bits(&self) -> u8 {
+    /// The bit pattern of the variant
+    pub const fn bits(&self) -> {{ctx.primitive}} {
         *self as {{ctx.primitive}}
     }
 }
