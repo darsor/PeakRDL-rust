@@ -48,6 +48,7 @@ pub(crate) trait Register: Copy {
 }
 
 /// Register abstraction used to read, write, and modify register values
+#[allow(private_bounds)]
 #[derive(Copy, Clone, PartialEq, Eq)]
 pub struct Reg<T: Register, A: Access> {
     ptr: *mut T::Regwidth,
@@ -58,8 +59,10 @@ unsafe impl<T: Register, A: Access> Send for Reg<T, A> {}
 unsafe impl<T: Register, A: Access> Sync for Reg<T, A> {}
 
 // pointer conversion functions
+#[allow(private_bounds)]
 impl<T: Register, A: Access> Reg<T, A> {
     #[inline(always)]
+    #[allow(private_interfaces)]
     pub const unsafe fn from_ptr(ptr: *mut T::Regwidth) -> Self {
         Self {
             ptr,
@@ -74,6 +77,7 @@ impl<T: Register, A: Access> Reg<T, A> {
 }
 
 // read access
+#[allow(private_bounds)]
 impl<T: Register, A: access::Read> Reg<T, A> {
     /// Read a register value.
     ///
@@ -94,6 +98,7 @@ impl<T: Register, A: access::Read> Reg<T, A> {
 }
 
 // write access
+#[allow(private_bounds)]
 impl<T: Register, A: access::Write> Reg<T, A> {
     /// Write a register value.
     ///
@@ -114,6 +119,7 @@ impl<T: Register, A: access::Write> Reg<T, A> {
     }
 }
 
+#[allow(private_bounds)]
 impl<T: Default + Register, A: access::Write> Reg<T, A> {
     /// Write a register.
     ///
@@ -140,6 +146,7 @@ impl<T: Default + Register, A: access::Write> Reg<T, A> {
 }
 
 // read/write access
+#[allow(private_bounds)]
 impl<T: Register, A: access::Read + access::Write> Reg<T, A> {
     /// Modify a register.
     ///
