@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Little-endian accesses follow industry standards rather than SystemRDL spec (see the [errata](https://systemrdl-compiler.readthedocs.io/en/latest/dev_notes/rdl_spec_errata.html#byte-ordering-example-of-littleendian-mode-in-17-3-2-is-incorrect))
 - Getters for enum-encoded fields unwrap the returned Option<Enum> if every bit pattern is represented
+- Register methods for getting and setting fields are no longer `const`
 
 ### Fixed
 

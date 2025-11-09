@@ -55,10 +55,10 @@ impl {{ctx.type_name|kw_filter}} {
     {% set return_type = field.encoding if field.encoding else field.primitive %}
     {% set return_type = "Option<" ~ return_type ~ ">" if not field.exhaustive else return_type %}
     {% if field.fracwidth is not none %}
-    const fn {{field.inst_name}}_raw_(&self) -> {{return_type}} {
+    fn {{field.inst_name}}_raw_(&self) -> {{return_type}} {
     {% else %}
     {% if "R" in field.access %}pub {% endif -%}
-    const fn {{field.inst_name|kw_filter}}(&self) -> {{return_type}} {
+    fn {{field.inst_name|kw_filter}}(&self) -> {{return_type}} {
     {% endif %}
         let val = (self.0 >> Self::{{field.inst_name|upper}}_OFFSET) & Self::{{field.inst_name|upper}}_MASK;
         {% if field.encoding is not none %}
@@ -98,7 +98,7 @@ impl {{ctx.type_name|kw_filter}} {
     #[inline(always)]
     {% set input_type = field.encoding if field.encoding else field.primitive %}
     {% if field.fracwidth is none %}pub {% endif -%}
-    const fn set_{{field.inst_name}}
+    fn set_{{field.inst_name}}
     {%- if field.fracwidth is not none %}_raw_{% endif -%}
     (&mut self, val: {{input_type}}) {
         {% if field.encoding %}
@@ -113,7 +113,7 @@ impl {{ctx.type_name|kw_filter}} {
     {% if field.fracwidth is not none %}
     {{field.comment | indent()}}
     #[inline(always)]
-    pub const fn set_{{field.inst_name}}(&mut self, val: {{field.type_name}}FixedPoint) {
+    pub fn set_{{field.inst_name}}(&mut self, val: {{field.type_name}}FixedPoint) {
         self.set_{{field.inst_name}}_raw_(val.to_bits());
     }
     {% endif %}
