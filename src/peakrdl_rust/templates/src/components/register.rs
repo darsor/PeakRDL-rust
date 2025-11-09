@@ -50,6 +50,7 @@ impl {{ctx.type_name|kw_filter}} {
     {% endif %}
 
     {# Field Getter #}
+    {% if "R" in field.access %}
     {{field.comment | indent()}}
     #[inline(always)]
     {% set return_type = field.encoding if field.encoding else field.primitive %}
@@ -57,7 +58,6 @@ impl {{ctx.type_name|kw_filter}} {
     {% if field.fracwidth is not none %}
     fn {{field.inst_name}}_raw_(&self) -> {{return_type}} {
     {% else %}
-    {% if "R" in field.access %}pub {% endif -%}
     fn {{field.inst_name|kw_filter}}(&self) -> {{return_type}} {
     {% endif %}
         let val = (self.0 >> Self::{{field.inst_name|upper}}_OFFSET) & Self::{{field.inst_name|upper}}_MASK;
@@ -86,10 +86,10 @@ impl {{ctx.type_name|kw_filter}} {
     {% if field.fracwidth is not none %}
     {{field.comment | indent()}}
     #[inline(always)]
-    {% if "R" in field.access %}pub {% endif -%}
     fn {{field.inst_name|kw_filter}}(&self) -> {{field.type_name}}FixedPoint {
         {{field.type_name}}FixedPoint::from_bits(self.{{field.inst_name}}_raw_())
     }
+    {% endif %}
     {% endif %}
 
     {# Field Setter #}
@@ -126,7 +126,9 @@ impl core::fmt::Debug for {{ctx.type_name|kw_filter}} {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         f.debug_struct("{{ctx.type_name|kw_filter}}")
             {% for field in ctx.fields %}
+            {% if "R" in field.access %}
             .field("{{field.inst_name|kw_filter}}", &self.{{field.inst_name|kw_filter}}())
+            {% endif %}
             {% endfor %}
             .finish()
     }
@@ -140,7 +142,9 @@ mod tests {
     fn test_default() {
         let reg = {{ctx.type_name|kw_filter}}::default();
         {% for field in ctx.fields %}
+        {% if "R" in field.access %}
         assert_eq!(reg.{{field.inst_name|kw_filter}}(){% if field.fracwidth is not none %}.to_f64(){% endif %}, {{field.reset_val}});
+        {% endif %}
         {% endfor %}
     }
 }
