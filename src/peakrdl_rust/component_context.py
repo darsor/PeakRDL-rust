@@ -152,6 +152,7 @@ class Register(Component):
     accesswidth: int
     reset_val: int
     fields: list[FieldInst]
+    has_sw_readable: bool
 
 
 @dataclass
@@ -441,6 +442,7 @@ class ContextScanner(RDLListener):
             accesswidth=node.get_property("accesswidth"),
             reset_val=reg_reset_val,
             fields=fields,
+            has_sw_readable=node.has_sw_readable,
         )
 
         return WalkerAction.Continue

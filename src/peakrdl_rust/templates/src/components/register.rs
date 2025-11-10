@@ -134,6 +134,7 @@ impl core::fmt::Debug for {{ctx.type_name|kw_filter}} {
     }
 }
 
+{% if ctx.has_sw_readable %}
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -148,3 +149,4 @@ mod tests {
         {% endfor %}
     }
 }
+{% endif %}
