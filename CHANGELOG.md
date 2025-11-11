@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Components named `mod` (a rust keyword) are now escaped as `mod_` instead of `r#mod` to avoid generating files named `mod.rs`
 - Rename memory component `len()` method to `num_entries()`
+- `UnknownVariant<T>` is now a public tuple struct
 
 ## [0.3.0] - 2025-11-10
 
