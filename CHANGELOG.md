@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Clippy exceptions for common but harmless auto-generated code lints
+
 ### Changed
 
 - Components named `mod` (a rust keyword) are now escaped as `mod_` instead of `r#mod` to avoid generating files named `mod.rs`

@@ -46,3 +46,4 @@ peakrdl rust --help
 - [x] Restrict read/write to memories
 - [ ] Add examples to docs
 - [ ] Regwidth > native integer types
+- [ ] Public const component instances
