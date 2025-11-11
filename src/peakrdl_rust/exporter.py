@@ -84,6 +84,4 @@ class RustExporter:
                     "(https://rustup.rs/) or silence this warning with `--no-fmt`"
                 )
             elif result.returncode != 0:
-                print(
-                    "Failed to format files. Please submit an bug report: https://github.com/darsor/PeakRDL-rust/issues"
-                )
+                print("Failed to format files. Silence this warning with '--no-fmt'.")
