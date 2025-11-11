@@ -64,6 +64,9 @@ PATH_IDENTIFIERS = {
     "Self",
     "extern",
     "crate",
+    # mod is included since we don't want to generate files named "mod.rs",
+    # which would be the expected filename for "pub mod r#mod"
+    "mod",
 }
 
 
