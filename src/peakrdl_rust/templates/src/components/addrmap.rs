@@ -17,29 +17,32 @@ impl {{ctx.type_name|kw_filter}} {
     pub const SIZE: usize = 0x{{"%x" % ctx.size}};
 
     #[inline(always)]
+    #[must_use]
     pub const unsafe fn from_ptr(ptr: *mut ()) -> Self {
-        Self { ptr: ptr as *mut u8 }
+        Self { ptr: ptr.cast::<u8>() }
     }
 
     #[inline(always)]
+    #[must_use]
     pub const fn as_ptr(&self) -> *mut () {
-        self.ptr as *mut ()
+        self.ptr.cast::<()>()
     }
 
 {% for reg in ctx.registers %}
     {% set reg_type_name = reg.type_name|kw_filter %}
     {{reg.comment | indent()}}
     #[inline(always)]
+    #[must_use]
     {% if reg.array is none %}
     pub const fn {{reg.inst_name|kw_filter}}(&self) -> crate::reg::Reg<{{reg_type_name}}, crate::access::{{reg.access}}> {
-        unsafe { crate::reg::Reg::from_ptr(self.ptr.byte_add(0x{{"%x" % reg.addr_offset}}) as _) }
+        unsafe { crate::reg::Reg::from_ptr(self.ptr.byte_add(0x{{"%x" % reg.addr_offset}}).cast()) }
     }
     {% else %}
     pub const fn {{reg.inst_name|kw_filter}}(&self) -> {{reg.array.type.format("crate::reg::Reg<" ~ reg_type_name ~ ", crate::access::" ~ reg.access ~ ">")}} {
         // SAFETY: We will initialize every element before using the array
         let mut array = {{reg.array.type.format("core::mem::MaybeUninit::uninit()")}};
 
-        {% set expr = "unsafe { crate::reg::Reg::<" ~ reg_type_name ~ ", crate::access::" ~ reg.access ~ ">::from_ptr(self.ptr.byte_add(" ~ reg.array.addr_offset ~ ") as _) }"  %}
+        {% set expr = "unsafe { crate::reg::Reg::<" ~ reg_type_name ~ ", crate::access::" ~ reg.access ~ ">::from_ptr(self.ptr.byte_add(" ~ reg.array.addr_offset ~ ").cast()) }"  %}
         {{ macros.loop(0, reg.array.dims, expr) | indent(8) }}
 
         // SAFETY: All elements have been initialized above
@@ -53,16 +56,17 @@ impl {{ctx.type_name|kw_filter}} {
     {% set node_type_name = node.type_name|kw_filter %}
     {{node.comment | indent()}}
     #[inline(always)]
+    #[must_use]
     {% if node.array is none %}
     pub const fn {{node.inst_name|kw_filter}}(&self) -> {{node_type_name}} {
-        unsafe { {{node_type_name}}::from_ptr(self.ptr.byte_add(0x{{"%x" % node.addr_offset}}) as _) }
+        unsafe { {{node_type_name}}::from_ptr(self.ptr.byte_add(0x{{"%x" % node.addr_offset}}).cast()) }
     }
     {% else %}
     pub const fn {{node.inst_name|kw_filter}}(&self) -> {{node.array.type.format(node_type_name)}} {
         // SAFETY: We will initialize every element before using the array
         let mut array = {{node.array.type.format("core::mem::MaybeUninit::uninit()")}};
 
-        {% set expr = "unsafe { " ~ node_type_name ~ "::from_ptr(self.ptr.byte_add(" ~ node.array.addr_offset ~ ") as _) }"  %}
+        {% set expr = "unsafe { " ~ node_type_name ~ "::from_ptr(self.ptr.byte_add(" ~ node.array.addr_offset ~ ").cast()) }"  %}
         {{ macros.loop(0, node.array.dims, expr) | indent(8) }}
 
         // SAFETY: All elements have been initialized above
@@ -76,16 +80,17 @@ impl {{ctx.type_name|kw_filter}} {
     {% set mem_type_name = mem.type_name|kw_filter %}
     {{mem.comment | indent()}}
     #[inline(always)]
+    #[must_use]
     {% if mem.array is none %}
     pub const fn {{mem.inst_name|kw_filter}}(&self) -> {{mem_type_name}} {
-        unsafe { {{mem_type_name}}::from_ptr(self.ptr.byte_add(0x{{"%x" % mem.addr_offset}}) as _) }
+        unsafe { {{mem_type_name}}::from_ptr(self.ptr.byte_add(0x{{"%x" % mem.addr_offset}}).cast()) }
     }
     {% else %}
     pub const fn {{mem.inst_name|kw_filter}}(&self) -> {{mem.array.type.format(mem_type_name)}} {
         // SAFETY: We will initialize every element before using the array
         let mut array = {{mem.array.type.format("core::mem::MaybeUninit::uninit()")}};
 
-        {% set expr = "unsafe { " ~ mem_type_name ~ "::from_ptr(self.ptr.byte_add(" ~ mem.array.addr_offset ~ ") as _) }"  %}
+        {% set expr = "unsafe { " ~ mem_type_name ~ "::from_ptr(self.ptr.byte_add(" ~ mem.array.addr_offset ~ ").cast()) }"  %}
         {{ macros.loop(0, mem.array.dims, expr) | indent(8) }}
 
         // SAFETY: All elements have been initialized above

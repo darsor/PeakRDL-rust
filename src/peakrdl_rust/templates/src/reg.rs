@@ -15,7 +15,7 @@ pub(crate) trait Register: Copy {
     unsafe fn read_register(ptr: *const Self::Regwidth) -> Self {
         // this cast is OK since SystemRDL guarantees accesswidth <= regwidth,
         // and we won't access outside the bounds of the original pointer
-        let ptr = ptr as *const Self::Accesswidth;
+        let ptr = ptr.cast::<Self::Accesswidth>();
         let accesswidth = 8 * core::mem::size_of::<Self::Accesswidth>();
         let regwidth = 8 * core::mem::size_of::<Self::Regwidth>();
         let num_subwords = regwidth / accesswidth;
@@ -35,7 +35,7 @@ pub(crate) trait Register: Copy {
     unsafe fn write_register(ptr: *mut Self::Regwidth, value: Self) {
         // this is OK since SystemRDL guarantees accesswidth <= regwidth,
         // and we won't write outside the bounds of the original pointer
-        let ptr = ptr as *mut Self::Accesswidth;
+        let ptr = ptr.cast::<Self::Accesswidth>();
         let raw_value = value.to_raw();
         let accesswidth = 8 * core::mem::size_of::<Self::Accesswidth>();
         let regwidth = 8 * core::mem::size_of::<Self::Regwidth>();
@@ -79,8 +79,9 @@ impl<T: Register, A: Access> Reg<T, A> {
     }
 
     #[inline(always)]
+    #[must_use]
     pub const fn as_ptr(&self) -> *mut T {
-        self.ptr as _
+        self.ptr.cast()
     }
 }
 
@@ -100,6 +101,7 @@ impl<T: Register, A: access::Read> Reg<T, A> {
     /// let field2_val = reg1_val.field2();
     /// ```
     #[inline(always)]
+    #[allow(clippy::must_use_candidate)]
     pub fn read(&self) -> T {
         unsafe { T::read_register(self.ptr) }
     }

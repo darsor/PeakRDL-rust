@@ -8,15 +8,19 @@ pub trait Memory {
     type Memwidth: num_traits::PrimInt;
     type Access: Access;
 
+    #[must_use]
     fn first_entry_ptr(&self) -> *mut Self::Memwidth;
 
     /// Number of memory entries
+    #[must_use]
     fn num_entries(&self) -> usize;
 
     /// Bit width of each memory entry
+    #[must_use]
     fn width(&self) -> usize;
 
     /// Access the memory entry at a specific index. Panics if out of bounds.
+    #[must_use]
     fn index(&mut self, idx: usize) -> MemEntry<Self::Memwidth, Self::Access> {
         if idx < self.num_entries() {
             unsafe { MemEntry::from_ptr(self.first_entry_ptr().add(idx), self.width()) }
@@ -30,10 +34,11 @@ pub trait Memory {
     }
 
     /// Get an iterator over a range of memory entries
-    fn slice<'a>(
-        &'a mut self,
+    #[must_use]
+    fn slice(
+        &mut self,
         range: impl core::ops::RangeBounds<usize>,
-    ) -> MemEntryIter<'a, Self> {
+    ) -> MemEntryIter<'_, Self> {
         let low_idx = match range.start_bound() {
             core::ops::Bound::Included(idx) => *idx,
             core::ops::Bound::Excluded(idx) => *idx + 1,
@@ -52,7 +57,8 @@ pub trait Memory {
     }
 
     /// Get an iterator over all memory entries
-    fn iter<'a>(&'a mut self) -> MemEntryIter<'a, Self> {
+    #[must_use]
+    fn iter(&mut self) -> MemEntryIter<'_, Self> {
         self.slice(..)
     }
 }
@@ -68,6 +74,7 @@ impl<T, A: Access> MemEntry<T, A>
 where
     T: num_traits::PrimInt,
 {
+    #[must_use]
     pub const unsafe fn from_ptr(ptr: *mut T, width: usize) -> Self {
         Self {
             ptr,
@@ -76,15 +83,18 @@ where
         }
     }
 
+    #[must_use]
     pub const fn as_ptr(&self) -> *mut T {
         self.ptr
     }
 
     /// Bit width of the entry
+    #[must_use]
     pub const fn width(&self) -> usize {
         self.width
     }
 
+    #[must_use]
     pub fn mask(&self) -> T {
         (T::one() << self.width) - T::one()
     }
@@ -94,6 +104,7 @@ impl<T, A: access::Read> MemEntry<T, A>
 where
     T: num_traits::PrimInt,
 {
+    #[must_use]
     pub fn read(&self) -> T {
         let value = unsafe { self.ptr.read_volatile() };
         value & self.mask()
@@ -120,7 +131,7 @@ where
     high_idx: usize,
 }
 
-impl<'a, M: Memory> Iterator for MemEntryIter<'a, M> {
+impl<M: Memory> Iterator for MemEntryIter<'_, M> {
     type Item = MemEntry<M::Memwidth, M::Access>;
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -143,7 +154,7 @@ impl<'a, M: Memory> Iterator for MemEntryIter<'a, M> {
     }
 }
 
-impl<'a, M> DoubleEndedIterator for MemEntryIter<'a, M>
+impl<M> DoubleEndedIterator for MemEntryIter<'_, M>
 where
     M: Memory,
 {
@@ -162,5 +173,5 @@ where
     }
 }
 
-impl<'a, M> core::iter::ExactSizeIterator for MemEntryIter<'a, M> where M: Memory {}
-impl<'a, M> core::iter::FusedIterator for MemEntryIter<'a, M> where M: Memory {}
+impl<M> core::iter::ExactSizeIterator for MemEntryIter<'_, M> where M: Memory {}
+impl<M> core::iter::FusedIterator for MemEntryIter<'_, M> where M: Memory {}

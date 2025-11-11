@@ -53,6 +53,7 @@ impl {{ctx.type_name|kw_filter}} {
     {% if "R" in field.access %}
     {{field.comment | indent()}}
     #[inline(always)]
+    #[must_use]
     {% set return_type = field.encoding if field.encoding else field.primitive %}
     {% set return_type = "Result<" ~ return_type ~ ", crate::encode::UnknownVariant<" ~ field.primitive ~">>" if not field.exhaustive else return_type %}
     {% if field.fracwidth is not none %}
@@ -86,6 +87,7 @@ impl {{ctx.type_name|kw_filter}} {
     {% if field.fracwidth is not none %}
     {{field.comment | indent()}}
     #[inline(always)]
+    #[must_use]
     fn {{field.inst_name|kw_filter}}(&self) -> {{field.type_name}}FixedPoint {
         {{field.type_name}}FixedPoint::from_bits(self.{{field.inst_name}}_raw_())
     }

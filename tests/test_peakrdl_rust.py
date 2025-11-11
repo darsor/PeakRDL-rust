@@ -68,7 +68,20 @@ def do_cargo_test(crate_dir: Path) -> None:
     subprocess.run(["cargo", "test"], cwd=crate_dir, check=True, env=env)
 
 
+def do_clippy_check(crate_dir: Path) -> None:
+    # shared target directory to cache compiled dependencies
+    env = os.environ.copy()
+    env["CARGO_TARGET_DIR"] = str(Path(__file__).parent / "output" / "target")
+    subprocess.run(
+        ["cargo", "clippy", "--", "-W", "clippy::pedantic", "-Dwarnings"],
+        cwd=crate_dir,
+        check=True,
+        env=env,
+    )
+
+
 @pytest.mark.parametrize("rdl_file", get_rdl_files(), ids=lambda file: file.stem)
 def test_generated_rust(rdl_file: Path) -> None:
     crate_dir = do_export(rdl_file)
     do_cargo_test(crate_dir)
+    do_clippy_check(crate_dir)

@@ -45,7 +45,7 @@ where
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         use core::fmt::Write as _;
         let mut name: heapless::String<32> = heapless::String::new();
-        write!(&mut name, "FixedPoint<{},{}>", I, F)
+        write!(&mut name, "FixedPoint<{I},{F}>")
             .expect("Fixedpoint type name should fit in small buffer");
         f.debug_struct(&name)
             .field("int", &self.val)
@@ -85,6 +85,7 @@ where
     /// # use {{ctx.crate_name}}::fixedpoint::FixedPoint;
     /// FixedPoint::<i8, -5, 4>::from_bits(0); // invalid negative width
     /// ```
+    #[must_use]
     pub fn from_bits(bits: P) -> Self {
         const {
             assert!(
@@ -109,6 +110,7 @@ where
     /// let fp = FixedPoint::<u16, 8, 2>::from_f64(2.25);
     /// assert_eq!(fp.to_bits(), 9);
     /// ```
+    #[must_use]
     pub const fn to_bits(self) -> P {
         self.val
     }
@@ -121,6 +123,7 @@ where
     /// # use {{ctx.crate_name}}::fixedpoint::FixedPoint;
     /// assert_eq!(FixedPoint::<u8, 10, -4>::intwidth(), 10);
     /// ```
+    #[must_use]
     pub const fn intwidth() -> isize {
         I
     }
@@ -133,6 +136,7 @@ where
     /// # use {{ctx.crate_name}}::fixedpoint::FixedPoint;
     /// assert_eq!(FixedPoint::<u8, 10, -4>::fracwidth(), -4);
     /// ```
+    #[must_use]
     pub const fn fracwidth() -> isize {
         F
     }
@@ -146,6 +150,7 @@ where
     /// assert_eq!(FixedPoint::<u8, 8, 0>::width(), 8);
     /// assert_eq!(FixedPoint::<i8, 7, -3>::width(), 4);
     /// ```
+    #[must_use]
     pub const fn width() -> usize {
         (I + F) as usize
     }
@@ -159,6 +164,7 @@ where
     /// assert_eq!(FixedPoint::<u16, 8, 2>::is_signed(), false);
     /// assert_eq!(FixedPoint::<i16, 8, 2>::is_signed(), true);
     /// ```
+    #[must_use]
     pub fn is_signed() -> bool {
         P::min_value() < P::zero()
     }
@@ -172,15 +178,18 @@ where
     /// let zero = FixedPoint::<u8, 4, 4>::zero();
     /// assert_eq!(zero.to_f64(), 0.0);
     /// ```
+    #[must_use]
     pub fn zero() -> Self {
         Self::from_bits(P::zero())
     }
 
+    #[must_use]
     fn max_bits() -> P {
         let unused_bits = core::mem::size_of::<P>() * 8 - Self::width();
         P::max_value().shr(unused_bits)
     }
 
+    #[must_use]
     fn min_bits() -> P {
         let unused_bits = core::mem::size_of::<P>() * 8 - Self::width();
         P::min_value().shr(unused_bits)
@@ -195,6 +204,7 @@ where
     /// assert_eq!(FixedPoint::<u8, 2, 6>::max_value().to_f32(), 3.984375);
     /// assert_eq!(FixedPoint::<i8, 3, 4>::max_value().to_f32(), 3.9375);
     /// ```
+    #[must_use]
     pub fn max_value() -> Self {
         Self::from_bits(Self::max_bits())
     }
@@ -208,6 +218,7 @@ where
     /// assert_eq!(FixedPoint::<u8, 2, 6>::min_value().to_f32(), 0.0);
     /// assert_eq!(FixedPoint::<i8, 3, 4>::min_value().to_f32(), -4.0);
     /// ```
+    #[must_use]
     pub fn min_value() -> Self {
         Self::from_bits(Self::min_bits())
     }
@@ -221,6 +232,7 @@ where
     /// let res = FixedPoint::<u8, 4, 4>::resolution();
     /// assert_eq!(res.to_f64(), 0.0625); // 2^(-4)
     /// ```
+    #[must_use]
     pub fn resolution() -> Self {
         Self::from_bits(P::one())
     }
@@ -267,6 +279,7 @@ where
     /// let min_fp = FixedPoint::<i8, 4, 4>::from_f64(-100.0);
     /// assert_eq!(min_fp, FixedPoint::<i8, 4, 4>::min_value());
     /// ```
+    #[must_use]
     pub fn from_f32(value: f32) -> Self
     where
         P: num_traits::AsPrimitive<f32>,
@@ -295,6 +308,7 @@ where
     /// let max_fp = FixedPoint::<u8, 4, 4>::from_f64(100.0);
     /// assert_eq!(max_fp, FixedPoint::<u8, 4, 4>::max_value());
     /// ```
+    #[must_use]
     pub fn from_f64(value: f64) -> Self
     where
         P: num_traits::AsPrimitive<f64>,
@@ -302,16 +316,16 @@ where
         Self::from_float(value)
     }
 
+    #[must_use]
     fn from_float<T>(value: T) -> Self
     where
         T: num_traits::Float + 'static,
         P: num_traits::AsPrimitive<T>,
     {
-        if value.is_nan() {
-            panic!("Can't convert NaN to FixedPoint");
-        }
+        assert!(!value.is_nan(), "Can't convert NaN to FixedPoint");
 
         // scale
+        #[allow(clippy::cast_possible_truncation)]
         let scale = T::from(2)
             .expect("two can be represented by any float type")
             .powi(F as i32);
@@ -343,6 +357,7 @@ where
     /// assert_eq!(FixedPoint::<i8, 4, 4>::from_bits(-1).to_f32(), -0.0625);
     /// assert_eq!(FixedPoint::<u8, 4, 4>::from_bits(0).to_f32(), 0.0);
     /// ```
+    #[must_use]
     pub fn to_f32(self) -> f32
     where
         P: num_traits::AsPrimitive<f32>,
@@ -363,6 +378,7 @@ where
     /// assert_eq!(FixedPoint::<i8, 4, 4>::from_bits(-1).to_f64(), -0.0625);
     /// assert_eq!(FixedPoint::<u8, 4, 4>::from_bits(0).to_f64(), 0.0);
     /// ```
+    #[must_use]
     pub fn to_f64(self) -> f64
     where
         P: num_traits::AsPrimitive<f64>,
@@ -370,11 +386,13 @@ where
         self.to_float()
     }
 
+    #[must_use]
     fn to_float<T>(self) -> T
     where
         T: num_traits::Float + 'static,
         P: num_traits::AsPrimitive<T>,
     {
+        #[allow(clippy::cast_possible_truncation)]
         let scale = T::from(2)
             .expect("two can be represented by any float type")
             .powi(-F as i32);
