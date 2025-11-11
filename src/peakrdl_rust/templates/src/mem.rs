@@ -11,20 +11,20 @@ pub trait Memory {
     fn first_entry_ptr(&self) -> *mut Self::Memwidth;
 
     /// Number of memory entries
-    fn len(&self) -> usize;
+    fn num_entries(&self) -> usize;
 
     /// Bit width of each memory entry
     fn width(&self) -> usize;
 
     /// Access the memory entry at a specific index. Panics if out of bounds.
     fn index(&mut self, idx: usize) -> MemEntry<Self::Memwidth, Self::Access> {
-        if idx < self.len() {
+        if idx < self.num_entries() {
             unsafe { MemEntry::from_ptr(self.first_entry_ptr().add(idx), self.width()) }
         } else {
             panic!(
                 "Tried to index {} in a memory with only {} entries",
                 idx,
-                self.len()
+                self.num_entries()
             );
         }
     }
@@ -42,7 +42,7 @@ pub trait Memory {
         let high_idx = match range.end_bound() {
             core::ops::Bound::Included(idx) => *idx,
             core::ops::Bound::Excluded(idx) => *idx - 1,
-            core::ops::Bound::Unbounded => self.len() - 1,
+            core::ops::Bound::Unbounded => self.num_entries() - 1,
         };
         MemEntryIter {
             mem: self,

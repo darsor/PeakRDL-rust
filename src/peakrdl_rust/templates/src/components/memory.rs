@@ -20,7 +20,7 @@ impl crate::mem::Memory for {{ctx.type_name|kw_filter}} {
         self.ptr
     }
 
-    fn len(&self) -> usize {
+    fn num_entries(&self) -> usize {
         {{ctx.mementries}}
     }
 
