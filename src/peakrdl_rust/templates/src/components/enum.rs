@@ -16,8 +16,10 @@ pub enum {{ctx.type_name|kw_filter}} {
 }
 
 impl {{ctx.type_name|kw_filter}} {
-    /// Decode a bit pattern into an encoded enum variant. Returns an Err
-    /// if the bit pattern does not match any encoded variants.
+    /// Decode a bit pattern into an encoded enum variant.
+    ///
+    /// # Errors
+    /// Returns an error if the bit pattern does not match any encoded variants.
     pub const fn from_bits(bits: {{ctx.primitive}}) -> Result<Self, crate::encode::UnknownVariant<{{ctx.primitive}}>> {
         match bits {
             {% for variant in ctx.variants %}
@@ -28,6 +30,7 @@ impl {{ctx.type_name|kw_filter}} {
     }
 
     /// The bit pattern of the variant
+    #[must_use]
     pub const fn bits(&self) -> {{ctx.primitive}} {
         *self as {{ctx.primitive}}
     }

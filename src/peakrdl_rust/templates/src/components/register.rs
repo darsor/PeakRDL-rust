@@ -19,7 +19,7 @@ unsafe impl Sync for {{ctx.type_name|kw_filter}} {}
 
 impl core::default::Default for {{ctx.type_name|kw_filter}} {
     fn default() -> Self {
-        Self(0x{{"%X" % ctx.reset_val}})
+        Self({{"0x{:_X}".format(ctx.reset_val)}})
     }
 }
 
@@ -40,7 +40,7 @@ impl {{ctx.type_name|kw_filter}} {
 {% for field in ctx.fields %}
     pub const {{field.inst_name|upper}}_OFFSET: usize = {{field.bit_offset}};
     pub const {{field.inst_name|upper}}_WIDTH: usize = {{field.width}};
-    pub const {{field.inst_name|upper}}_MASK: u{{ctx.regwidth}} = 0x{{"%X" % field.mask}};
+    pub const {{field.inst_name|upper}}_MASK: u{{ctx.regwidth}} = {{"0x{:_X}".format(field.mask)}};
     {% if field.is_signed is not none %}
     pub const {{field.inst_name|upper}}_SIGNED: bool = {{ field.is_signed|lower }};
     {% endif %}
@@ -52,10 +52,12 @@ impl {{ctx.type_name|kw_filter}} {
     {# Field Getter #}
     {% if "R" in field.access %}
     {{field.comment | indent()}}
-    #[inline(always)]
-    #[must_use]
     {% set return_type = field.encoding if field.encoding else field.primitive %}
     {% set return_type = "Result<" ~ return_type ~ ", crate::encode::UnknownVariant<" ~ field.primitive ~">>" if not field.exhaustive else return_type %}
+    #[inline(always)]
+    {% if not return_type.startswith("Result<") %}
+    #[must_use]
+    {% endif %}
     {% if field.fracwidth is not none %}
     fn {{field.inst_name}}_raw_(&self) -> {{return_type}} {
     {% else %}

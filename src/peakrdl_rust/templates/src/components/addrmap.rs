@@ -14,8 +14,12 @@ unsafe impl Sync for {{ctx.type_name|kw_filter}} {}
 
 impl {{ctx.type_name|kw_filter}} {
     /// Size in bytes of the underlying memory
-    pub const SIZE: usize = 0x{{"%x" % ctx.size}};
+    pub const SIZE: usize = {{"0x{:_X}".format(ctx.size)}};
 
+    /// # Safety
+    ///
+    /// The caller must guarantee that the provided address points to a
+    /// hardware register block implementing this interface.
     #[inline(always)]
     #[must_use]
     pub const unsafe fn from_ptr(ptr: *mut ()) -> Self {
@@ -35,7 +39,7 @@ impl {{ctx.type_name|kw_filter}} {
     #[must_use]
     {% if reg.array is none %}
     pub const fn {{reg.inst_name|kw_filter}}(&self) -> crate::reg::Reg<{{reg_type_name}}, crate::access::{{reg.access}}> {
-        unsafe { crate::reg::Reg::from_ptr(self.ptr.byte_add(0x{{"%x" % reg.addr_offset}}).cast()) }
+        unsafe { crate::reg::Reg::from_ptr(self.ptr.byte_add({{"0x{:_X}".format(reg.addr_offset)}}).cast()) }
     }
     {% else %}
     pub const fn {{reg.inst_name|kw_filter}}(&self) -> {{reg.array.type.format("crate::reg::Reg<" ~ reg_type_name ~ ", crate::access::" ~ reg.access ~ ">")}} {
@@ -59,7 +63,7 @@ impl {{ctx.type_name|kw_filter}} {
     #[must_use]
     {% if node.array is none %}
     pub const fn {{node.inst_name|kw_filter}}(&self) -> {{node_type_name}} {
-        unsafe { {{node_type_name}}::from_ptr(self.ptr.byte_add(0x{{"%x" % node.addr_offset}}).cast()) }
+        unsafe { {{node_type_name}}::from_ptr(self.ptr.byte_add({{"0x{:_X}".format(node.addr_offset)}}).cast()) }
     }
     {% else %}
     pub const fn {{node.inst_name|kw_filter}}(&self) -> {{node.array.type.format(node_type_name)}} {
@@ -83,7 +87,7 @@ impl {{ctx.type_name|kw_filter}} {
     #[must_use]
     {% if mem.array is none %}
     pub const fn {{mem.inst_name|kw_filter}}(&self) -> {{mem_type_name}} {
-        unsafe { {{mem_type_name}}::from_ptr(self.ptr.byte_add(0x{{"%x" % mem.addr_offset}}).cast()) }
+        unsafe { {{mem_type_name}}::from_ptr(self.ptr.byte_add({{"0x{:_X}".format(mem.addr_offset)}}).cast()) }
     }
     {% else %}
     pub const fn {{mem.inst_name|kw_filter}}(&self) -> {{mem.array.type.format(mem_type_name)}} {

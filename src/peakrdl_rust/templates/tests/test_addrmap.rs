@@ -14,7 +14,7 @@ fn test_{{ctx.name}}_addresses() {
     unsafe {
         assert_eq!(dut.as_ptr() as *mut u8, base_addr);
         {% for address in ctx.addresses %}
-        assert_eq!(dut.{{address.dut_method}}.as_ptr() as *mut u8, base_addr.byte_add(0x{{"%x" % address.absolute_addr}}));
+        assert_eq!(dut.{{address.dut_method}}.as_ptr() as *mut u8, base_addr.byte_add({{"0x{:_X}".format(address.absolute_addr)}}));
         {% endfor %}
     }
 }

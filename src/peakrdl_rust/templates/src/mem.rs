@@ -3,7 +3,7 @@
 use crate::access::{self, Access};
 use core::marker::PhantomData;
 
-pub trait Memory {
+pub trait Memory: Sized {
     /// Primitive integer type used to represented a memory entry
     type Memwidth: num_traits::PrimInt;
     type Access: Access;
@@ -74,6 +74,10 @@ impl<T, A: Access> MemEntry<T, A>
 where
     T: num_traits::PrimInt,
 {
+    /// # Safety
+    ///
+    /// The caller must guarantee that the provided address points to a
+    /// hardware memory entry of size `T` with access `A`.
     #[must_use]
     pub const unsafe fn from_ptr(ptr: *mut T, width: usize) -> Self {
         Self {
@@ -122,10 +126,7 @@ where
 }
 
 /// Iterator over memory entries
-pub struct MemEntryIter<'a, M: Memory>
-where
-    M: ?Sized,
-{
+pub struct MemEntryIter<'a, M: Memory> {
     mem: &'a mut M,
     low_idx: usize,
     high_idx: usize,

@@ -69,6 +69,10 @@ unsafe impl<T: Register, A: Access> Sync for Reg<T, A> {}
 // pointer conversion functions
 #[allow(private_bounds)]
 impl<T: Register, A: Access> Reg<T, A> {
+    /// # Safety
+    ///
+    /// The caller must guarantee that the provided address points to a
+    /// hardware register of type `T` with access `A`.
     #[inline(always)]
     #[allow(private_interfaces)]
     pub const unsafe fn from_ptr(ptr: *mut T::Regwidth) -> Self {

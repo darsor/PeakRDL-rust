@@ -24,6 +24,16 @@ def doc_comment(node: Union[Node, UserEnum]) -> str:
         name = node.rdl_name
         desc = node.rdl_desc
 
+    if name is not None:
+        name = name.strip()
+        if not name:
+            name = None
+
+    if desc is not None:
+        desc = desc.strip()
+        if not desc:
+            desc = None
+
     if name is None and desc is None:
         return ""
 
