@@ -469,18 +469,18 @@ mod tests {
     #[test]
     #[should_panic(expected = "Can't convert NaN to FixedPoint")]
     fn test_from_float_nan_panic() {
-        FixedPoint::<u8, 4, 4>::from_float(f64::NAN);
+        let _ = FixedPoint::<u8, 4, 4>::from_float(f64::NAN);
     }
 
     #[test]
     #[should_panic(expected = "The provided bits overflow this fixed-point representation")]
     fn test_positive_overflow1() {
-        FixedPoint::<u8, 2, 4>::from_bits(64);
+        let _ = FixedPoint::<u8, 2, 4>::from_bits(64);
     }
 
     #[test]
     #[should_panic(expected = "The provided bits overflow this fixed-point representation")]
     fn test_negative_overflow() {
-        FixedPoint::<i8, 2, 4>::from_bits(-33);
+        let _ = FixedPoint::<i8, 2, 4>::from_bits(-33);
     }
 }

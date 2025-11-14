@@ -65,6 +65,7 @@ def do_cargo_test(crate_dir: Path) -> None:
     # shared target directory to cache compiled dependencies
     env = os.environ.copy()
     env["CARGO_TARGET_DIR"] = str(Path(__file__).parent / "output" / "target")
+    env["RUSTFLAGS"] = "-D warnings"
     subprocess.run(["cargo", "test"], cwd=crate_dir, check=True, env=env)
 
 
