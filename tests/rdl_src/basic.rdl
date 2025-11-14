@@ -53,6 +53,7 @@ addrmap basic {
         field { fieldwidth=8; sw = r; } basicfield_p;
         field { fieldwidth=8; } basicfield_1;
         field { fieldwidth=8; sw = r; } basicfield_r;
+        field { fieldwidth=1; } basicfield_s;
     } basicreg_g;
 
 };

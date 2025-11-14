@@ -18,6 +18,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `UnknownVariant<T>` is now a public tuple struct
 - Handled all pedantic clippy lints
 
+### Fixed
+
+- Field getters were not `pub` in several instances
+
 ## [0.3.0] - 2025-11-10
 
 ### Added

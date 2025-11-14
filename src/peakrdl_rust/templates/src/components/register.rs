@@ -55,13 +55,16 @@ impl {{ctx.type_name|kw_filter}} {
     {% set return_type = field.encoding if field.encoding else field.primitive %}
     {% set return_type = "Result<" ~ return_type ~ ", crate::encode::UnknownVariant<" ~ field.primitive ~">>" if not field.exhaustive else return_type %}
     #[inline(always)]
-    {% if not return_type.startswith("Result<") %}
+    {% if return_type.startswith("Result<") %}
+    #[allow(clippy::missing_errors_doc)]
+    {% else %}
+    #[allow(clippy::missing_panics_doc)]
     #[must_use]
     {% endif %}
     {% if field.fracwidth is not none %}
     fn {{field.inst_name}}_raw_(&self) -> {{return_type}} {
     {% else %}
-    fn {{field.inst_name|kw_filter}}(&self) -> {{return_type}} {
+    pub fn {{field.inst_name|kw_filter}}(&self) -> {{return_type}} {
     {% endif %}
         let val = (self.0 >> Self::{{field.inst_name|upper}}_OFFSET) & Self::{{field.inst_name|upper}}_MASK;
         {% if field.encoding is not none %}
@@ -90,7 +93,7 @@ impl {{ctx.type_name|kw_filter}} {
     {{field.comment | indent()}}
     #[inline(always)]
     #[must_use]
-    fn {{field.inst_name|kw_filter}}(&self) -> {{field.type_name}}FixedPoint {
+    pub fn {{field.inst_name|kw_filter}}(&self) -> {{field.type_name}}FixedPoint {
         {{field.type_name}}FixedPoint::from_bits(self.{{field.inst_name}}_raw_())
     }
     {% endif %}
