@@ -1,5 +1,6 @@
 import os
 import re
+import shutil
 import subprocess
 from pathlib import Path
 from typing import TYPE_CHECKING
@@ -57,6 +58,13 @@ def do_export(rdl_file: Path) -> Path:
         crate_name=crate_name,
         force=True,
     )
+
+    # copy integration test into package if it exists
+    integration_test = rdl_file.parent / (rdl_file.stem + ".rs")
+    if integration_test.exists():
+        shutil.copyfile(
+            integration_test, crate_dir / crate_name / "tests" / integration_test.name
+        )
 
     return crate_dir / crate_name
 
