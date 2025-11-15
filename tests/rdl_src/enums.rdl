@@ -1,4 +1,3 @@
-
 addrmap enum_test1 {
     enum my_enum {
         zero;
