@@ -10,13 +10,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Tests now treat pedantic clippy lints as errors
+- Derive common traits for `MemEntry` struct
 
 ### Changed
 
 - Components named `mod` (a rust keyword) are now escaped as `mod_` instead of `r#mod` to avoid generating files named `mod.rs`
+- Refactored `Memory` trait to be consistent with no-owned-struct approach used by other component types
 - Rename memory component `len()` method to `num_entries()`
 - `UnknownVariant<T>` is now a public tuple struct
 - Handled all pedantic clippy lints
+
+### Removed
+
+- `MemEntry` struct methods `width()` and `mask()` (use width method on the `Memory` itself)
 
 ### Fixed
 

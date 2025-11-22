@@ -2,10 +2,11 @@
 
 use crate::access::{self, Access};
 use core::marker::PhantomData;
+use num_traits::PrimInt;
 
 pub trait Memory: Sized {
     /// Primitive integer type used to represented a memory entry
-    type Memwidth: num_traits::PrimInt;
+    type Memwidth: PrimInt;
     type Access: Access;
 
     #[must_use]
@@ -21,9 +22,9 @@ pub trait Memory: Sized {
 
     /// Access the memory entry at a specific index. Panics if out of bounds.
     #[must_use]
-    fn index(&mut self, idx: usize) -> MemEntry<Self::Memwidth, Self::Access> {
+    fn index(&self, idx: usize) -> MemEntry<Self::Memwidth, Self::Access> {
         if idx < self.num_entries() {
-            unsafe { MemEntry::from_ptr(self.first_entry_ptr().add(idx), self.width()) }
+            unsafe { MemEntry::from_ptr(self.first_entry_ptr().add(idx)) }
         } else {
             panic!(
                 "Tried to index {} in a memory with only {} entries",
@@ -36,9 +37,9 @@ pub trait Memory: Sized {
     /// Get an iterator over a range of memory entries
     #[must_use]
     fn slice(
-        &mut self,
+        &self,
         range: impl core::ops::RangeBounds<usize>,
-    ) -> MemEntryIter<'_, Self> {
+    ) -> MemEntryIter<Self::Memwidth, Self::Access> {
         let low_idx = match range.start_bound() {
             core::ops::Bound::Included(idx) => *idx,
             core::ops::Bound::Excluded(idx) => *idx + 1,
@@ -49,40 +50,36 @@ pub trait Memory: Sized {
             core::ops::Bound::Excluded(idx) => *idx - 1,
             core::ops::Bound::Unbounded => self.num_entries() - 1,
         };
+        let num_entries = high_idx - low_idx + 1;
         MemEntryIter {
-            mem: self,
-            low_idx,
-            high_idx,
+            next: self.index(low_idx),
+            remaining: num_entries,
         }
     }
 
     /// Get an iterator over all memory entries
     #[must_use]
-    fn iter(&mut self) -> MemEntryIter<'_, Self> {
+    fn iter(&self) -> MemEntryIter<Self::Memwidth, Self::Access> {
         self.slice(..)
     }
 }
 
 /// Representation of a single memory entry
-pub struct MemEntry<T, A: Access> {
+#[derive(Copy, Clone, PartialEq, Eq, Hash, Debug)]
+pub struct MemEntry<T: PrimInt, A: Access> {
     ptr: *mut T,
-    width: usize,
     phantom: PhantomData<A>,
 }
 
-impl<T, A: Access> MemEntry<T, A>
-where
-    T: num_traits::PrimInt,
-{
+impl<T: PrimInt, A: Access> MemEntry<T, A> {
     /// # Safety
     ///
     /// The caller must guarantee that the provided address points to a
     /// hardware memory entry of size `T` with access `A`.
     #[must_use]
-    pub const unsafe fn from_ptr(ptr: *mut T, width: usize) -> Self {
+    pub const unsafe fn from_ptr(ptr: *mut T) -> Self {
         Self {
             ptr,
-            width,
             phantom: PhantomData,
         }
     }
@@ -91,88 +88,61 @@ where
     pub const fn as_ptr(&self) -> *mut T {
         self.ptr
     }
-
-    /// Bit width of the entry
-    #[must_use]
-    pub const fn width(&self) -> usize {
-        self.width
-    }
-
-    #[must_use]
-    pub fn mask(&self) -> T {
-        (T::one() << self.width) - T::one()
-    }
 }
 
-impl<T, A: access::Read> MemEntry<T, A>
-where
-    T: num_traits::PrimInt,
-{
+impl<T: PrimInt, A: access::Read> MemEntry<T, A> {
     #[must_use]
     pub fn read(&self) -> T {
-        let value = unsafe { self.ptr.read_volatile() };
-        value & self.mask()
+        // SAFETY: MemEntry can only be constructed through from_ptr(),
+        // which means the user has guaranteed the address points to
+        // a suitable hardware memory.
+        unsafe { self.ptr.read_volatile() }
     }
 }
 
-impl<T, A: access::Write> MemEntry<T, A>
-where
-    T: num_traits::PrimInt,
-{
+impl<T: PrimInt, A: access::Write> MemEntry<T, A> {
     pub fn write(&mut self, value: T) {
-        let value = value & self.mask();
+        // SAFETY: MemEntry can only be constructed through from_ptr(),
+        // which means the user has guaranteed the address points to
+        // a suitable hardware memory.
         unsafe { self.ptr.write_volatile(value) }
     }
 }
 
 /// Iterator over memory entries
-pub struct MemEntryIter<'a, M: Memory> {
-    mem: &'a mut M,
-    low_idx: usize,
-    high_idx: usize,
+pub struct MemEntryIter<T: PrimInt, A: Access> {
+    next: MemEntry<T, A>,
+    remaining: usize,
 }
 
-impl<M: Memory> Iterator for MemEntryIter<'_, M> {
-    type Item = MemEntry<M::Memwidth, M::Access>;
+impl<T: PrimInt, A: Access> Iterator for MemEntryIter<T, A> {
+    type Item = MemEntry<T, A>;
 
     fn next(&mut self) -> Option<Self::Item> {
-        if self.low_idx > self.high_idx {
+        if self.remaining == 0 {
             None
         } else {
-            let entry = self.mem.index(self.low_idx);
-            self.low_idx += 1;
-            Some(entry)
+            self.remaining -= 1;
+            let new_next = unsafe { MemEntry::from_ptr(self.next.as_ptr().add(1)) };
+            Some(core::mem::replace(&mut self.next, new_next))
         }
     }
 
     fn size_hint(&self) -> (usize, Option<usize>) {
-        if self.low_idx > self.high_idx {
-            (0, Some(0))
-        } else {
-            let len = self.high_idx - self.low_idx + 1;
-            (len, Some(len))
-        }
+        (self.remaining, Some(self.remaining))
     }
 }
 
-impl<M> DoubleEndedIterator for MemEntryIter<'_, M>
-where
-    M: Memory,
-{
+impl<T: PrimInt, A: Access> DoubleEndedIterator for MemEntryIter<T, A> {
     fn next_back(&mut self) -> Option<Self::Item> {
-        if self.low_idx > self.high_idx {
+        if self.remaining == 0 {
             None
         } else {
-            let entry = self.mem.index(self.high_idx);
-            if self.high_idx > 0 {
-                self.high_idx -= 1;
-            } else {
-                self.low_idx += 1;
-            }
-            Some(entry)
+            self.remaining -= 1;
+            unsafe { Some(MemEntry::from_ptr(self.next.as_ptr().add(self.remaining))) }
         }
     }
 }
 
-impl<M> core::iter::ExactSizeIterator for MemEntryIter<'_, M> where M: Memory {}
-impl<M> core::iter::FusedIterator for MemEntryIter<'_, M> where M: Memory {}
+impl<T: PrimInt, A: Access> core::iter::ExactSizeIterator for MemEntryIter<T, A> {}
+impl<T: PrimInt, A: Access> core::iter::FusedIterator for MemEntryIter<T, A> {}
