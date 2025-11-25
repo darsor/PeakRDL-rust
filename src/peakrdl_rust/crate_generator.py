@@ -1,5 +1,8 @@
 import shutil
 
+from caseconverter.pascal import pascalcase
+
+from . import utils
 from .design_state import DesignState
 
 
@@ -60,6 +63,14 @@ def write_crate(ds: DesignState) -> None:
     lib_rs_path.parent.mkdir(parents=True, exist_ok=True)
     context = {
         "has_fixedpoint": ds.has_fixedpoint,
+        "top_nodes": [
+            "::".join(
+                ["crate", "components"]
+                + utils.crate_module_path(node, escaped=True)
+                + [pascalcase(utils.rust_type_name(node))]
+            )
+            for node in ds.top_nodes
+        ],
     }
     with lib_rs_path.open("w") as f:
         template = ds.jj_env.get_template("src/lib.rs")

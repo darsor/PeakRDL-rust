@@ -11,12 +11,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Tests now treat pedantic clippy lints as errors
 - Derive common traits for `MemEntry` struct
-- Examples including generated crate's cargo docs in sphinx documentation
+- Examples in sphinx documentation, including generated crate's cargo docs
+- Top-level nodes are publicly re-exported at the crate root
 
 ### Changed
 
-- Components named `mod` (a rust keyword) are now escaped as `mod_` instead of `r#mod` to avoid generating files named `mod.rs`
 - Refactored `Memory` trait to be consistent with no-owned-struct approach used by other component types
+- Components named `mod` (a rust keyword) are now escaped as `mod_` instead of `r#mod` to avoid generating files named `mod.rs`
 - Rename memory component `len()` method to `num_entries()`
 - `UnknownVariant<T>` is now a public tuple struct
 - Handled all pedantic clippy lints

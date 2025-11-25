@@ -52,6 +52,8 @@ def is_anonymous(node: Node) -> bool:
 
 
 def parent_scope(node: Node) -> Union[Node, None]:
+    """Get the parent node that the given node was declared within
+    (lexical scope)."""
     # Due to namespace nesting properties, it is guaranteed that the parent
     # scope definition is also going to be one of the node's ancestors.
     # Seek up and find it
@@ -102,10 +104,14 @@ def enum_parent_scope(node: FieldNode, encoding: type[UserEnum]) -> Union[Node, 
     return None
 
 
-def crate_module_path(node: Node) -> list[str]:
+def crate_module_path(node: Node, escaped=False) -> list[str]:
+    """Get a list of the nested modules (under crate::components) under
+    which this node's type is defined."""
     parent = parent_scope(node)
     assert parent is not None
     type_name = snakecase(rust_type_name(node))
+    if escaped:
+        type_name = kw_filter(type_name)
     if isinstance(parent, RootNode):
         return [type_name]
     parent_path = crate_module_path(parent)
@@ -116,6 +122,8 @@ def crate_module_path(node: Node) -> list[str]:
 
 
 def crate_enum_module_path(field: FieldNode, enum: type[UserEnum]) -> list[str]:
+    """Get a list of the nested modules (under crate::components) under
+    which this field's enum type is defined."""
     assert field.get_property("encode") is enum
     declaring_parent = enum_parent_scope(field, enum)
     assert declaring_parent is not None

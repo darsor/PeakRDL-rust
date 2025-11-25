@@ -20,7 +20,7 @@ class RustExporter:
         Parameters
         ----------
         node: AddrmapNode
-            Top-level SystemRDL node to export.
+            Top-level SystemRDL node(s) to export.
         path: str
             Output directory for generated crate. A subfolder with the name of
             the crate is generated in this directory.

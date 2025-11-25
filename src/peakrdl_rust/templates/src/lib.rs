@@ -20,3 +20,8 @@ pub mod fixedpoint;
 {% endif %}
 pub mod mem;
 pub mod reg;
+
+{% for top_node in ctx.top_nodes %}
+#[cfg(not(doctest))]
+pub use {{top_node}};
+{% endfor %}

@@ -1,5 +1,5 @@
 #![allow(unused_variables)]
-use turboencabulator::components::turbo_encab::TurboEncab;
+use turboencabulator::TurboEncab;
 
 /// A block of memory used for simulating hardware registers.
 ///

@@ -17,7 +17,7 @@ while {{idx}} < {{dims[depth]}} {
 {% endfor %}
 
 {% if ctx.anon_instances|length > 0 %}
-// anonymous component instances
+// Anonymous component instances
 {% endif %}
 {% for mod in ctx.anon_instances %}
 pub mod {{mod|kw_filter}};
@@ -33,7 +33,7 @@ pub mod named_types {
 {% endif %}
 
 {% if ctx.named_type_instances|length > 0 %}
-// instances of named component types
+// Instances of named component types
 {% endif %}
 {% for (inst_name, module) in ctx.named_type_instances %}
 pub use {{module}} as {{inst_name|kw_filter}};

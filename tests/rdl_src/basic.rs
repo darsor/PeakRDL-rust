@@ -1,4 +1,4 @@
-use basic::components::basic::Basic;
+use basic::Basic;
 
 /// A block of memory used for simulating hardware registers.
 ///

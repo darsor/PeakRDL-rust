@@ -1,6 +1,6 @@
-use enums::components::enum_test1::EnumTest1;
 use enums::components::enum_test1::named_types::{my_enum::MyEnum, self_::Self_};
 use enums::encode::UnknownVariant;
+use enums::EnumTest1;
 
 /// A block of memory used for simulating hardware registers.
 ///

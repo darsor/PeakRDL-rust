@@ -1,7 +1,7 @@
 use memories::{
     access::{R, RW, W},
-    components::memories::Memories,
     mem::{MemEntry, Memory},
+    Memories,
 };
 
 /// A block of memory used for simulating hardware registers.

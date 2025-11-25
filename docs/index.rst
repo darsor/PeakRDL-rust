@@ -7,15 +7,13 @@ for accessing control/status registers from a SystemRDL definition.
 Features:
 
 * Generates Rust types and accessor methods representing your hardware registers
+* Type-safe field access with compile-time guarantees
+* Includes component names and descriptions as doc comments in the generated code
+* Embedded-friendly code generation with ``no_std`` support
 * Preserves the hierarchical structure of SystemRDL
 * Supports complex nested regfiles, arrays, and memory components
 * Supports enumerated field types
 * Supports signed and fixed-point field types
-* Type-safe field access with compile-time guarantees
-* Includes component names and descriptions as doc comments in the generated code
-* Embedded-friendly code generation with ``no_std`` support
-* Generates comprehensive test suites to validate register functionality
-* Implements ``Debug`` and ``Default`` traits for generated register types
 
 
 Installing
