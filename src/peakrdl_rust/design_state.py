@@ -47,6 +47,14 @@ class DesignState:
         self.byte_endian: Literal["Big", "Little"] = byte_endian.capitalize()  # type: ignore
         self.word_endian: Literal["Big", "Little"] = word_endian.capitalize()  # type: ignore
 
+        self.access_mode: str
+        self.access_mode = kwargs.pop("access_mode", "software")
+        if self.access_mode not in ("software", "hardware", "read_only"):
+            raise ValueError(
+                f"Invalid access_mode '{self.access_mode}'. "
+                "Must be one of: 'software', 'hardware', 'read_only'"
+            )
+
         # ------------------------
         # Collect info for export
         # ------------------------
@@ -55,7 +63,7 @@ class DesignState:
         self.has_fixedpoint: bool = scanner.has_fixedpoint
 
         component_context = ContextScanner(
-            self.top_nodes, self.byte_endian, self.word_endian
+            self.top_nodes, self.byte_endian, self.word_endian, self.access_mode
         )
         component_context.run()
         self.top_component_modules: list[str] = component_context.top_component_modules

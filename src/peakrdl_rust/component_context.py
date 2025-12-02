@@ -183,6 +183,7 @@ class ContextScanner(RDLListener):
         top_nodes: list[AddrmapNode],
         byte_endian: Literal["Big", "Little"],
         word_endian: Literal["Big", "Little"],
+        access_mode: str = "software",
     ) -> None:
         self.top_nodes = top_nodes
         self.byte_endian: Literal["Big", "Little"] = byte_endian
@@ -190,6 +191,7 @@ class ContextScanner(RDLListener):
         self.top_component_modules: list[str] = []
         self.components: dict[Path, Component] = {}
         self.msg = top_nodes[0].env.msg
+        self.access_mode = access_mode
 
     def run(self) -> None:
         for node in self.top_nodes:
@@ -260,7 +262,7 @@ class ContextScanner(RDLListener):
                 addr_offset = child.address_offset
 
             if isinstance(child, RegNode):
-                if not utils.reg_access(child):
+                if not utils.reg_access(child, self.access_mode):
                     continue
                 registers.append(
                     RegisterInst(
@@ -328,7 +330,7 @@ class ContextScanner(RDLListener):
         else:
             assert len(submaps) == 0
             assert len(memories) == 0
-            if not (access := utils.field_access(node)):
+            if not (access := utils.field_access(node, self.access_mode)):
                 return WalkerAction.Continue
             memwidth = node.get_property("memwidth")
             primitive_width = 2 ** int(math.ceil(math.log2(memwidth)))
@@ -429,7 +431,7 @@ class ContextScanner(RDLListener):
                     comment=utils.doc_comment(field),
                     inst_name=snakecase(field.inst_name),
                     type_name=pascalcase(field.inst_name),
-                    access=utils.field_access(field),
+                    access=utils.field_access(field, self.access_mode),
                     primitive=primitive,
                     encoding=encoding_name,
                     exhaustive=exhaustive,

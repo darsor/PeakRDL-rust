@@ -33,6 +33,11 @@ class RustExporter:
         word_endian: Optional[Literal["big", "little"]]
             Ordering of `accesswidth`-sized words within a wide register. Overrides
             the `littleendian` and `bigendian` addrmap properties.
+        access_mode: str
+            Access mode for register/field access functions. One of:
+            - 'software' (default): Returns software read/write access properties
+            - 'hardware': Returns hardware read/write access properties
+            - 'read_only': Returns read-only for all access types
         """
         # If it is the root node, skip to top addrmap
         if isinstance(node, RootNode):
