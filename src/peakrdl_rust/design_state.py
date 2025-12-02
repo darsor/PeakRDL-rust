@@ -54,6 +54,14 @@ class DesignState:
         self.no_fmt: bool
         self.no_fmt = kwargs.pop("no_fmt", False)
 
+        self.access_mode: str
+        self.access_mode = kwargs.pop("access_mode", "software")
+        if self.access_mode not in ("software", "hardware", "read_only"):
+            raise ValueError(
+                f"Invalid access_mode '{self.access_mode}'. "
+                "Must be one of: 'software', 'hardware', 'read_only'"
+            )
+
         # ------------------------
         # Collect info for export
         # ------------------------
@@ -61,7 +69,7 @@ class DesignState:
         scanner.run()
         self.has_fixedpoint: bool = scanner.has_fixedpoint
 
-        component_context = ContextScanner(self.top_nodes)
+        component_context = ContextScanner(self.top_nodes, self.access_mode)
         component_context.run()
         self.top_component_modules: list[str] = component_context.top_component_modules
         self.components: dict[Path, Component] = component_context.components
