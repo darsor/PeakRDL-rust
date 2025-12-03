@@ -151,27 +151,47 @@ def crate_enum_module_path(field: FieldNode, enum: type[UserEnum]) -> list[str]:
         return parent_modules + ["named_types", module_name]
 
 
-def reg_access(node: RegNode) -> Union[str, None]:
-    if node.has_sw_readable:
-        if node.has_sw_writable:
+def reg_access(node: RegNode, access_mode: str = "software") -> Union[str, None]:
+    if access_mode == "read_only":
+        return "R"
+    
+    if access_mode == "hardware":
+        readable = node.has_hw_readable
+        writable = node.has_hw_writable
+    else:  # software (default)
+        readable = node.has_sw_readable
+        writable = node.has_sw_writable
+    
+    if readable:
+        if writable:
             return "RW"
         else:
             return "R"
     else:
-        if node.has_sw_writable:
+        if writable:
             return "W"
         else:
             return None
 
 
-def field_access(node: Union[FieldNode, MemNode]) -> Union[str, None]:
-    if node.is_sw_readable:
-        if node.is_sw_writable:
+def field_access(node: Union[FieldNode, MemNode], access_mode: str = "software") -> Union[str, None]:
+    if access_mode == "read_only":
+        return "R"
+    
+    if access_mode == "hardware":
+        readable = node.is_hw_readable
+        writable = node.is_hw_writable
+    else:  # software (default)
+        readable = node.is_sw_readable
+        writable = node.is_sw_writable
+    
+    if readable:
+        if writable:
             return "RW"
         else:
             return "R"
     else:
-        if node.is_sw_writable:
+        if writable:
             return "W"
         else:
             return None

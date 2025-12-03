@@ -1,0 +1,46 @@
+
+addrmap access_modes_test {
+    name = "Access Modes Test";
+    desc = "Test different access mode configurations for software and hardware";
+
+    reg {
+        name = "Software RW, Hardware R";
+        field {
+            sw=rw;
+            hw=r;
+        } sw_rw_hw_r[7:0] = 0x00;
+        
+        field {
+            sw=r;
+            hw=rw;
+        } sw_r_hw_rw[15:8] = 0x00;
+        
+        field {
+            sw=rw;
+            hw=rw;
+        } sw_rw_hw_rw[23:16] = 0x00;
+        
+        field {
+            sw=w;
+            hw=r;
+        } sw_w_hw_r[31:24] = 0x00;
+    } test_reg @ 0x0;
+
+    reg {
+        name = "Hardware Access Only";
+        field {
+            sw=r;
+            hw=w;
+        } sw_r_hw_w[7:0] = 0x55;
+        
+        field {
+            sw=w;
+            hw=r;
+        } sw_w_hw_r[15:8] = 0xAA;
+        
+        field {
+            sw=r;
+            hw=r;
+        } sw_r_hw_r[23:16] = 0xFF;
+    } hw_reg @ 0x4;
+};
