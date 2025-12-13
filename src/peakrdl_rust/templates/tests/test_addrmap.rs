@@ -8,13 +8,8 @@ fn test_{{ctx.name}}_addresses() {
     let base_addr = memory.as_mut_ptr();
     let dut = unsafe { {{ctx.name|kw_filter}}::{{ctx.type_name}}::from_ptr(base_addr as _) };
 
-    // SAFETY: we're using unsafe pointer arithmetic, but never deference the
-    // resulting pointer and should never go outside the bounds of the memory
-    // allocation.
-    unsafe {
-        assert_eq!(dut.as_ptr() as *mut u8, base_addr);
-        {% for address in ctx.addresses %}
-        assert_eq!(dut.{{address.dut_method}}.as_ptr() as *mut u8, base_addr.byte_add({{"0x{:_X}".format(address.absolute_addr)}}));
-        {% endfor %}
-    }
+    assert_eq!(dut.as_ptr() as *mut u8, base_addr);
+    {% for address in ctx.addresses %}
+    assert_eq!(dut.{{address.dut_method}}.as_ptr() as *mut u8, base_addr.wrapping_byte_add({{"0x{:_X}".format(address.absolute_addr)}}));
+    {% endfor %}
 }

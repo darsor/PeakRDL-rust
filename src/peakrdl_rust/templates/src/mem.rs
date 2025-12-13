@@ -25,7 +25,7 @@ pub trait Memory: Sized {
     #[must_use]
     fn index(&self, idx: usize) -> MemEntry<Self::Memwidth, Self::Access> {
         if idx < self.num_entries() {
-            unsafe { MemEntry::from_ptr(self.first_entry_ptr().add(idx)) }
+            unsafe { MemEntry::from_ptr(self.first_entry_ptr().wrapping_add(idx)) }
         } else {
             panic!(
                 "Tried to index {} in a memory with only {} entries",
@@ -126,7 +126,7 @@ impl<T: PrimInt, A: Access> Iterator for MemEntryIter<T, A> {
             None
         } else {
             self.remaining -= 1;
-            let new_next = unsafe { MemEntry::from_ptr(self.next.as_ptr().add(1)) };
+            let new_next = unsafe { MemEntry::from_ptr(self.next.as_ptr().wrapping_add(1)) };
             Some(core::mem::replace(&mut self.next, new_next))
         }
     }
@@ -142,7 +142,11 @@ impl<T: PrimInt, A: Access> DoubleEndedIterator for MemEntryIter<T, A> {
             None
         } else {
             self.remaining -= 1;
-            unsafe { Some(MemEntry::from_ptr(self.next.as_ptr().add(self.remaining))) }
+            unsafe {
+                Some(MemEntry::from_ptr(
+                    self.next.as_ptr().wrapping_add(self.remaining),
+                ))
+            }
         }
     }
 }

@@ -56,14 +56,14 @@ impl {{ctx.type_name|kw_filter}} {
     #[must_use]
     {% if reg.array is none %}
     pub const fn {{reg.inst_name|kw_filter}}(&self) -> crate::reg::Reg<{{reg_type_name}}, crate::access::{{reg.access}}> {
-        unsafe { crate::reg::Reg::from_ptr(self.ptr.byte_add({{"0x{:_X}".format(reg.addr_offset)}}).cast()) }
+        unsafe { crate::reg::Reg::from_ptr(self.ptr.wrapping_byte_add({{"0x{:_X}".format(reg.addr_offset)}}).cast()) }
     }
     {% else %}
     pub const fn {{reg.inst_name|kw_filter}}(&self) -> {{reg.array.type.format("crate::reg::Reg<" ~ reg_type_name ~ ", crate::access::" ~ reg.access ~ ">")}} {
         // SAFETY: We will initialize every element before using the array
         let mut array = {{reg.array.type.format("core::mem::MaybeUninit::uninit()")}};
 
-        {% set expr = "unsafe { crate::reg::Reg::<" ~ reg_type_name ~ ", crate::access::" ~ reg.access ~ ">::from_ptr(self.ptr.byte_add(" ~ reg.array.addr_offset ~ ").cast()) }"  %}
+        {% set expr = "unsafe { crate::reg::Reg::<" ~ reg_type_name ~ ", crate::access::" ~ reg.access ~ ">::from_ptr(self.ptr.wrapping_byte_add(" ~ reg.array.addr_offset ~ ").cast()) }"  %}
         {{ macros.loop(0, reg.array.dims, expr) | indent(8) }}
 
         // SAFETY: All elements have been initialized above
