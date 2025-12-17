@@ -33,6 +33,11 @@ class RustExporter:
             Semantic version number for the generated crate.
         no_fmt: bool
             Don't attempt to format the generated rust code using `cargo fmt`.
+        access_mode: str
+            Access mode for register/field access functions. One of:
+            - 'software' (default): Returns software read/write access properties
+            - 'hardware': Returns hardware read/write access properties
+            - 'read_only': Returns read-only for all access types
         """
         # If it is the root node, skip to top addrmap
         if isinstance(node, RootNode):

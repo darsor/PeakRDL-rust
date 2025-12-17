@@ -16,6 +16,7 @@ For example:
     crate_version = "0.1.0"
     force = true
     no_fmt = false
+    access_mode = "software"
 
 
 .. data:: crate_name
@@ -46,3 +47,17 @@ For example:
     ``cargo fmt``.
 
     Default: ``false``
+
+
+.. data:: access_mode
+
+    Controls which access properties are used for register and field access
+    determination.
+
+    Options:
+
+    - ``software`` - Use software read/write access properties (sw property)
+    - ``hardware`` - Use hardware read/write access properties (hw property)
+    - ``read_only`` - Force all registers and fields to be read-only
+
+    Default: ``software``
