@@ -53,38 +53,32 @@ class Exporter(ExporterSubcommandPlugin):
             """,
         )
 
-        # TODO
-        # arg_group.add_argument(
-        #     "-i",
-        #     "--instantiate",
-        #     action="store_true",
-        #     default=False,
-        #     help="""
-        #     If set, header will also include a macro that instantiates each top-level
-        #     block at a defined hardware address, allowing for direct access.
-        #     """,
-        # )
-
-        # Wrap constructor to allow hex strings
-        def integer(n: Union[int, str]) -> int:
-            return int(n, 0)  # type: ignore # bogus error
-
-        # TODO
-        # arg_group.add_argument(
-        #     "--inst-offset",
-        #     type=integer,
-        #     default=0,
-        #     help="""
-        #     Apply an additional address offset to instance definitions.
-        #     """,
-        # )
-
         arg_group.add_argument(
             "--no-fmt",
             action="store_true",
             default=False,
             help="""
             Don't attempt to format the generated rust code using `cargo fmt`.
+            """,
+        )
+
+        arg_group.add_argument(
+            "--byte-endian",
+            choices=["big", "little"],
+            default=None,
+            help="""
+            Ordering of bytes within `accesswidth`-sized accesses to the register
+            file. Overrides the `littleendian` and `bigendian` addrmap properties.
+            """,
+        )
+
+        arg_group.add_argument(
+            "--word-endian",
+            choices=["big", "little"],
+            default=None,
+            help="""
+            Ordering of `accesswidth`-sized words within a wide register. Overrides
+            the `littleendian` and `bigendian` addrmap properties.
             """,
         )
 
@@ -96,7 +90,5 @@ class Exporter(ExporterSubcommandPlugin):
             force=options.force,
             crate_name=options.crate_name,
             crate_version=options.crate_version,
-            # instantiate=options.instantiate,
-            # inst_offset=options.inst_offset,
             no_fmt=options.no_fmt,
         )

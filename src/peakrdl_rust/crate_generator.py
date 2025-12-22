@@ -40,8 +40,21 @@ def write_crate(ds: DesignState) -> None:
     # src/reg.rs
     reg_rs_path = ds.output_dir / "src" / "reg.rs"
     reg_rs_path.parent.mkdir(parents=True, exist_ok=True)
+    if ds.byte_endian:
+        byte_endian = ds.byte_endian
+    elif ds.top_nodes[0].get_property("bigendian", default=False):
+        byte_endian = "big"
+    else:
+        byte_endian = "little"
+    if ds.word_endian:
+        word_endian = ds.word_endian
+    elif ds.top_nodes[0].get_property("bigendian", default=False):
+        word_endian = "big"
+    else:
+        word_endian = "little"
     context = {
-        "endianness": "be" if ds.top_nodes[0].get_property("bigendian") else "le",
+        "byte_endian": "be" if byte_endian == "big" else "le",
+        "word_endian": word_endian,
     }
     with reg_rs_path.open("w") as f:
         template = ds.jj_env.get_template("src/reg.rs")

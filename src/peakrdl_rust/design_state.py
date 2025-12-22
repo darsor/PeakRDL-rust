@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Literal, Optional
 
 import jinja2 as jj
 from caseconverter import snakecase
@@ -45,14 +45,14 @@ class DesignState:
         self.crate_version: str
         self.crate_version = kwargs.pop("crate_version", "0.1.0")
 
-        # self.instantiate: bool
-        # self.instantiate = kwargs.pop("instantiate", False)
-
-        # self.inst_offset: int
-        # self.inst_offset = kwargs.pop("inst_offset", 0)
-
         self.no_fmt: bool
         self.no_fmt = kwargs.pop("no_fmt", False)
+
+        self.byte_endian: Optional[Literal["big", "little"]]
+        self.byte_endian = kwargs.pop("byte_endian", None)
+
+        self.word_endian: Optional[Literal["big", "little"]]
+        self.word_endian = kwargs.pop("word_endian", None)
 
         # ------------------------
         # Collect info for export

@@ -46,3 +46,22 @@ For example:
     ``cargo fmt``.
 
     Default: ``false``
+
+
+.. data:: byte_endian
+
+    Ordering of bytes within `accesswidth`-sized accesses to the register
+    file. Valid options are ``big`` or ``little``. Overrides the `littleendian`
+    and `bigendian` addrmap properties.
+
+    Default: addrmap endianness propery, or ``little`` if not defined
+
+
+.. data:: word_endian
+
+    Ordering of `accesswidth`-sized words within a wide register. Valid options are
+    ``big`` or ``little``. Overrides the `littleendian` and `bigendian` addrmap
+    properties. Note that the PeakRDL regblock exporters only support ``little``
+    word endianness.
+
+    Default: addrmap endianness propery, or ``little`` if not defined

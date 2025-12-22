@@ -33,6 +33,12 @@ class RustExporter:
             Semantic version number for the generated crate.
         no_fmt: bool
             Don't attempt to format the generated rust code using `cargo fmt`.
+        byte_endian: Optional[Literal["big", "little"]]
+            Ordering of bytes within `accesswidth`-sized accesses to the register
+            file. Overrides the `littleendian` and `bigendian` addrmap properties.
+        word_endian: Optional[Literal["big", "little"]]
+            Ordering of `accesswidth`-sized words within a wide register. Overrides
+            the `littleendian` and `bigendian` addrmap properties.
         """
         # If it is the root node, skip to top addrmap
         if isinstance(node, RootNode):
