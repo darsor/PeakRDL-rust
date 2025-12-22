@@ -32,14 +32,6 @@ def write_crate(ds: DesignState) -> None:
     encode_rs_path.parent.mkdir(parents=True, exist_ok=True)
     shutil.copyfile(ds.template_dir / "src" / "encode.rs", encode_rs_path)
 
-    # src/mem.rs
-    mem_rs_path = ds.output_dir / "src" / "mem.rs"
-    mem_rs_path.parent.mkdir(parents=True, exist_ok=True)
-    shutil.copyfile(ds.template_dir / "src" / "mem.rs", mem_rs_path)
-
-    # src/reg.rs
-    reg_rs_path = ds.output_dir / "src" / "reg.rs"
-    reg_rs_path.parent.mkdir(parents=True, exist_ok=True)
     if ds.byte_endian:
         byte_endian = ds.byte_endian
     elif ds.top_nodes[0].get_property("bigendian", default=False):
@@ -56,6 +48,17 @@ def write_crate(ds: DesignState) -> None:
         "byte_endian": "be" if byte_endian == "big" else "le",
         "word_endian": word_endian,
     }
+
+    # src/mem.rs
+    mem_rs_path = ds.output_dir / "src" / "mem.rs"
+    mem_rs_path.parent.mkdir(parents=True, exist_ok=True)
+    with mem_rs_path.open("w") as f:
+        template = ds.jj_env.get_template("src/mem.rs")
+        template.stream(ctx=context).dump(f)  # type: ignore # jinja incorrectly typed
+
+    # src/reg.rs
+    reg_rs_path = ds.output_dir / "src" / "reg.rs"
+    reg_rs_path.parent.mkdir(parents=True, exist_ok=True)
     with reg_rs_path.open("w") as f:
         template = ds.jj_env.get_template("src/reg.rs")
         template.stream(ctx=context).dump(f)  # type: ignore # jinja incorrectly typed

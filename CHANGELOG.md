@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Command line option to override byte or word endianness
 
+### Changed
+
+- Accesses on Memory components now use the configured byte endianness
+
 ## [0.4.1] - 2025-12-14
 
 ### Fixed

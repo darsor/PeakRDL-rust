@@ -98,7 +98,7 @@ impl<T: PrimInt, A: access::Read> MemEntry<T, A> {
         // SAFETY: MemEntry can only be constructed through from_ptr(),
         // which means the user has guaranteed the address points to
         // a suitable hardware memory.
-        unsafe { self.ptr.read_volatile() }
+        T::from_{{ctx.byte_endian}}(unsafe { self.ptr.read_volatile() })
     }
 }
 
@@ -108,7 +108,7 @@ impl<T: PrimInt, A: access::Write> MemEntry<T, A> {
         // SAFETY: MemEntry can only be constructed through from_ptr(),
         // which means the user has guaranteed the address points to
         // a suitable hardware memory.
-        unsafe { self.ptr.write_volatile(value) }
+        unsafe { self.ptr.write_volatile(value.to_{{ctx.byte_endian}}()) }
     }
 }
 
