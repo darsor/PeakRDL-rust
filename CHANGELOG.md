@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Command line option to override byte or word endianness
+- All command line options can now be specified in the `peakrdl.toml` configuration file
 
 ### Changed
 

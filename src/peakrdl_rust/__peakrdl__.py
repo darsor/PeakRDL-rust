@@ -1,6 +1,6 @@
 from typing import TYPE_CHECKING, Union
 
-# from peakrdl.config import schema
+from peakrdl.config import schema
 from peakrdl.plugins.exporter import ExporterSubcommandPlugin
 
 from .exporter import RustExporter
@@ -17,12 +17,14 @@ class Exporter(ExporterSubcommandPlugin):
 
     udp_definitions = ALL_UDPS
 
-    # cfg_schema = {
-    #     "std": schema.Choice(list(CStandard.__members__.keys())),
-    #     "type_style": schema.Choice(["lexical", "hier"]),
-    #     "subword_size": schema.Integer(),
-    #     "bitfields": schema.Choice(["ltoh", "htol", "none"]),
-    # }
+    cfg_schema = {
+        "crate_name": schema.String(),
+        "crate_version": schema.String(),
+        "force": schema.Boolean(),
+        "no_fmt": schema.Boolean(),
+        "byte_endian": schema.Choice(["big", "little"]),
+        "word_endian": schema.Choice(["big", "little"]),
+    }
 
     def add_exporter_arguments(self, arg_group: "argparse._ActionsContainer") -> None:
         arg_group.add_argument(

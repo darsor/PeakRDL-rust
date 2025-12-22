@@ -16,6 +16,8 @@ For example:
     crate_version = "0.1.0"
     force = true
     no_fmt = false
+    byte_endian = "big"
+    word_endian = "little"
 
 
 .. data:: crate_name
