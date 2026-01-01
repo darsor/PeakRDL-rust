@@ -1,6 +1,6 @@
 from typing import Any, Union
 
-from caseconverter import snakecase
+from caseconverter import pascalcase, snakecase
 from systemrdl.node import (
     AddressableNode,
     FieldNode,
@@ -70,16 +70,36 @@ def parent_scope(node: Node) -> Union[Node, None]:
     return None
 
 
-def rust_type_name(node: Node) -> str:
-    """The SystemRDL compiler adds unique identifiers to any type name
-    if properties are dynamically set. But anonymous instances can not be
-    reused, and don't need to be uniquified. If the node is anonymously defined,
-    use the instance name as the type name (ignoring the unique suffix)."""
+def _type_name_normalization(node: Node) -> tuple[str, Union[str, None]]:
+    """Get the SystemRDL type name and optional type normaliation suffix"""
+    # The SystemRDL compiler adds unique identifiers to any type name
+    # if properties are dynamically set. But anonymous instances can not be
+    # reused, and don't need to be uniquified. If the node is anonymously defined,
+    # use the instance name as the type name (ignoring the unique suffix).
     if is_anonymous(node):
-        return node.inst_name
-    else:
-        assert node.type_name is not None
-        return node.type_name
+        return (node.inst_name, None)
+
+    assert node.type_name is not None
+    assert node.orig_type_name is not None
+    return (node.orig_type_name, node.type_name.removeprefix(node.orig_type_name))
+
+
+def rust_type_name(node: Node) -> str:
+    """Get the Rust type name of a component, in PascalCase."""
+    type_name, suffix = _type_name_normalization(node)
+    rust_type_name = pascalcase(type_name)
+    # Don't change the case of the suffix. It gets really messy in PascalCase.
+    if suffix is not None:
+        rust_type_name += suffix
+    return rust_type_name
+
+
+def rust_module_name(node: Node) -> str:
+    """Get the Rust module name of a component, in snake_case."""
+    type_name, suffix = _type_name_normalization(node)
+    if suffix is not None:
+        type_name = type_name + suffix
+    return snakecase(type_name)
 
 
 def enum_parent_scope(node: FieldNode, encoding: type[UserEnum]) -> Union[Node, None]:
@@ -109,16 +129,16 @@ def crate_module_path(node: Node, escaped: bool = False) -> list[str]:
     which this node's type is defined."""
     parent = parent_scope(node)
     assert parent is not None
-    type_name = snakecase(rust_type_name(node))
+    module_name = rust_module_name(node)
     if escaped:
-        type_name = kw_filter(type_name)
+        module_name = kw_filter(module_name)
     if isinstance(parent, RootNode):
-        return [type_name]
+        return [module_name]
     parent_path = crate_module_path(parent)
     if is_anonymous(node):
-        return parent_path + [type_name]
+        return parent_path + [module_name]
     else:
-        return parent_path + ["named_types", type_name]
+        return parent_path + ["named_types", module_name]
 
 
 def crate_enum_module_path(field: FieldNode, enum: type[UserEnum]) -> list[str]:

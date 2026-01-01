@@ -258,7 +258,7 @@ class ContextScanner(RDLListener):
                         inst_name=inst_name,
                         type_name=kw_filter(inst_name)
                         + "::"
-                        + kw_filter(pascalcase(utils.rust_type_name(child))),
+                        + kw_filter(utils.rust_type_name(child)),
                         array=array,
                         addr_offset=addr_offset,
                         access=access,
@@ -271,7 +271,7 @@ class ContextScanner(RDLListener):
                         inst_name=inst_name,
                         type_name=kw_filter(inst_name)
                         + "::"
-                        + kw_filter(pascalcase(utils.rust_type_name(child))),
+                        + kw_filter(utils.rust_type_name(child)),
                         array=array,
                         addr_offset=addr_offset,
                     )
@@ -283,7 +283,7 @@ class ContextScanner(RDLListener):
                         inst_name=inst_name,
                         type_name=kw_filter(inst_name)
                         + "::"
-                        + kw_filter(pascalcase(utils.rust_type_name(child))),
+                        + kw_filter(utils.rust_type_name(child)),
                         array=array,
                         addr_offset=addr_offset,
                     )
@@ -310,7 +310,7 @@ class ContextScanner(RDLListener):
                 anon_instances=anon_instances,
                 named_type_instances=named_type_instances,
                 named_type_declarations=[],
-                type_name=pascalcase(utils.rust_type_name(node)),
+                type_name=utils.rust_type_name(node),
                 registers=registers,
                 submaps=submaps,
                 memories=memories,
@@ -331,7 +331,7 @@ class ContextScanner(RDLListener):
                 anon_instances=anon_instances,
                 named_type_instances=named_type_instances,
                 named_type_declarations=[],
-                type_name=pascalcase(utils.rust_type_name(node)),
+                type_name=utils.rust_type_name(node),
                 mementries=node.get_property("mementries"),
                 memwidth=memwidth,
                 primitive=f"u{primitive_width}",
@@ -437,7 +437,7 @@ class ContextScanner(RDLListener):
             named_type_instances=[],
             named_type_declarations=[],
             use_statements=[],
-            type_name=pascalcase(utils.rust_type_name(node)),
+            type_name=utils.rust_type_name(node),
             regwidth=node.get_property("regwidth"),
             accesswidth=node.get_property("accesswidth"),
             reset_val=reg_reset_val,
@@ -451,17 +451,17 @@ class ContextScanner(RDLListener):
         if utils.is_anonymous(node) or isinstance(node, FieldNode):
             return WalkerAction.Continue
 
-        type_name = kw_filter(snakecase(utils.rust_type_name(node)))
+        module_name = kw_filter(utils.rust_module_name(node))
 
         parent = utils.parent_scope(node)
         assert parent is not None
         if isinstance(parent, RootNode):
-            utils.append_unique(self.top_component_modules, type_name)
+            utils.append_unique(self.top_component_modules, module_name)
             return WalkerAction.Continue
 
         file = self.get_node_module_file(parent)
         assert file in self.components
-        utils.append_unique(self.components[file].named_type_declarations, type_name)
+        utils.append_unique(self.components[file].named_type_declarations, module_name)
 
         return WalkerAction.Continue
 

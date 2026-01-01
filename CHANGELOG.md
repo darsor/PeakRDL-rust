@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Accesses on Memory components now use the configured byte endianness
+- Generated type names don't case convert the normalization suffix (if present)
 
 ## [0.4.1] - 2025-12-14
 

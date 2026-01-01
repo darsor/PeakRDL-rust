@@ -65,7 +65,7 @@ def write_tests(ds: DesignState) -> None:
         component = TestComponent(
             crate_name=ds.crate_name,
             name=snakecase(top.inst_name),
-            type_name=pascalcase(utils.rust_type_name(top)),
+            type_name=utils.rust_type_name(top),
             addresses=scanner.test_addrs,
         )
 

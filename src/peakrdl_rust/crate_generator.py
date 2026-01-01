@@ -1,7 +1,5 @@
 import shutil
 
-from caseconverter.pascal import pascalcase
-
 from . import utils
 from .design_state import DesignState
 
@@ -83,7 +81,7 @@ def write_crate(ds: DesignState) -> None:
             "::".join(
                 ["crate", "components"]
                 + utils.crate_module_path(node, escaped=True)
-                + [pascalcase(utils.rust_type_name(node))]
+                + [utils.rust_type_name(node)]
             )
             for node in ds.top_nodes
         ],
