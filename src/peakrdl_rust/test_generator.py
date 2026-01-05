@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import Optional, Union
 
-from caseconverter import pascalcase, snakecase
+from caseconverter import snakecase
 from systemrdl.node import (
     AddressableNode,
     AddrmapNode,

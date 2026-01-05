@@ -1,6 +1,6 @@
 [project]
 name = "peakrdl-rust"
-version = "0.4.1"
+version = "0.5.0"
 description = "Generate a Rust crate from SystemRDL for accessing control/status registers."
 readme = "README.md"
 authors = [{ name = "Dana Sorensen", email = "dana.r.sorensen@gmail.com" }]

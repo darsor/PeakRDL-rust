@@ -87,7 +87,7 @@ def _type_name_normalization(node: Node) -> tuple[str, Union[str, None]]:
 def rust_type_name(node: Node) -> str:
     """Get the Rust type name of a component, in PascalCase."""
     type_name, suffix = _type_name_normalization(node)
-    rust_type_name = pascalcase(type_name)
+    rust_type_name = str(pascalcase(type_name))
     # Don't change the case of the suffix. It gets really messy in PascalCase.
     if suffix is not None:
         rust_type_name += suffix
@@ -99,7 +99,7 @@ def rust_module_name(node: Node) -> str:
     type_name, suffix = _type_name_normalization(node)
     if suffix is not None:
         type_name = type_name + suffix
-    return snakecase(type_name)
+    return str(snakecase(type_name))
 
 
 def enum_parent_scope(node: FieldNode, encoding: type[UserEnum]) -> Union[Node, None]:
