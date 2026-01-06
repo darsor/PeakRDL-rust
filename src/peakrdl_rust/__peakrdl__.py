@@ -93,4 +93,6 @@ class Exporter(ExporterSubcommandPlugin):
             crate_name=options.crate_name,
             crate_version=options.crate_version,
             no_fmt=options.no_fmt,
+            byte_endian=options.byte_endian,
+            word_endian=options.word_endian,
         )
