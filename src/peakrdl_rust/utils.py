@@ -125,7 +125,7 @@ def enum_parent_scope(node: FieldNode, encoding: type[UserEnum]) -> Union[Node, 
 
 
 def crate_module_path(node: Node, escaped: bool = False) -> list[str]:
-    """Get a list of the nested modules (under crate::components) under
+    """Get a list of the nested modules (under components::) under
     which this node's type is defined."""
     parent = parent_scope(node)
     assert parent is not None

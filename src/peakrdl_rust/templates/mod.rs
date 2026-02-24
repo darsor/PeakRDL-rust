@@ -1,5 +1,4 @@
-//! Control/Status Register crate generated with PeakRDL-rust
-#![no_std]
+//! Control/Status Registers generated with PeakRDL-rust
 #![allow(clippy::cast_lossless)]
 #![allow(clippy::cast_possible_wrap)]
 #![allow(clippy::cast_sign_loss)]
@@ -11,15 +10,8 @@
 #![allow(clippy::trivially_copy_pass_by_ref)]
 #![allow(clippy::unnecessary_cast)]
 
-pub mod access;
 #[cfg(not(doctest))]
 pub mod components;
-pub mod encode;
-{% if ctx.has_fixedpoint %}
-pub mod fixedpoint;
-{% endif %}
-pub mod mem;
-pub mod reg;
 
 {% for top_node in ctx.top_nodes %}
 #[cfg(not(doctest))]

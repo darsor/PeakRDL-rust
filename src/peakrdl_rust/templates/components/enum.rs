@@ -1,4 +1,4 @@
-{% import 'src/components/macros.jinja2' as macros %}
+{% import 'components/macros.jinja2' as macros %}
 //! {{ctx.module_comment}}
 
 {{macros.includes(ctx)}}
@@ -20,12 +20,12 @@ impl {{ctx.type_name|kw_filter}} {
     ///
     /// # Errors
     /// Returns an error if the bit pattern does not match any encoded variants.
-    pub const fn from_bits(bits: {{ctx.primitive}}) -> Result<Self, crate::encode::UnknownVariant<{{ctx.primitive}}>> {
+    pub const fn from_bits(bits: {{ctx.primitive}}) -> Result<Self, peakrdl_rust::encode::UnknownVariant<{{ctx.primitive}}>> {
         match bits {
             {% for variant in ctx.variants %}
             {{variant.value}} => Ok(Self::{{variant.name|kw_filter}}),
             {% endfor %}
-            bits => Err(crate::encode::UnknownVariant::new(bits)),
+            bits => Err(peakrdl_rust::encode::UnknownVariant::new(bits)),
         }
     }
 

@@ -2,7 +2,7 @@ Examples
 ========
 
 This section includes an example RDL file, the auto-generated ``cargo doc``
-documentation for the exported crate, and example usage.
+documentation for the exported module, and example usage.
 
 .. contents:: Contents
       :local:
@@ -11,13 +11,16 @@ documentation for the exported crate, and example usage.
 Example RDL
 -----------
 
-File: :download:`turboencabulator.rdl <examples/turboencabulator.rdl>`.
+Files: :download:`turboencabulator.rdl <../tests/rdl_src/turboencabulator.rdl>`
+and :download:`udps.rdl <../src/peakrdl_rust/udps/udps.rdl>`.
 
-Exported with ``peakrdl rust -o output/ --crate-name turboencabulator udps.rdl turboencabulator.rdl``
+Exported with ``peakrdl rust -o output/ udps.rdl turboencabulator.rdl``
 
-Cargo docs for the exported turboencabulator crate can be viewed
+Cargo docs for the exported turboencabulator module can be viewed
 here: `turboencabulator docs <examples/turboencabulator/index.html>`_.
 Click on the source button in the docs to see the generated source for any module.
+
+Note that the generated code relies on the `peakrdl-rust <https://crates.io/crates/peakrdl-rust>`__ crate on crates.io.
 
 
 Example Usage
@@ -32,7 +35,7 @@ can typically be omitted in normal use.
 Reading a Register
 ^^^^^^^^^^^^^^^^^^
 
-.. literalinclude:: examples/turboencabulator.rs
+.. literalinclude:: ../tests/rdl_src/turboencabulator.rs
    :language: rust
    :start-after: test_read() {
    :end-before: } // test-read
@@ -43,13 +46,13 @@ Links:
 * Docs for `registers <output.html#registers>`__
 * Cargo docs for the top-level `TurboEncab <examples/turboencabulator/components/turbo_encab/index.html>`__ addrmap type
 * Cargo docs for the `Status <examples/turboencabulator/components/turbo_encab/status/struct.Status.html>`__ register type
-* Cargo docs for the `Reg <examples/turboencabulator/reg/struct.Reg.html>`__ type
-* Cargo docs for the `access <examples/turboencabulator/access/index.html>`__ module
+* Cargo docs for the `Reg <examples/peakrdl_rust/reg/struct.Reg.html>`__ type
+* Cargo docs for the `access <examples/peakrdl_rust/access/index.html>`__ module
 
 Writing a Register
 ^^^^^^^^^^^^^^^^^^
 
-.. literalinclude:: examples/turboencabulator.rs
+.. literalinclude:: ../tests/rdl_src/turboencabulator.rs
    :language: rust
    :start-after: test_write() {
    :end-before: } // test-write
@@ -60,13 +63,13 @@ Links:
 * Docs for `registers <output.html#registers>`__
 * Cargo docs for the top-level `TurboEncab <examples/turboencabulator/components/turbo_encab/index.html>`__ addrmap type
 * Cargo docs for the `Ctrl <examples/turboencabulator/components/turbo_encab/ctrl/struct.Ctrl.html>`__ register type
-* Cargo docs for the `Reg <examples/turboencabulator/reg/struct.Reg.html>`__ type
-* Cargo docs for the `access <examples/turboencabulator/access/index.html>`__ module
+* Cargo docs for the `Reg <examples/peakrdl_rust/reg/struct.Reg.html>`__ type
+* Cargo docs for the `access <examples/peakrdl_rust/access/index.html>`__ module
 
 Modifying a Register
 ^^^^^^^^^^^^^^^^^^^^
 
-.. literalinclude:: examples/turboencabulator.rs
+.. literalinclude:: ../tests/rdl_src/turboencabulator.rs
    :language: rust
    :start-after: // test-modify-example
    :end-before: } // test-modify
@@ -76,13 +79,13 @@ Links:
 
 * Cargo docs for the top-level `TurboEncab <examples/turboencabulator/components/turbo_encab/index.html>`__ addrmap type
 * Cargo docs for the `Ctrl <examples/turboencabulator/components/turbo_encab/ctrl/struct.Ctrl.html>`__ register type
-* Cargo docs for the `Reg <examples/turboencabulator/reg/struct.Reg.html>`__ type
-* Cargo docs for the `access <examples/turboencabulator/access/index.html>`__ module
+* Cargo docs for the `Reg <examples/peakrdl_rust/reg/struct.Reg.html>`__ type
+* Cargo docs for the `access <examples/peakrdl_rust/access/index.html>`__ module
 
 Arrays of Components
 ^^^^^^^^^^^^^^^^^^^^
 
-.. literalinclude:: examples/turboencabulator.rs
+.. literalinclude:: ../tests/rdl_src/turboencabulator.rs
    :language: rust
    :start-after: test_array() {
    :end-before: } // test-array
@@ -101,7 +104,7 @@ The Turbo Encabulator SystemRDL contains a ``state`` field with a defined encodi
 
 .. rst-class:: scrollable-code
 
-.. literalinclude:: examples/turboencabulator.rdl
+.. literalinclude:: ../tests/rdl_src/turboencabulator.rdl
    :language: systemrdl
    :start-after: // start-enum-example
    :end-before: // end-enum-example
@@ -110,7 +113,7 @@ The Turbo Encabulator SystemRDL contains a ``state`` field with a defined encodi
 PeakRDL-rust translates this encoding into an ``enum`` type that can be
 used as follows:
 
-.. literalinclude:: examples/turboencabulator.rs
+.. literalinclude:: ../tests/rdl_src/turboencabulator.rs
    :language: rust
    :start-after: test_enum() {
    :end-before: } // test-enum
@@ -120,14 +123,14 @@ Links:
 
 * Cargo docs for the `Status <examples/turboencabulator/components/turbo_encab/grammeter/status/struct.Status.html>`__ register type
 * Cargo docs for `GrammeterStateE <examples/turboencabulator/components/turbo_encab/grammeter/status/state/enum.GrammeterStateE.html>`__ field type
-* Cargo docs for the `UnknownVariant <examples/turboencabulator/encode/struct.UnknownVariant.html>`__ type
+* Cargo docs for the `UnknownVariant <examples/peakrdl_rust/encode/struct.UnknownVariant.html>`__ type
 
 Accessing a Memory
 ^^^^^^^^^^^^^^^^^^
 
 SystemRDL memories implement the ``Memory`` trait.
 
-.. literalinclude:: examples/turboencabulator.rs
+.. literalinclude:: ../tests/rdl_src/turboencabulator.rs
    :language: rust
    :start-after: test_memory() {
    :end-before: } // test-memory
@@ -138,14 +141,14 @@ Virtual registers instantiated within memories are fully supported.
 Links:
 
 * Cargo docs for the `Measurements <examples/turboencabulator/components/turbo_encab/measurements/struct.Measurements.html>`__ memory type
-* Cargo docs for the `Memory <examples/turboencabulator/mem/trait.Memory.html>`__ trait
-* Cargo docs for the `MemEntry <examples/turboencabulator/mem/struct.MemEntry.html>`__ type
-* Cargo docs for the `access <examples/turboencabulator/access/index.html>`__ module
+* Cargo docs for the `Memory <examples/peakrdl_rust/mem/trait.Memory.html>`__ trait
+* Cargo docs for the `MemEntry <examples/peakrdl_rust/mem/struct.MemEntry.html>`__ type
+* Cargo docs for the `access <examples/peakrdl_rust/access/index.html>`__ module
 
 Fixedpoint Fields
 ^^^^^^^^^^^^^^^^^
 
-.. literalinclude:: examples/turboencabulator.rs
+.. literalinclude:: ../tests/rdl_src/turboencabulator.rs
    :language: rust
    :start-after: test_fixedpoint() {
    :end-before: } // test-fixedpoint
@@ -154,5 +157,5 @@ Fixedpoint Fields
 Links:
 
 * Docs for `Fixed-Point Fields <udps/fixedpoint.html>`__
-* Cargo docs for the `FixedPoint <examples/turboencabulator/fixedpoint/struct.FixedPoint.html>`__ type
+* Cargo docs for the `FixedPoint <examples/peakrdl_rust/fixedpoint/struct.FixedPoint.html>`__ type
 * Cargo docs for the `Status <examples/turboencabulator/components/turbo_encab/grammeter/status/index.html>`__ register type

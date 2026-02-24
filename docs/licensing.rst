@@ -34,7 +34,9 @@ The following are exempt and are free to use with no restrictions:
     IP, whatever.
 *   Any code snippets in this documentation can be freely copy/pasted. These are
     examples that are intended for this purpose.
-*   The provided ``upds.rdl`` file can be download and used freely.
+*   The provided ``upds.rdl`` file can be downloaded and used freely.
+*   The ``peakrdl-rust`` crate that the generated code uses is licensed
+    under the dual MIT/Apache 2.0 license.
 
 
 Can I use this as part of my company's internally developed tools?

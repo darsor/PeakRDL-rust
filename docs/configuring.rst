@@ -12,27 +12,10 @@ For example:
 .. code-block:: toml
 
     [rust]
-    crate_name = "my_registers"
-    crate_version = "0.1.0"
     force = true
-    no_fmt = false
+    fmt = true
     byte_endian = "big"
     word_endian = "little"
-
-
-.. data:: crate_name
-
-    Specify the name of the generated Rust crate or module.
-
-    If not provided, the crate name will be derived from the top-level
-    SystemRDL component name using Rust naming conventions.
-
-
-.. data:: crate_version
-
-    Semantic version of the generated crate.
-
-    Default: ``0.1.0``
 
 
 .. data:: force
@@ -42,10 +25,9 @@ For example:
     Default: ``false``
 
 
-.. data:: no_fmt
+.. data:: fmt
 
-    If true, don't attempt to format the generated rust code using
-    ``cargo fmt``.
+    If true, attempt to format the generated rust code using ``rustfmt``.
 
     Default: ``false``
 

@@ -120,7 +120,7 @@ class FieldInst(Instantiation):
 class Addrmap(Component):
     """Addrmap or Regfile component, defined in its own Rust module."""
 
-    template: ClassVar[str] = "src/components/addrmap.rs"
+    template: ClassVar[str] = "components/addrmap.rs"
 
     registers: list[RegisterInst]
     submaps: list[SubmapInst]
@@ -132,7 +132,7 @@ class Addrmap(Component):
 class Memory(Component):
     """Memory component, defined in its own Rust module."""
 
-    template: ClassVar[str] = "src/components/memory.rs"
+    template: ClassVar[str] = "components/memory.rs"
 
     mementries: int
     memwidth: int
@@ -140,19 +140,21 @@ class Memory(Component):
     registers: list[RegisterInst]
     size: int
     access: str  # "R", "W", or "RW"
+    endian: str
 
 
 @dataclass
 class Register(Component):
     """Register component, defined in its own Rust module"""
 
-    template: ClassVar[str] = "src/components/register.rs"
+    template: ClassVar[str] = "components/register.rs"
 
     regwidth: int
     accesswidth: int
     reset_val: int
     fields: list[FieldInst]
     has_sw_readable: bool
+    endian: str
 
 
 @dataclass
@@ -168,15 +170,16 @@ class EnumVariant:
 class Enum(Component):
     """User-defined enum type used to encode a field"""
 
-    template: ClassVar[str] = "src/components/enum.rs"
+    template: ClassVar[str] = "components/enum.rs"
 
     primitive: str  # which unsigned rust type is used to represent
     variants: list[EnumVariant]
 
 
 class ContextScanner(RDLListener):
-    def __init__(self, top_nodes: list[AddrmapNode]) -> None:
+    def __init__(self, top_nodes: list[AddrmapNode], endian: str) -> None:
         self.top_nodes = top_nodes
+        self.endian = endian
         self.top_component_modules: list[str] = []
         self.components: dict[Path, Component] = {}
         self.msg = top_nodes[0].env.msg
@@ -200,7 +203,7 @@ class ContextScanner(RDLListener):
     def file_from_modules(self, module_names: list[str]) -> Path:
         """Construct a filename from a list of module names in the hierarchy"""
         escaped_names = list(map(kw_filter_path, module_names))
-        return Path("src") / "components" / Path(*escaped_names).with_suffix(".rs")
+        return "components" / Path(*escaped_names).with_suffix(".rs")
 
     def enter_addrmap_or_regfile_or_memory(
         self, node: Union[AddrmapNode, RegfileNode, MemNode]
@@ -338,6 +341,7 @@ class ContextScanner(RDLListener):
                 registers=registers,
                 size=node.size,
                 access=access,
+                endian=self.endian,
             )
         return WalkerAction.Continue
 
@@ -397,7 +401,8 @@ class ContextScanner(RDLListener):
                     # specified (or unspecified default 0) reset value is not a valid
                     # encoding
                     reset_val = (
-                        f"Err(crate::encode::UnknownVariant::new({reset_val_int}))"
+                        "Err(peakrdl_rust::encode::UnknownVariant"
+                        f"::new({reset_val_int}))"
                     )
             elif primitive == "bool":
                 reset_val = "true" if reset_val_int else "false"
@@ -443,6 +448,7 @@ class ContextScanner(RDLListener):
             reset_val=reg_reset_val,
             fields=fields,
             has_sw_readable=node.has_sw_readable,
+            endian=self.endian,
         )
 
         return WalkerAction.Continue

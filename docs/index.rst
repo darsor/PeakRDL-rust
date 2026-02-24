@@ -37,7 +37,7 @@ The easiest way to use PeakRDL-rust is via the `PeakRDL command line tool <https
     # Install the command line tool
     python3 -m pip install peakrdl peakrdl-rust
 
-    # Generate a Rust crate in the example/ directory
+    # Generate a Rust module in the example/ directory
     peakrdl rust example.rdl -o example/
 
 Using the generated Rust code, you can access your device registers in a type-safe manner.
@@ -54,7 +54,7 @@ For example, the tool transforms this SystemRDL:
         } my_reg;
     };
 
-Into a Rust crate you can use like:
+Into a Rust module you can use like:
 
 .. code-block:: rust
 

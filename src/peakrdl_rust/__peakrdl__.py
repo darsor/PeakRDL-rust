@@ -18,8 +18,6 @@ class Exporter(ExporterSubcommandPlugin):
     udp_definitions = ALL_UDPS
 
     cfg_schema = {
-        "crate_name": schema.String(),
-        "crate_version": schema.String(),
         "force": schema.Boolean(),
         "no_fmt": schema.Boolean(),
         "byte_endian": schema.Choice(["big", "little"]),
@@ -27,25 +25,6 @@ class Exporter(ExporterSubcommandPlugin):
     }
 
     def add_exporter_arguments(self, arg_group: "argparse._ActionsContainer") -> None:
-        arg_group.add_argument(
-            "-n",
-            "--crate-name",
-            help="""
-            Name of the generated crate. Should be snake_case. Derived from the root
-            addrmap if not given. The rust crate is generated under a directory of
-            this name.
-            """,
-        )
-
-        arg_group.add_argument(
-            "-v",
-            "--crate-version",
-            default="0.1.0",
-            help="""
-            Semantic version of the generated crate. Default is "0.1.0".
-            """,
-        )
-
         arg_group.add_argument(
             "--force",
             action="store_true",
@@ -56,11 +35,11 @@ class Exporter(ExporterSubcommandPlugin):
         )
 
         arg_group.add_argument(
-            "--no-fmt",
+            "--fmt",
             action="store_true",
             default=False,
             help="""
-            Don't attempt to format the generated rust code using `cargo fmt`.
+            Attempt to format the generated rust code using `cargo fmt`.
             """,
         )
 
@@ -90,9 +69,7 @@ class Exporter(ExporterSubcommandPlugin):
             top_node,
             path=options.output,
             force=options.force,
-            crate_name=options.crate_name,
-            crate_version=options.crate_version,
-            no_fmt=options.no_fmt,
+            fmt=options.fmt,
             byte_endian=options.byte_endian,
             word_endian=options.word_endian,
         )

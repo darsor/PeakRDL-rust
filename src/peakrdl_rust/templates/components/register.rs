@@ -1,11 +1,11 @@
-{% import 'src/components/macros.jinja2' as macros %}
+{% import 'components/macros.jinja2' as macros %}
 //! {{ctx.module_comment}}
 
 {{macros.includes(ctx)}}
 
 {% for field in ctx.fields %}
     {% if field.fracwidth is not none %}
-pub type {{field.type_name}}FixedPoint = crate::fixedpoint::FixedPoint<{{field.primitive}}, {{field.intwidth}}, {{field.fracwidth}}>;
+pub type {{field.type_name}}FixedPoint = peakrdl_rust::fixedpoint::FixedPoint<{{field.primitive}}, {{field.intwidth}}, {{field.fracwidth}}>;
     {% endif %}
 {% endfor %}
 
@@ -23,9 +23,10 @@ impl core::default::Default for {{ctx.type_name|kw_filter}} {
     }
 }
 
-impl crate::reg::Register for {{ctx.type_name|kw_filter}} {
+impl peakrdl_rust::reg::Register for {{ctx.type_name|kw_filter}} {
     type Regwidth = u{{ctx.regwidth}};
     type Accesswidth = u{{ctx.accesswidth}};
+    type Endian = peakrdl_rust::endian::{{ctx.endian}};
 
     unsafe fn from_raw(val: Self::Regwidth) -> Self {
         Self(val)
@@ -53,7 +54,7 @@ impl {{ctx.type_name|kw_filter}} {
     {% if "R" in field.access %}
     {{field.comment | indent()}}
     {% set return_type = field.encoding if field.encoding else field.primitive %}
-    {% set return_type = "Result<" ~ return_type ~ ", crate::encode::UnknownVariant<" ~ field.primitive ~">>" if not field.exhaustive else return_type %}
+    {% set return_type = "Result<" ~ return_type ~ ", peakrdl_rust::encode::UnknownVariant<" ~ field.primitive ~">>" if not field.exhaustive else return_type %}
     #[inline(always)]
     {% if return_type.startswith("Result<") %}
     #[allow(clippy::missing_errors_doc)]

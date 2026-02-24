@@ -1,4 +1,4 @@
-use basic::Basic;
+use peakrdl_rust_test::Basic;
 
 /// A block of memory used for simulating hardware registers.
 ///

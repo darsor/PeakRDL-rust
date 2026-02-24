@@ -13,7 +13,7 @@
 /// Basic usage with different bit configurations:
 ///
 /// ```
-/// # use {{ctx.crate_name}}::fixedpoint::FixedPoint;
+/// # use peakrdl_rust::fixedpoint::FixedPoint;
 /// // 8-bit unsigned with 4 integer and 4 fractional bits
 /// let fp = FixedPoint::<u8, 4, 4>::from_f64(2.25);
 /// assert_eq!(fp.to_f64(), 2.25);
@@ -26,7 +26,7 @@
 /// The total width is calculated as I + F:
 ///
 /// ```
-/// # use {{ctx.crate_name}}::fixedpoint::FixedPoint;
+/// # use peakrdl_rust::fixedpoint::FixedPoint;
 /// assert_eq!(FixedPoint::<u8, 8, 0>::width(), 8);
 /// assert_eq!(FixedPoint::<i8, 7, -3>::width(), 4);
 /// ```
@@ -69,7 +69,7 @@ where
     /// # Examples
     ///
     /// ```
-    /// # use {{ctx.crate_name}}::fixedpoint::FixedPoint;
+    /// # use peakrdl_rust::fixedpoint::FixedPoint;
     /// let fp = FixedPoint::<u8, 4, 4>::from_bits(16); // represents 1.0
     /// assert_eq!(fp.to_f64(), 1.0);
     /// ```
@@ -77,12 +77,12 @@ where
     /// The following should not compile:
     ///
     /// ```compile_fail
-    /// # use {{ctx.crate_name}}::fixedpoint::FixedPoint;
+    /// # use peakrdl_rust::fixedpoint::FixedPoint;
     /// FixedPoint::<u8, 5, 4>::from_bits(0); // u8 not large enough
     /// ```
     ///
     /// ```compile_fail
-    /// # use {{ctx.crate_name}}::fixedpoint::FixedPoint;
+    /// # use peakrdl_rust::fixedpoint::FixedPoint;
     /// FixedPoint::<i8, -5, 4>::from_bits(0); // invalid negative width
     /// ```
     #[must_use]
@@ -106,7 +106,7 @@ where
     /// # Examples
     ///
     /// ```
-    /// # use {{ctx.crate_name}}::fixedpoint::FixedPoint;
+    /// # use peakrdl_rust::fixedpoint::FixedPoint;
     /// let fp = FixedPoint::<u16, 8, 2>::from_f64(2.25);
     /// assert_eq!(fp.to_bits(), 9);
     /// ```
@@ -120,7 +120,7 @@ where
     /// # Examples
     ///
     /// ```
-    /// # use {{ctx.crate_name}}::fixedpoint::FixedPoint;
+    /// # use peakrdl_rust::fixedpoint::FixedPoint;
     /// assert_eq!(FixedPoint::<u8, 10, -4>::intwidth(), 10);
     /// ```
     #[must_use]
@@ -133,7 +133,7 @@ where
     /// # Examples
     ///
     /// ```
-    /// # use {{ctx.crate_name}}::fixedpoint::FixedPoint;
+    /// # use peakrdl_rust::fixedpoint::FixedPoint;
     /// assert_eq!(FixedPoint::<u8, 10, -4>::fracwidth(), -4);
     /// ```
     #[must_use]
@@ -146,7 +146,7 @@ where
     /// # Examples
     ///
     /// ```
-    /// # use {{ctx.crate_name}}::fixedpoint::FixedPoint;
+    /// # use peakrdl_rust::fixedpoint::FixedPoint;
     /// assert_eq!(FixedPoint::<u8, 8, 0>::width(), 8);
     /// assert_eq!(FixedPoint::<i8, 7, -3>::width(), 4);
     /// ```
@@ -160,7 +160,7 @@ where
     /// # Examples
     ///
     /// ```
-    /// # use {{ctx.crate_name}}::fixedpoint::FixedPoint;
+    /// # use peakrdl_rust::fixedpoint::FixedPoint;
     /// assert_eq!(FixedPoint::<u16, 8, 2>::is_signed(), false);
     /// assert_eq!(FixedPoint::<i16, 8, 2>::is_signed(), true);
     /// ```
@@ -174,7 +174,7 @@ where
     /// # Examples
     ///
     /// ```
-    /// # use {{ctx.crate_name}}::fixedpoint::FixedPoint;
+    /// # use peakrdl_rust::fixedpoint::FixedPoint;
     /// let zero = FixedPoint::<u8, 4, 4>::zero();
     /// assert_eq!(zero.to_f64(), 0.0);
     /// ```
@@ -200,7 +200,7 @@ where
     /// # Examples
     ///
     /// ```
-    /// # use {{ctx.crate_name}}::fixedpoint::FixedPoint;
+    /// # use peakrdl_rust::fixedpoint::FixedPoint;
     /// assert_eq!(FixedPoint::<u8, 2, 6>::max_value().to_f32(), 3.984375);
     /// assert_eq!(FixedPoint::<i8, 3, 4>::max_value().to_f32(), 3.9375);
     /// ```
@@ -214,7 +214,7 @@ where
     /// # Examples
     ///
     /// ```
-    /// # use {{ctx.crate_name}}::fixedpoint::FixedPoint;
+    /// # use peakrdl_rust::fixedpoint::FixedPoint;
     /// assert_eq!(FixedPoint::<u8, 2, 6>::min_value().to_f32(), 0.0);
     /// assert_eq!(FixedPoint::<i8, 3, 4>::min_value().to_f32(), -4.0);
     /// ```
@@ -228,7 +228,7 @@ where
     /// # Examples
     ///
     /// ```
-    /// # use {{ctx.crate_name}}::fixedpoint::FixedPoint;
+    /// # use peakrdl_rust::fixedpoint::FixedPoint;
     /// let res = FixedPoint::<u8, 4, 4>::resolution();
     /// assert_eq!(res.to_f64(), 0.0625); // 2^(-4)
     /// ```
@@ -245,7 +245,7 @@ where
     /// # Examples
     ///
     /// ```
-    /// # use {{ctx.crate_name}}::fixedpoint::FixedPoint;
+    /// # use peakrdl_rust::fixedpoint::FixedPoint;
     /// // 2.3 gets quantized to the nearest representable value
     /// let quantized = FixedPoint::<u8, 4, 4>::quantize(2.3);
     /// assert_eq!(quantized, 2.3125);
@@ -271,7 +271,7 @@ where
     /// # Examples
     ///
     /// ```
-    /// # use {{ctx.crate_name}}::fixedpoint::FixedPoint;
+    /// # use peakrdl_rust::fixedpoint::FixedPoint;
     /// let fp = FixedPoint::<u8, 4, 4>::from_f32(1.5);
     /// assert_eq!(fp.to_bits(), 24);
     ///
@@ -300,7 +300,7 @@ where
     /// # Examples
     ///
     /// ```
-    /// # use {{ctx.crate_name}}::fixedpoint::FixedPoint;
+    /// # use peakrdl_rust::fixedpoint::FixedPoint;
     /// let fp = FixedPoint::<u16, 8, 2>::from_f64(2.25);
     /// assert_eq!(fp.to_bits(), 9);
     ///
@@ -349,7 +349,7 @@ where
     /// # Examples
     ///
     /// ```
-    /// # use {{ctx.crate_name}}::fixedpoint::FixedPoint;
+    /// # use peakrdl_rust::fixedpoint::FixedPoint;
     /// assert_eq!(FixedPoint::<u16, 8, 2>::from_bits(8).to_f32(), 2.0);
     /// assert_eq!(FixedPoint::<u16, 8, 2>::from_bits(9).to_f32(), 2.25);
     /// assert_eq!(FixedPoint::<i16, 8, 4>::from_bits(-24).to_f32(), -1.5);
@@ -370,7 +370,7 @@ where
     /// # Examples
     ///
     /// ```
-    /// # use {{ctx.crate_name}}::fixedpoint::FixedPoint;
+    /// # use peakrdl_rust::fixedpoint::FixedPoint;
     /// assert_eq!(FixedPoint::<u16, 8, 2>::from_bits(8).to_f64(), 2.0);
     /// assert_eq!(FixedPoint::<u16, 8, 2>::from_bits(9).to_f64(), 2.25);
     /// assert_eq!(FixedPoint::<i16, 8, 4>::from_bits(-24).to_f64(), -1.5);
@@ -413,7 +413,7 @@ where
 /// # Examples
 ///
 /// ```
-/// # use {{ctx.crate_name}}::fixedpoint::FixedPoint;
+/// # use peakrdl_rust::fixedpoint::FixedPoint;
 /// let fp: FixedPoint<u8, 4, 4> = 2.5.into();
 /// assert_eq!(fp.to_f64(), 2.5);
 /// ```

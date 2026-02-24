@@ -1,7 +1,5 @@
 //! Marker types for read/write access
 
-trait Sealed {}
-
 #[allow(private_bounds)]
 pub trait Access: Sealed + Copy {}
 
@@ -21,6 +19,7 @@ impl Access for R {}
 impl Access for W {}
 impl Access for RW {}
 
+trait Sealed {}
 impl Sealed for R {}
 impl Sealed for W {}
 impl Sealed for RW {}

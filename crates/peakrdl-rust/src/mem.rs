@@ -1,7 +1,14 @@
 //! Memory abstraction used to read, write, and iterate over memory entries
 
-use crate::access::{self, Access};
-use core::marker::PhantomData;
+use crate::{
+    access::{Access, Read, Write},
+    endian::Endian,
+};
+use core::{
+    iter::{ExactSizeIterator, FusedIterator},
+    marker::PhantomData,
+    ops::{Bound, RangeBounds},
+};
 use num_traits::PrimInt;
 
 /// Behaviors common to all SystemRDL memories
@@ -9,6 +16,7 @@ pub trait Memory: Sized {
     /// Primitive integer type used to represented a memory entry
     type Memwidth: PrimInt;
     type Access: Access;
+    type Endian: Endian;
 
     #[must_use]
     fn first_entry_ptr(&self) -> *mut Self::Memwidth;
@@ -23,7 +31,7 @@ pub trait Memory: Sized {
 
     /// Access the memory entry at a specific index. Panics if out of bounds.
     #[must_use]
-    fn index(&self, idx: usize) -> MemEntry<Self::Memwidth, Self::Access> {
+    fn index(&self, idx: usize) -> MemEntry<Self::Memwidth, Self::Access, Self::Endian> {
         if idx < self.num_entries() {
             unsafe { MemEntry::from_ptr(self.first_entry_ptr().wrapping_add(idx)) }
         } else {
@@ -39,17 +47,17 @@ pub trait Memory: Sized {
     #[must_use]
     fn slice(
         &self,
-        range: impl core::ops::RangeBounds<usize>,
-    ) -> MemEntryIter<Self::Memwidth, Self::Access> {
+        range: impl RangeBounds<usize>,
+    ) -> MemEntryIter<Self::Memwidth, Self::Access, Self::Endian> {
         let low_idx = match range.start_bound() {
-            core::ops::Bound::Included(idx) => *idx,
-            core::ops::Bound::Excluded(idx) => *idx + 1,
-            core::ops::Bound::Unbounded => 0,
+            Bound::Included(idx) => *idx,
+            Bound::Excluded(idx) => *idx + 1,
+            Bound::Unbounded => 0,
         };
         let high_idx = match range.end_bound() {
-            core::ops::Bound::Included(idx) => *idx,
-            core::ops::Bound::Excluded(idx) => *idx - 1,
-            core::ops::Bound::Unbounded => self.num_entries() - 1,
+            Bound::Included(idx) => *idx,
+            Bound::Excluded(idx) => *idx - 1,
+            Bound::Unbounded => self.num_entries() - 1,
         };
         let num_entries = high_idx - low_idx + 1;
         MemEntryIter {
@@ -60,28 +68,30 @@ pub trait Memory: Sized {
 
     /// Iterate over all memory entries
     #[must_use]
-    fn iter(&self) -> MemEntryIter<Self::Memwidth, Self::Access> {
+    fn iter(&self) -> MemEntryIter<Self::Memwidth, Self::Access, Self::Endian> {
         self.slice(..)
     }
 }
 
 /// Representation of a single memory entry
 #[derive(Copy, Clone, PartialEq, Eq, Hash, Debug)]
-pub struct MemEntry<T: PrimInt, A: Access> {
+pub struct MemEntry<T: PrimInt, A: Access, E: Endian> {
     ptr: *mut T,
-    phantom: PhantomData<A>,
+    phantom_access: PhantomData<A>,
+    phantom_endian: PhantomData<E>,
 }
 
-impl<T: PrimInt, A: Access> MemEntry<T, A> {
+impl<T: PrimInt, A: Access, E: Endian> MemEntry<T, A, E> {
     /// # Safety
     ///
     /// The caller must guarantee that the provided address points to a
-    /// hardware memory entry of size `T` with access `A`.
+    /// hardware memory entry of size `T` with access `A` and endianness `E`.
     #[must_use]
     pub const unsafe fn from_ptr(ptr: *mut T) -> Self {
         Self {
             ptr,
-            phantom: PhantomData,
+            phantom_access: PhantomData,
+            phantom_endian: PhantomData,
         }
     }
 
@@ -91,35 +101,35 @@ impl<T: PrimInt, A: Access> MemEntry<T, A> {
     }
 }
 
-impl<T: PrimInt, A: access::Read> MemEntry<T, A> {
+impl<T: PrimInt, A: Read, E: Endian> MemEntry<T, A, E> {
     /// Read the value of the hardware memory entry.
     #[must_use]
     pub fn read(&self) -> T {
         // SAFETY: MemEntry can only be constructed through from_ptr(),
         // which means the user has guaranteed the address points to
         // a suitable hardware memory.
-        T::from_{{ctx.byte_endian}}(unsafe { self.ptr.read_volatile() })
+        E::from_register_endian(unsafe { self.ptr.read_volatile() })
     }
 }
 
-impl<T: PrimInt, A: access::Write> MemEntry<T, A> {
+impl<T: PrimInt, A: Write, E: Endian> MemEntry<T, A, E> {
     /// Write the provided value to the hardware memory entry.
     pub fn write(&mut self, value: T) {
         // SAFETY: MemEntry can only be constructed through from_ptr(),
         // which means the user has guaranteed the address points to
         // a suitable hardware memory.
-        unsafe { self.ptr.write_volatile(value.to_{{ctx.byte_endian}}()) }
+        unsafe { self.ptr.write_volatile(E::to_register_endian(value)) }
     }
 }
 
 /// Iterator over memory entries
-pub struct MemEntryIter<T: PrimInt, A: Access> {
-    next: MemEntry<T, A>,
+pub struct MemEntryIter<T: PrimInt, A: Access, E: Endian> {
+    next: MemEntry<T, A, E>,
     remaining: usize,
 }
 
-impl<T: PrimInt, A: Access> Iterator for MemEntryIter<T, A> {
-    type Item = MemEntry<T, A>;
+impl<T: PrimInt, A: Access, E: Endian> Iterator for MemEntryIter<T, A, E> {
+    type Item = MemEntry<T, A, E>;
 
     fn next(&mut self) -> Option<Self::Item> {
         if self.remaining == 0 {
@@ -136,7 +146,7 @@ impl<T: PrimInt, A: Access> Iterator for MemEntryIter<T, A> {
     }
 }
 
-impl<T: PrimInt, A: Access> DoubleEndedIterator for MemEntryIter<T, A> {
+impl<T: PrimInt, A: Access, E: Endian> DoubleEndedIterator for MemEntryIter<T, A, E> {
     fn next_back(&mut self) -> Option<Self::Item> {
         if self.remaining == 0 {
             None
@@ -151,5 +161,5 @@ impl<T: PrimInt, A: Access> DoubleEndedIterator for MemEntryIter<T, A> {
     }
 }
 
-impl<T: PrimInt, A: Access> core::iter::ExactSizeIterator for MemEntryIter<T, A> {}
-impl<T: PrimInt, A: Access> core::iter::FusedIterator for MemEntryIter<T, A> {}
+impl<T: PrimInt, A: Access, E: Endian> ExactSizeIterator for MemEntryIter<T, A, E> {}
+impl<T: PrimInt, A: Access, E: Endian> FusedIterator for MemEntryIter<T, A, E> {}
