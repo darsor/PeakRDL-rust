@@ -5,7 +5,7 @@ from typing import Any, Union
 from systemrdl.node import AddrmapNode, RootNode
 
 from .design_state import DesignState
-from .generator import write_crate
+from .generator import write_module
 
 
 class RustExporter:
@@ -69,22 +69,11 @@ class RustExporter:
             else:
                 ds.output_dir.unlink()
 
-        # Write crate modules
-        write_crate(ds)
+        # Write module files
+        generated_files = write_module(ds)
 
-        print(f"Generated Rust module at {ds.output_dir}")
+        print(f"Generated Rust module at {ds.output_dir / 'mod.rs'}")
 
-        # TODO: verify this works. May need to call rustfmt directly.
         if ds.fmt:
-            result = subprocess.run(["cargo", "fmt"], cwd=ds.output_dir)
-            if result.returncode == 127:
-                print(
-                    "Warning: failed to run `cargo fmt`. Install cargo "
-                    "(https://rustup.rs/) or silence this warning by removing "
-                    "the `--fmt` flag."
-                )
-            elif result.returncode != 0:
-                print(
-                    "Failed to format files. Remove the '--fmt' flag "
-                    "to silence this warning."
-                )
+            cmd = ["rustfmt"] + list(map(str, generated_files))
+            subprocess.check_call(cmd)

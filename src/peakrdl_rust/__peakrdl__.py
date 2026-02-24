@@ -39,7 +39,7 @@ class Exporter(ExporterSubcommandPlugin):
             action="store_true",
             default=False,
             help="""
-            Attempt to format the generated rust code using `cargo fmt`.
+            Attempt to format the generated rust code using `rustfmt`.
             """,
         )
 

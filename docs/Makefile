@@ -20,5 +20,5 @@ help:
 	@$(SPHINXBUILD) -M $@ "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
 
 examples:
-	cd .. && ./scripts/build_binary.sh
+	touch ../scripts/uv_wrapper.sh
 	make -C examples/

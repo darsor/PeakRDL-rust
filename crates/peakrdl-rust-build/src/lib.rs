@@ -69,7 +69,7 @@ pub struct Generator {
     out_dir: Option<PathBuf>,
     /// Overwrite the generated module directory if it already exists. Defaults to true.
     force: bool,
-    /// Attempt to format the generated rust code
+    /// Format the generated rust code using `rustfmt`.
     fmt: bool,
     /// Ordering of bytes within `accesswidth`-sized accesses to the register file.
     /// By default uses the `littleendian` and `bigendian` addrmap properties,
@@ -176,7 +176,7 @@ impl Generator {
         self
     }
 
-    /// Set to `true` to attempt to format the generated rust code using `rustfmt`.
+    /// Set to `true` to format the generated rust code using `rustfmt`.
     pub fn format_output(&mut self, format: bool) -> &mut Self {
         self.fmt = format;
         self
