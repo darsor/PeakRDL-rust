@@ -6,9 +6,6 @@ _build/
 *.pyc
 __pycache__/
 rust_docs/
-examples/turboencabulator/target
-examples/turboencabulator/src/generated
-examples/turboencabulator/tests
 
 # OS generated files
 .DS_Store

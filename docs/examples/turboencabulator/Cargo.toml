@@ -5,3 +5,6 @@ edition = "2024"
 
 [dependencies]
 peakrdl-rust = { path = "../../../crates/peakrdl-rust", features = ["fixedpoint"] }
+
+[build-dependencies]
+peakrdl-rust-build = { path = "../../../crates/peakrdl-rust-build", default-features = false }

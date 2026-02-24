@@ -12,13 +12,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Moved common traits/types to new `peakrdl-rust` crate dependency on [crates.io](https://crates.io/crates/peakrdl-rust).
 - No longer generates full Rust crate with Cargo.toml. Now only generates mod.rs and component files.
 - Generated code is now placed directly into the specified output directory, not in a new subfolder within the output directory.
-- The `force` configuration option will now delete the entire output directory, not just a subfolder within that directory.
+- The `--force` configuration option will now delete the entire output directory, not just a subfolder within that directory.
 - Formatting the generated code using rustfmt is now opt-in intead of opt-out.
 
 ### Added
 
 - Public `Register` trait with `from_raw` and `to_raw` functions.
 - Compile-time `peakrdl-rust` crate dependency version checks.
+- `peakrdl-rust-build` build-helper crate to run PeakRDL-rust in `build.rs`.
+- `--fmt` configuration option (replaces `--no-fmt`).
 
 ### Removed
 
