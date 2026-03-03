@@ -1,0 +1,79 @@
+name: Build Binaries
+
+on:
+  workflow_call:
+    outputs:
+      artifact-pattern:
+        description: "Pattern to pass to download-artifact to fetch all binary artifacts"
+        value: "binary-*"
+
+jobs:
+  build-binary:
+    name: ${{ matrix.target }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            target: linux-x86_64
+            asset_name: peakrdl-rust-linux-x86_64.tar.gz
+          - os: ubuntu-24.04-arm
+            target: linux-aarch64
+            asset_name: peakrdl-rust-linux-aarch64.tar.gz
+          - os: macos-15-intel
+            target: darwin-x86_64
+            asset_name: peakrdl-rust-darwin-x86_64.tar.gz
+          - os: macos-latest
+            target: darwin-aarch64
+            asset_name: peakrdl-rust-darwin-aarch64.tar.gz
+          - os: windows-latest
+            target: windows-x86_64
+            asset_name: peakrdl-rust-windows-x86_64.tar.gz
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          python-version: "3.12"
+          version: "0.9.2"
+          enable-cache: true
+
+      - name: Install dependencies and PyInstaller
+        run: |
+          uv sync --locked
+
+      - name: Build binary (Unix)
+        if: runner.os != 'Windows'
+        run: |
+          bash scripts/build_binary.sh
+
+      - name: Build binary (Windows)
+        if: runner.os == 'Windows'
+        run: pwsh scripts/build_binary.ps1
+        shell: pwsh
+
+      - name: Package as tar.gz (Unix)
+        if: runner.os != 'Windows'
+        run: |
+          tar -czf ${{ matrix.asset_name }} -C dist peakrdl-rust
+          sha256sum ${{ matrix.asset_name }} > ${{ matrix.asset_name }}.sha256
+
+      - name: Package as tar.gz (Windows)
+        if: runner.os == 'Windows'
+        run: |
+          tar -czf ${{ matrix.asset_name }} -C dist peakrdl-rust.exe
+          $hash = (Get-FileHash ${{ matrix.asset_name }} -Algorithm SHA256).Hash.ToLower()
+          "$hash  ${{ matrix.asset_name }}" | Out-File -Encoding ASCII ${{ matrix.asset_name }}.sha256
+        shell: pwsh
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: binary-${{ matrix.target }}
+          path: |
+            ${{ matrix.asset_name }}
+            ${{ matrix.asset_name }}.sha256
+          if-no-files-found: error
