@@ -1,4 +1,6 @@
-from . import utils
+from importlib.metadata import version
+
+from . import PEAKRDL_RUST_CRATE_MIN_VERSION, utils
 from .design_state import DesignState
 
 
@@ -6,6 +8,10 @@ def write_crate(ds: DesignState) -> None:
     # mod.rs
     mod_rs_path = ds.output_dir / "mod.rs"
     mod_rs_path.parent.mkdir(parents=True, exist_ok=True)
+    if PEAKRDL_RUST_CRATE_MIN_VERSION[0] == 0:
+        crate_max_version = (0, PEAKRDL_RUST_CRATE_MIN_VERSION[1] + 1, 0)
+    else:
+        crate_max_version = (PEAKRDL_RUST_CRATE_MIN_VERSION[0] + 1, 0, 0)
     context = {
         "top_nodes": [
             "::".join(
@@ -15,6 +21,9 @@ def write_crate(ds: DesignState) -> None:
             )
             for node in ds.top_nodes
         ],
+        "peakrdl_rust_version": version("peakrdl-rust"),
+        "crate_min_version": PEAKRDL_RUST_CRATE_MIN_VERSION,
+        "crate_max_version": crate_max_version,
     }
     with mod_rs_path.open("w") as f:
         template = ds.jj_env.get_template("mod.rs")

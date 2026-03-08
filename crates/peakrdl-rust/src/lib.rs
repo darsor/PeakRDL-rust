@@ -7,3 +7,4 @@ pub mod endian;
 pub mod fixedpoint;
 pub mod mem;
 pub mod reg;
+pub mod version;

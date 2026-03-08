@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Public `Register` trait with `from_raw` and `to_raw` functions.
+- Compile-time `peakrdl-rust` crate dependency version checks.
 
 ### Removed
 
