@@ -1,0 +1,12 @@
+[package]
+name = "smoke-test"
+version = "0.1.0"
+edition = "2024"
+publish = false
+
+[dependencies]
+peakrdl-rust = { workspace = true }
+
+[build-dependencies]
+anyhow = "1.0.102"
+peakrdl-rust-build = { path = "../peakrdl-rust-build" }

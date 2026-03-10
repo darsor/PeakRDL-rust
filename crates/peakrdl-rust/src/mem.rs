@@ -123,6 +123,7 @@ impl<T: PrimInt, A: Write, E: Endian> MemEntry<T, A, E> {
 }
 
 /// Iterator over memory entries
+#[derive(Debug)]
 pub struct MemEntryIter<T: PrimInt, A: Access, E: Endian> {
     next: MemEntry<T, A, E>,
     remaining: usize,

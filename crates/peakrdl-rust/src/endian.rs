@@ -1,7 +1,8 @@
-//! Marker types for register endianness
+//! Register endianness implementations
 
 use num_traits::PrimInt;
 
+/// Endianness of a register
 #[allow(private_bounds)]
 pub trait Endian: Sealed + Copy {
     /// Convert from native endianness to register endianness.
@@ -19,13 +20,17 @@ pub trait Endian: Sealed + Copy {
     fn address_order_to_significance(address_order: usize, num_subwords: usize) -> usize;
 }
 
-#[derive(Clone, Copy)]
+/// Big endian byte and word ordering
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct BigEndian;
-#[derive(Clone, Copy)]
+/// Little endian byte and word ordering
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct LittleEndian;
-#[derive(Clone, Copy)]
+/// Little endian byte ordering with big endian word ordering
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct WordBigByteLittleEndian;
-#[derive(Clone, Copy)]
+/// Big endian byte ordering with little endian word ordering
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct WordLittleByteBigEndian;
 
 trait Sealed {}

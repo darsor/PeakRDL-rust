@@ -8,10 +8,15 @@ use crate::{
 use core::marker::PhantomData;
 use num_traits::{AsPrimitive, Bounded, PrimInt, identities::ConstZero};
 
+/// Trait implemented by all register types.
 pub trait Register: Copy {
     // NOTE: SystemRDL guarantees accesswidth <= regwidth, and both are 2^N bits where N >= 3
+    /// Primitive integer type representing the size of the full register value.
     type Regwidth: PrimInt + AsPrimitive<Self::Accesswidth> + ConstZero + 'static;
+    /// Primitive integer type representing the size of memory accesses used when
+    /// reading/writing this register.
     type Accesswidth: PrimInt + AsPrimitive<Self::Regwidth> + Bounded;
+    /// Endianness of this register.
     type Endian: Endian;
 
     /// Convert a raw bit value into a Register instance.
@@ -19,6 +24,7 @@ pub trait Register: Copy {
     /// # Safety
     ///
     /// The caller must ensure the raw bit value is valid for the given register.
+    /// For example, by reading it directly from hardware.
     unsafe fn from_raw(val: Self::Regwidth) -> Self;
 
     /// Convert a Register instance into its raw bit value.
@@ -26,7 +32,7 @@ pub trait Register: Copy {
 }
 
 /// Register abstraction used to read, write, and modify register values
-#[derive(Copy, Clone, PartialEq, Eq)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub struct Reg<T: Register, A: Access> {
     ptr: *mut T::Regwidth,
     phantom: PhantomData<A>,
