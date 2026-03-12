@@ -37,6 +37,8 @@ The following are exempt and are free to use with no restrictions:
 *   The provided ``upds.rdl`` file can be downloaded and used freely.
 *   The ``peakrdl-rust`` crate that the generated code uses is licensed
     under the dual MIT/Apache 2.0 license.
+*   The ``peakrdl-rust-build`` build utility crate is licensed under the dual
+    MIT/Apache 2.0 license.
 
 
 Can I use this as part of my company's internally developed tools?

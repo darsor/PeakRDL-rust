@@ -25,6 +25,10 @@ thiserror = "2"
 ureq = { version = "3.2.0", optional = true }
 
 [features]
-default = ["download-bin"]
-# Disable this feature to skip the download and require PEAKRDL_RUST_BINARY to be set
+default = []
+# Enable this feature to download the peakrdl-rust binary automatically
 download-bin = ["dep:flate2", "dep:hex", "dep:tar", "dep:ureq", "dep:dirs", "dep:sha2"]
+
+[lints.clippy]
+pedantic = "warn"
+doc_markdown = "allow"

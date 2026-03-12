@@ -26,3 +26,7 @@ num-traits = { version = "0.2.19", default-features = false}
 [features]
 default = []
 fixedpoint = ["dep:heapless", "num-traits/libm"]
+
+[lints.clippy]
+pedantic = "warn"
+doc_markdown = "allow"

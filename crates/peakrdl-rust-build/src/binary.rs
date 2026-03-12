@@ -16,36 +16,35 @@ pub(crate) fn resolve_generator_binary() -> Result<PathBuf> {
         let p = PathBuf::from(path);
         if p.exists() {
             return Ok(p);
-        } else {
-            return Err(Error::Io(std::io::Error::new(
-                std::io::ErrorKind::NotFound,
-                format!(
-                    "PEAKRDL_RUST_BINARY is set to '{}' but that path does not exist",
-                    p.display()
-                ),
-            )));
         }
+        return Err(Error::Io(std::io::Error::new(
+            std::io::ErrorKind::NotFound,
+            format!(
+                "PEAKRDL_RUST_BINARY is set to '{}' but that path does not exist",
+                p.display()
+            ),
+        )));
     }
 
     #[cfg(not(feature = "download-bin"))]
     {
-        return Err(Error::Io(std::io::Error::new(
+        Err(Error::Io(std::io::Error::new(
             std::io::ErrorKind::NotFound,
-            "the `download-bin` feature is disabled but PEAKRDL_RUST_BINARY is not set",
-        )));
+            "PEAKRDL_RUST_BINARY is not set; please set it or enable the 'download-bin' feature",
+        )))
     }
     #[cfg(feature = "download-bin")]
     {
         // 2. Check cache.
         let (asset_name, exe_name) = download::platform_info()?;
-        let cache_path = download::cache_binary_path(&exe_name)?;
+        let cache_path = download::cache_binary_path(exe_name)?;
 
         if cache_path.exists() {
             return Ok(cache_path);
         }
 
         // 3. Download, verify, extract, and cache.
-        download::download_binary(asset_name, &exe_name, &cache_path)?;
+        download::download_binary(asset_name, exe_name, &cache_path)?;
         Ok(cache_path)
     }
 }
@@ -53,13 +52,18 @@ pub(crate) fn resolve_generator_binary() -> Result<PathBuf> {
 #[cfg(feature = "download-bin")]
 pub(crate) mod download {
     use crate::{Error, Result};
-    use std::io::{Read as _, Write};
-    use std::path::PathBuf;
+    use flate2::read::GzDecoder;
+    use sha2::Digest as _;
+    use std::{
+        io::{Read as _, Write},
+        path::PathBuf,
+    };
+    use tar::Archive;
 
     /// GitHub Releases base URL.
     const GITHUB_RELEASES_BASE: &str = "https://github.com/darsor/PeakRDL-rust/releases/download";
 
-    /// Per-platform binary info: (target_os, target_arch, asset_filename).
+    /// Per-platform binary info: `(target_os, target_arch, asset_filename)`.
     const PLATFORM_ASSETS: &[(&str, &str, &str)] = &[
         ("linux", "x86_64", "peakrdl-rust-linux-x86_64.tar.gz"),
         ("linux", "aarch64", "peakrdl-rust-linux-aarch64.tar.gz"),
@@ -130,7 +134,6 @@ pub(crate) mod download {
             })?;
 
         // Verify the checksum of the archive before extracting.
-        use sha2::Digest as _;
         let actual_sha256 = hex::encode(sha2::Sha256::digest(&archive_bytes));
         if actual_sha256 != expected_sha256 {
             return Err(Error::ChecksumMismatch {
@@ -138,9 +141,6 @@ pub(crate) mod download {
                 actual: actual_sha256,
             });
         }
-
-        use flate2::read::GzDecoder;
-        use tar::Archive;
 
         // Extract the binary from the tar.gz.
         let cursor = std::io::Cursor::new(archive_bytes);
@@ -150,7 +150,7 @@ pub(crate) mod download {
         for entry in archive.entries().map_err(Error::Io)? {
             let mut entry = entry.map_err(Error::Io)?;
             let path = entry.path().map_err(Error::Io)?;
-            if path.file_name().map(|n| n == exe_name).unwrap_or(false) {
+            if path.file_name().is_some_and(|n| n == exe_name) {
                 let mut data = Vec::new();
                 std::io::Read::read_to_end(&mut entry, &mut data)?;
                 binary_data = Some(data);

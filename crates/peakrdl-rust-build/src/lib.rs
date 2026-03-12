@@ -1,29 +1,4 @@
-//! Build-script helper for generating Rust register-access code from SystemRDL files
-//! using [PeakRDL-rust](https://github.com/darsor/PeakRDL-rust).
-//!
-//! # Usage
-//!
-//! In your crate's `Cargo.toml`:
-//! ```toml
-//! [build-dependencies]
-//! peakrdl-rust-build = "0.6"
-//! ```
-//!
-//! In your `build.rs`:
-//! ```rust,no_run
-//! fn main() {
-//!     peakrdl_rust_build::Generator::new()
-//!         .file("src/regs/my_block.rdl")
-//!         .top("my_block")
-//!         .generate()
-//!         .unwrap();
-//! }
-//! ```
-//!
-//! Then in your `src/lib.rs` (or wherever you want to use the generated code):
-//! ```rust,ignore
-//! include!(concat!(env!("OUT_DIR"), "/my_block/mod.rs"));
-//! ```
+#![doc = include_str!("../README.md")]
 
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};
@@ -89,6 +64,7 @@ impl Default for Generator {
 
 impl Generator {
     /// Create a new, empty configuration.
+    #[must_use]
     pub fn new() -> Self {
         Self {
             force: true,
@@ -137,7 +113,7 @@ impl Generator {
         name: impl Into<String>,
         value: Option<impl Into<String>>,
     ) -> &mut Self {
-        self.macros.insert(name.into(), value.map(|v| v.into()));
+        self.macros.insert(name.into(), value.map(Into::into));
         self
     }
 
@@ -198,12 +174,17 @@ impl Generator {
         self
     }
 
+    #[allow(clippy::missing_errors_doc)]
     /// Run the code generator.
     ///
     /// This will:
     /// 1. Locate (or download) the `peakrdl-rust` binary.
     /// 2. Emit `cargo:rerun-if-changed` directives for all input files.
     /// 3. Invoke `peakrdl rust` with the specified options.
+    ///
+    /// # Panics
+    ///
+    /// Panics if any of the configured paths contain non UTF-8 characters.
     pub fn generate(&self) -> Result<()> {
         if self.files.is_empty() {
             return Err(Error::NoInputs);
@@ -248,7 +229,7 @@ impl Generator {
         }
 
         // preprocessor macros
-        for (name, value) in self.macros.iter() {
+        for (name, value) in &self.macros {
             cmd.arg("-D");
             match value {
                 Some(value) => cmd.arg(format!("{name}={value}")),
@@ -265,7 +246,7 @@ impl Generator {
         }
 
         // parameters
-        for (name, value) in self.parameters.iter() {
+        for (name, value) in &self.parameters {
             cmd.args(["-D", &format!("{name}={value}")]);
         }
 
@@ -293,7 +274,7 @@ impl Generator {
                 cmd.args(["--byte-endian", "little"]);
             }
             _ => (),
-        };
+        }
         match self.word_endian {
             Some(Endian::Big) => {
                 cmd.args(["--word-endian", "big"]);
@@ -302,7 +283,7 @@ impl Generator {
                 cmd.args(["--word-endian", "little"]);
             }
             _ => (),
-        };
+        }
 
         for file in &self.files {
             cmd.arg(file);

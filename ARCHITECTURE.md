@@ -28,9 +28,11 @@ Version numbers:
   * `Cargo.lock`
   * `CHANGELOG.md`
   * `uv_peakrdl_rust.sh`
+  * `peakrdl-rust-build/README.md`
 * `peakrdl-rust` crate dependency version, manually published and versioned separately
   * `peakrdl-rust/Cargo.toml`
   * `peakrdl-rust/CHANGELOG.md`
   * `Cargo.lock`
   * workspace `Cargo.toml`
   * PEAKRDL_RUST_CRATE_MIN_VERSION in `__init__.py`
+  * `peakrdl-rust-build/README.md`

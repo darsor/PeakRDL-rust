@@ -9,4 +9,4 @@ peakrdl-rust = { workspace = true }
 
 [build-dependencies]
 anyhow = "1.0.102"
-peakrdl-rust-build = { path = "../peakrdl-rust-build" }
+peakrdl-rust-build = { path = "../peakrdl-rust-build", features = ["download-bin"] }

@@ -14,7 +14,17 @@ Example RDL
 Files: :download:`turboencabulator.rdl <../tests/rdl_src/turboencabulator.rdl>`
 and :download:`udps.rdl <../src/peakrdl_rust/udps/udps.rdl>`.
 
-Exported with ``peakrdl rust -o output/ udps.rdl turboencabulator.rdl``
+The turboencabulator code was exported using
+
+.. code-block:: rust
+
+    // in build.rs
+    Generator::new()
+        .rdl_file("udps.rdl")
+        .rdl_file("turboencabulator.rdl")
+        .top("turbo_encab")
+        .format_output(true)
+        .generate();
 
 Cargo docs for the exported turboencabulator module can be viewed
 here: `turboencabulator docs <examples/turboencabulator/index.html>`_.
