@@ -1,6 +1,6 @@
 [package]
 name = "peakrdl-rust-build"
-version = "0.6.0"
+version = "0.6.1"
 edition = "2024"
 description = "Build script helper that runs PeakRDL-rust to generate Rust register access code from SystemRDL files"
 license = "MIT OR Apache-2.0"
