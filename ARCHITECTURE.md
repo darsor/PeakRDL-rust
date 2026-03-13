@@ -33,6 +33,6 @@ Version numbers:
   * `peakrdl-rust/Cargo.toml`
   * `peakrdl-rust/CHANGELOG.md`
   * `Cargo.lock`
-  * workspace `Cargo.toml`
+  * smoke-test `Cargo.toml`
   * PEAKRDL_RUST_CRATE_MIN_VERSION in `__init__.py`
   * `peakrdl-rust-build/README.md`

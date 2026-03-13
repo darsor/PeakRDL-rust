@@ -89,7 +89,7 @@ where
     pub fn from_bits(bits: P) -> Self {
         const {
             assert!(
-                I + F <= 8 * (core::mem::size_of::<P>() as isize),
+                I + F <= 8 * core::mem::size_of::<P>().cast_signed(),
                 "The primitive integer type is not wide enough for this fixed-point representation"
             );
             assert!(I + F > 0, "The fixed-point bit width must be positive");
@@ -152,7 +152,7 @@ where
     /// ```
     #[must_use]
     pub const fn width() -> usize {
-        (I + F) as usize
+        (I + F).cast_unsigned()
     }
 
     /// Returns true if the fixedpoint representation (underlying primitive type) is signed.

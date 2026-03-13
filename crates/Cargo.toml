@@ -1,6 +1,7 @@
 [workspace]
 resolver = "3"
-members = ["peakrdl-rust", "peakrdl-rust-build", "smoke-test"]
+members = ["peakrdl-rust", "peakrdl-rust-build"]
+exclude = ["smoke-test"]
 
 [workspace.dependencies]
 peakrdl-rust = { path = "peakrdl-rust", version = "0.1.0" }
