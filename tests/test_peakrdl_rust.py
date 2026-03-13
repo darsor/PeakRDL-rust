@@ -61,6 +61,7 @@ def do_export(rdl_file: Path) -> Path:
     x.export(
         top_nodes,
         path=str(generated_dir),
+        fmt=True,
         force=True,
     )
 

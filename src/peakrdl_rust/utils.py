@@ -2,7 +2,6 @@ from typing import Any, Union
 
 from caseconverter import pascalcase, snakecase
 from systemrdl.node import (
-    AddressableNode,
     FieldNode,
     MemNode,
     Node,
@@ -238,18 +237,3 @@ def append_unique(list: list, obj: Any) -> None:
     """Append an object to a list only if it's not already present"""
     if obj not in list:
         list.append(obj)
-
-
-def dut_access_method(node: AddressableNode) -> str:
-    """Get register access method, e.g. 'grammeter()[1].status()'"""
-    segments = node.get_path_segments()[1:]
-    called_segments = []
-    for seg in segments:
-        idx = seg.find("[")
-        if idx == -1:
-            # not an array
-            called_segments.append(kw_filter(snakecase(seg)) + "()")
-        else:
-            name = kw_filter(snakecase(seg[:idx]))
-            called_segments.append(name + "()" + seg[idx:])
-    return ".".join(called_segments)
