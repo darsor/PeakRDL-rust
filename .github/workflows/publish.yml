@@ -36,3 +36,7 @@ jobs:
       - name: Publish to crates.io
         working-directory: crates/peakrdl-rust-build
         run: cargo publish
+
+      - name: Smoke test
+        working-directory: crates/smoke-test
+        run: cargo build

@@ -271,16 +271,9 @@ checksum = "04744f49eae99ab78e0d5c0b603ab218f515ea8cfe5a456d7629ad883a3b6e7d"
 
 [[package]]
 name = "peakrdl-rust"
-version = "0.1.0"
-dependencies = [
- "num-traits",
-]
-
-[[package]]
-name = "peakrdl-rust"
-version = "0.1.0"
+version = "0.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "588d52d74fb87a1f707dcc973dec67570096f1237598aa12eb4e9051c6b7cad9"
+checksum = "c90dec3e7d767b944f51311189f5aefd30e8f42827dfef2254d25fe0cd648ced"
 dependencies = [
  "num-traits",
 ]
@@ -292,7 +285,6 @@ dependencies = [
  "dirs",
  "flate2",
  "hex",
- "peakrdl-rust 0.1.0",
  "sha2",
  "tar",
  "thiserror",
@@ -439,7 +431,7 @@ name = "smoke-test"
 version = "0.1.0"
 dependencies = [
  "anyhow",
- "peakrdl-rust 0.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "peakrdl-rust",
  "peakrdl-rust-build",
 ]
 
