@@ -29,7 +29,7 @@ Or to integrate directly with your Rust code use the `peakrdl-rust-build`_
 build utility crate.
 
 .. _PyPi: https://pypi.org/project/peakrdl-rust
-.. _peakrdl-rust-build: https://docs.rs/peakrd-rust-build
+.. _peakrdl-rust-build: https://docs.rs/peakrdl-rust-build
 
 Quick Start
 -----------
