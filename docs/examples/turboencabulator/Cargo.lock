@@ -57,7 +57,7 @@ dependencies = [
 
 [[package]]
 name = "peakrdl-rust"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "heapless",
  "num-traits",
@@ -67,7 +67,6 @@ dependencies = [
 name = "peakrdl-rust-build"
 version = "0.6.0"
 dependencies = [
- "peakrdl-rust",
  "thiserror",
 ]
 
