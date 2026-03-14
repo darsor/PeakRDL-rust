@@ -11,6 +11,8 @@ section.
 To enable these UDPs, compile this RDL file prior to the rest of your design:
 :download:`udps.rdl <../../src/peakrdl_rust/udps/udps.rdl>`.
 
+Any UDPs encountered that are not listed here are ignored.
+
 .. list-table:: Summary of UDPs
     :header-rows: 1
 

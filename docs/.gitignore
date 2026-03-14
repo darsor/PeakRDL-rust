@@ -6,8 +6,6 @@ _build/
 *.pyc
 __pycache__/
 rust_docs/
-examples/
-!examples/Makefile
 
 # OS generated files
 .DS_Store

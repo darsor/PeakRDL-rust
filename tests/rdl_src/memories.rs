@@ -1,8 +1,8 @@
-use memories::{
+use peakrdl_rust::{
     access::{R, RW, W},
     mem::{MemEntry, Memory},
-    Memories,
 };
+use peakrdl_rust_test::Memories;
 
 /// A block of memory used for simulating hardware registers.
 ///
@@ -62,7 +62,7 @@ fn test_memory_iter() {
 
 #[test]
 fn test_memory_access() {
-    let _: MemEntry<u32, R> = TOP.mem_2_32_r().index(0);
-    let _: MemEntry<u32, W> = TOP.mem_2_32_w().index(0);
-    let _: MemEntry<u32, RW> = TOP.mem_2_32_rw().index(0);
+    let _: MemEntry<u32, R, _> = TOP.mem_2_32_r().index(0);
+    let _: MemEntry<u32, W, _> = TOP.mem_2_32_w().index(0);
+    let _: MemEntry<u32, RW, _> = TOP.mem_2_32_rw().index(0);
 }

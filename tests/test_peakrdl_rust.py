@@ -21,8 +21,16 @@ def get_rdl_files() -> list[Path]:
 
 
 def do_export(rdl_file: Path) -> Path:
-    crate_dir = Path(__file__).parent / "output"
+    crate_name = rdl_file.stem.replace("-", "_")
+
+    crate_dir = Path(__file__).parent / "output" / crate_name
     crate_dir.mkdir(exist_ok=True, parents=True)
+
+    src_dir = crate_dir / "src"
+    src_dir.mkdir(exist_ok=True)
+
+    generated_dir = src_dir / "generated"
+    generated_dir.mkdir(exist_ok=True)
 
     # Read the file to find top-level addrmap definitions
     with open(rdl_file) as f:
@@ -49,24 +57,27 @@ def do_export(rdl_file: Path) -> Path:
         root_node = rdlc.elaborate(top_def_name=name)
         top_nodes.append(root_node.top)
 
-    crate_name = rdl_file.stem.replace("-", "_")
-
     x = RustExporter()
     x.export(
         top_nodes,
-        path=str(crate_dir),
-        crate_name=crate_name,
+        path=str(generated_dir),
+        fmt=True,
         force=True,
     )
 
     # copy integration test into package if it exists
     integration_test = rdl_file.parent / (rdl_file.stem + ".rs")
     if integration_test.exists():
-        shutil.copyfile(
-            integration_test, crate_dir / crate_name / "tests" / integration_test.name
-        )
+        (crate_dir / "tests").mkdir(exist_ok=True)
+        shutil.copyfile(integration_test, crate_dir / "tests" / integration_test.name)
 
-    return crate_dir / crate_name
+    # copy boilerplate templates
+    templates_dir = Path(__file__).parent / "templates"
+    print(f"copied to {crate_dir / 'Cargo.toml'}")
+    shutil.copyfile(templates_dir / "Cargo.toml.tmpl", crate_dir / "Cargo.toml")
+    shutil.copyfile(templates_dir / "lib.rs.tmpl", src_dir / "lib.rs")
+
+    return crate_dir
 
 
 def do_cargo_test(crate_dir: Path) -> None:

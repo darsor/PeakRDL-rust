@@ -1,7 +1,7 @@
 [project]
 name = "peakrdl-rust"
-version = "0.5.1"
-description = "Generate a Rust crate from SystemRDL for accessing control/status registers."
+version = "0.6.1"
+description = "Generate a Rust module from SystemRDL for accessing control/status registers."
 readme = "README.md"
 authors = [{ name = "Dana Sorensen", email = "dana.r.sorensen@gmail.com" }]
 requires-python = ">=3.9"

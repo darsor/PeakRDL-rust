@@ -1,0 +1,11 @@
+[package]
+name = "turboencabulator"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+peakrdl-rust = { path = "../../../crates/peakrdl-rust", features = ["fixedpoint"] }
+
+[build-dependencies]
+anyhow = "1.0.102"
+peakrdl-rust-build = { path = "../../../crates/peakrdl-rust-build", default-features = false }

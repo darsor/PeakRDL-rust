@@ -25,19 +25,39 @@ Install from `PyPi`_ using pip
 
     python3 -m pip install peakrdl-rust[cli]
 
-.. _PyPi: https://pypi.org/project/peakrdl-rust
+Or to integrate directly with your Rust code use the `peakrdl-rust-build`_
+build utility crate.
 
+.. _PyPi: https://pypi.org/project/peakrdl-rust
+.. _peakrdl-rust-build: https://docs.rs/peakrdl-rust-build
 
 Quick Start
 -----------
-The easiest way to use PeakRDL-rust is via the `PeakRDL command line tool <https://peakrdl.readthedocs.io/>`_:
+There are two primary ways to interact with this tool. The first (and recommended)
+way is by using the `peakrdl-rust-build`_ crate in your ``build.rs`` file.
+
+.. code-block:: rust
+
+    // in build.rs
+    peakrdl_rust_build::Generator::new()
+        .rdl_file("example.rdl")
+        .top("example")
+        .generate()
+        .unwrap();
+
+    // in lib.rs
+    mod example {
+        include!(concat!(env!("OUT_DIR"), "/example/mod.rs"));
+    }
+
+The second way to use this tool is via the `PeakRDL command line tool <https://peakrdl.readthedocs.io/>`_:
 
 .. code-block:: bash
 
     # Install the command line tool
-    python3 -m pip install peakrdl peakrdl-rust
+    python3 -m pip install peakrdl-rust[cli]
 
-    # Generate a Rust crate in the example/ directory
+    # Generate a Rust module in the example/ directory
     peakrdl rust example.rdl -o example/
 
 Using the generated Rust code, you can access your device registers in a type-safe manner.
@@ -54,7 +74,7 @@ For example, the tool transforms this SystemRDL:
         } my_reg;
     };
 
-Into a Rust crate you can use like:
+Into a Rust module you can use like:
 
 .. code-block:: rust
 

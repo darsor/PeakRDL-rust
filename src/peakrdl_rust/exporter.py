@@ -4,9 +4,8 @@ from typing import Any, Union
 
 from systemrdl.node import AddrmapNode, RootNode
 
-from .crate_generator import write_crate
 from .design_state import DesignState
-from .test_generator import write_tests
+from .generator import write_module
 
 
 class RustExporter:
@@ -26,13 +25,8 @@ class RustExporter:
             the crate is generated in this directory.
         force: bool
             Overwrite the contents of the output directory if it already exists.
-        crate_name: Optional[str]
-            Name of the generated crate. Should be in snake_case. If not set, derived
-            from the root addrmap name.
-        crate_version: str
-            Semantic version number for the generated crate.
-        no_fmt: bool
-            Don't attempt to format the generated rust code using `cargo fmt`.
+        fmt: bool
+            Attempt to format the generated rust code using `rustfmt`.
         byte_endian: Optional[Literal["big", "little"]]
             Ordering of bytes within `accesswidth`-sized accesses to the register
             file. Overrides the `littleendian` and `bigendian` addrmap properties.
@@ -75,20 +69,11 @@ class RustExporter:
             else:
                 ds.output_dir.unlink()
 
-        # Write crate modules
-        write_crate(ds)
+        # Write module files
+        generated_files = write_module(ds)
 
-        # Generate integration tests
-        write_tests(ds)
+        print(f"Generated Rust module at {ds.output_dir / 'mod.rs'}")
 
-        print(f"Generated Rust crate at {ds.output_dir}")
-
-        if not ds.no_fmt:
-            result = subprocess.run(["cargo", "fmt"], cwd=ds.output_dir)
-            if result.returncode == 127:
-                print(
-                    "Warning: failed to run `cargo fmt`. Install cargo "
-                    "(https://rustup.rs/) or silence this warning with `--no-fmt`"
-                )
-            elif result.returncode != 0:
-                print("Failed to format files. Silence this warning with '--no-fmt'.")
+        if ds.fmt:
+            cmd = ["rustfmt"] + list(map(str, generated_files))
+            subprocess.check_call(cmd)
