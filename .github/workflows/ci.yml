@@ -160,8 +160,6 @@ jobs:
         run: |
           echo "## SHA-256 Checksums" >> "$GITHUB_STEP_SUMMARY"
           echo "" >> "$GITHUB_STEP_SUMMARY"
-          echo "Copy these into the \`PLATFORM_ASSETS\` table in \`peakrdl-rust-build/src/binary.rs\`:" >> "$GITHUB_STEP_SUMMARY"
-          echo "" >> "$GITHUB_STEP_SUMMARY"
           echo '```' >> "$GITHUB_STEP_SUMMARY"
           cat artifacts/*.sha256 >> "$GITHUB_STEP_SUMMARY"
           echo '```' >> "$GITHUB_STEP_SUMMARY"

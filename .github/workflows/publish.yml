@@ -8,8 +8,7 @@ jobs:
   deploy:
     environment: pypi
     permissions:
-      contents: read
-      id-token: write # Required for OIDC token request
+      id-token: write
     runs-on: ubuntu-latest
 
     steps:
@@ -33,8 +32,14 @@ jobs:
       - name: Publish to PyPI
         run: uv publish
 
+      - name: Get crates.io token
+        uses: rust-lang/crates-io-auth-action@v1
+        id: auth
+
       - name: Publish to crates.io
         working-directory: crates/peakrdl-rust-build
+        env:
+          CARGO_REGISTRY_TOKEN: ${{ steps.auth.outputs.token }}
         run: cargo publish
 
       - name: Smoke test
