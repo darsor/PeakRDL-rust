@@ -85,9 +85,9 @@ pub(crate) mod download {
         for &(p_os, p_arch, asset) in PLATFORM_ASSETS {
             if os == p_os && arch == p_arch {
                 let exe = if os == "windows" {
-                    "peakrdl.exe"
+                    "peakrdl-rust.exe"
                 } else {
-                    "peakrdl"
+                    "peakrdl-rust"
                 };
                 return Ok((asset, exe));
             }
