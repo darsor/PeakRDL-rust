@@ -3,18 +3,18 @@
 use crate::{
     access::{Access, Read, Write},
     endian::Endian,
+    reg::RegInt,
 };
 use core::{
     fmt::Debug,
     iter::{ExactSizeIterator, FusedIterator},
     ops::{Bound, RangeBounds},
 };
-use num_traits::PrimInt;
 
 /// Behaviors common to all SystemRDL memories
 pub trait Memory: Sized {
     /// Primitive integer type used to represented a memory entry
-    type Memwidth: PrimInt + Debug;
+    type Memwidth: RegInt;
     type Access: Access;
     type Endian: Endian;
 
@@ -117,7 +117,7 @@ where
         // a suitable hardware memory.
         unsafe {
             self.ptr
-                .write_volatile(M::Endian::to_register_endian(value))
+                .write_volatile(M::Endian::to_register_endian(value));
         }
     }
 }

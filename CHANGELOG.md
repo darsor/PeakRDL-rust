@@ -5,12 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## Unreleased
+## [unreleased]
 
 ### Changed
 
-- Updated to peakrdl-rust dependency crate v0.2.0
+- Require peakrdl-rust dependency crate >=0.2.0, <0.3.0
 - `MemEntry` and `MemEntryIter` are now generic over the memory type instead of access and endianness.
+- Addrmaps, regfiles, and memories are now generic over a `RegisterIO` type, allowing custom register access implementations.
 
 ## [0.6.2] - 2026-03-13
 

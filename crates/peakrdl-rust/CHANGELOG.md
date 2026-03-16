@@ -11,7 +11,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `Access` is now an associated type of the `Register` trait, so `Access` is no longer a direct generic of the `Reg` type
 - Split the `Endian` associated type of the `Register` trait into `ByteEndian` and `WordEndian`
-- `T: Register` generic of the `Reg` type was renamed to `R`
+- `Reg` is now generic over a `RegisterIO` type, allowing custom register access implementations
+
+### Added
+
+- `RegisterIO` and `RawRegisterIO` traits
+- Fallible `try_read`, `try_write`, `try_modify` methods on the `Reg` type
 
 ## [0.1.1] - 2026-03-13
 

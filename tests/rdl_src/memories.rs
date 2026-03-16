@@ -21,7 +21,7 @@ impl<const N: usize> MockMemory<N> {
     }
 }
 
-const SIZE: usize = Memories::SIZE;
+const SIZE: usize = Memories::<()>::SIZE;
 static mut MOCK_MEM: MockMemory<SIZE> = MockMemory::new_zeroed();
 #[allow(static_mut_refs)]
 const TOP: Memories = unsafe { Memories::from_ptr(MOCK_MEM.as_mut_ptr() as _) };

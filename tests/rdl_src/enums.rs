@@ -1,38 +1,21 @@
-use peakrdl_rust::encode::UnknownVariant;
+use peakrdl_rust::{encode::UnknownVariant, io::MockIO};
 use peakrdl_rust_test::{
     components::enum_test1::named_types::{my_enum::MyEnum, self_::Self_},
     EnumTest1,
 };
 
-/// A block of memory used for simulating hardware registers.
-///
-/// A forced alignment of 16 bytes allows access to internal registers as
-/// primitive types.
-#[repr(align(16))]
-pub(crate) struct Memory<const N: usize>([u8; N]);
-
-impl<const N: usize> Memory<N> {
-    pub const fn new_zeroed() -> Self {
-        Memory([0; N])
-    }
-
-    pub const fn as_mut_ptr(&mut self) -> *mut u8 {
-        self.0.as_mut_ptr()
-    }
-}
-
-const SIZE: usize = EnumTest1::SIZE;
-static mut MEMORY: Memory<SIZE> = Memory::new_zeroed();
-#[allow(static_mut_refs)]
-const TOP: EnumTest1 = unsafe { EnumTest1::from_ptr(MEMORY.as_mut_ptr() as _) };
+const SIZE: usize = EnumTest1::<()>::SIZE;
 
 #[test]
 fn test_enum_access() {
+    let memory: MockIO<SIZE> = MockIO::new_zeroed();
+    let top = unsafe { EnumTest1::from_ptr_with(memory.base_ptr(), &memory) };
+
     // write default value
-    TOP.reg1().write(|_| {});
+    top.reg1().write(|_| {});
 
     // read and check reset values (name of variant + 1)
-    let reg1 = TOP.reg1().read();
+    let reg1 = top.reg1().read();
     assert_eq!(reg1.f_default(), Ok(MyEnum::Five));
     assert_eq!(reg1.f_zero(), Ok(MyEnum::One));
     assert_eq!(reg1.f_one(), Err(UnknownVariant(2)));
@@ -41,8 +24,8 @@ fn test_enum_access() {
     assert_eq!(reg1.f_five(), Err(UnknownVariant(6)));
 
     // check write
-    TOP.reg1().modify(|reg| reg.set_f_five(MyEnum::One));
-    let reg1 = TOP.reg1().read();
+    top.reg1().modify(|reg| reg.set_f_five(MyEnum::One));
+    let reg1 = top.reg1().read();
     assert_eq!(reg1.f_default(), Ok(MyEnum::Five));
     assert_eq!(reg1.f_zero(), Ok(MyEnum::One));
     assert_eq!(reg1.f_one(), Err(UnknownVariant(2)));
@@ -59,8 +42,8 @@ fn test_enum_access() {
 
     // ensure reg2, which has an exhaustively encoded field
     // (3 bits storing 8 variants), returns the enum directly
-    TOP.reg2().write(|_| {});
-    let reg2 = TOP.reg2().read();
+    top.reg2().write(|_| {});
+    let reg2 = top.reg2().read();
     assert_eq!(reg2.f0(), Self_::Mro);
     assert_eq!(reg2.f1(), Self_::Dict);
     assert_eq!(reg2.f2(), Self_::Name);

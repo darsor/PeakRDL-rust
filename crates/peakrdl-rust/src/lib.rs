@@ -5,6 +5,7 @@ pub mod encode;
 pub mod endian;
 #[cfg(feature = "fixedpoint")]
 pub mod fixedpoint;
+pub mod io;
 pub mod mem;
 pub mod reg;
 pub mod version;

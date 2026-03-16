@@ -57,7 +57,6 @@ Links:
 * Cargo docs for the top-level `TurboEncab <examples/turboencabulator/components/turbo_encab/index.html>`__ addrmap type
 * Cargo docs for the `Status <examples/turboencabulator/components/turbo_encab/status/struct.Status.html>`__ register type
 * Cargo docs for the `Reg <examples/peakrdl_rust/reg/struct.Reg.html>`__ type
-* Cargo docs for the `access <examples/peakrdl_rust/access/index.html>`__ module
 
 Writing a Register
 ^^^^^^^^^^^^^^^^^^
@@ -74,7 +73,6 @@ Links:
 * Cargo docs for the top-level `TurboEncab <examples/turboencabulator/components/turbo_encab/index.html>`__ addrmap type
 * Cargo docs for the `Ctrl <examples/turboencabulator/components/turbo_encab/ctrl/struct.Ctrl.html>`__ register type
 * Cargo docs for the `Reg <examples/peakrdl_rust/reg/struct.Reg.html>`__ type
-* Cargo docs for the `access <examples/peakrdl_rust/access/index.html>`__ module
 
 Modifying a Register
 ^^^^^^^^^^^^^^^^^^^^
@@ -90,7 +88,6 @@ Links:
 * Cargo docs for the top-level `TurboEncab <examples/turboencabulator/components/turbo_encab/index.html>`__ addrmap type
 * Cargo docs for the `Ctrl <examples/turboencabulator/components/turbo_encab/ctrl/struct.Ctrl.html>`__ register type
 * Cargo docs for the `Reg <examples/peakrdl_rust/reg/struct.Reg.html>`__ type
-* Cargo docs for the `access <examples/peakrdl_rust/access/index.html>`__ module
 
 Arrays of Components
 ^^^^^^^^^^^^^^^^^^^^
@@ -153,7 +150,6 @@ Links:
 * Cargo docs for the `Measurements <examples/turboencabulator/components/turbo_encab/measurements/struct.Measurements.html>`__ memory type
 * Cargo docs for the `Memory <examples/peakrdl_rust/mem/trait.Memory.html>`__ trait
 * Cargo docs for the `MemEntry <examples/peakrdl_rust/mem/struct.MemEntry.html>`__ type
-* Cargo docs for the `access <examples/peakrdl_rust/access/index.html>`__ module
 
 Fixedpoint Fields
 ^^^^^^^^^^^^^^^^^
@@ -169,3 +165,61 @@ Links:
 * Docs for `Fixed-Point Fields <udps/fixedpoint.html>`__
 * Cargo docs for the `FixedPoint <examples/peakrdl_rust/fixedpoint/struct.FixedPoint.html>`__ type
 * Cargo docs for the `Status <examples/turboencabulator/components/turbo_encab/grammeter/status/index.html>`__ register type
+
+Advanced: Tunneled Registers
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Sometimes the registers to access are located on another device through a tunneled interface.
+For example, a chip with internal registers that is accessed over a SPI bus. PeakRDL-rust supports
+this by allowing the user to define a custom ``RegisterIO`` implementation.
+
+.. code-block:: rust
+
+    // ZST implementing the register accesses over SPI.
+    // This can use a globally accessible SPI interface, or it can own the
+    // interface. It is passed around by shared reference.
+    struct SpiRegisterIO;
+
+    // Implementers of the `RawRegisterIO` trait automatically implement
+    // the `RegisterIO` trait. The blanket implementation takes care of
+    // common details like accesswidth and endianness, so we don't have to
+    // worry about that here.
+    impl peakrdl_rust::io::RawRegisterIO for SpiRegisterIO {
+        // Some SPI error type defined externally. If the register access is
+        // infallible, set this to `core::convert::Infallible` and the `Reg`
+        // type will expose infallible access methods (e.g., `modify` in addition
+        // to `try_modify`).
+        type Error = SpiError;
+
+        unsafe fn try_read<T: RegInt>(&self, ptr: *const T) -> Result<T, Self::Error> {
+            // The device only supports 16-bit register accesses
+            assert_eq!(core::mem::size_of::<T>(), 2, "SPI registers must be 16 bits wide");
+            let spi_addr = ptr.addr() as u8;
+            let command: [u8; 3] = build_spi_read_access(spi_addr);
+            let result: [u8; 3] = spi_transaction(command)?;
+            let data: &[u8; 2] = extract_spi_read_data(result);
+            Ok(T::from_ne_bytes(data.try_into().unwrap()))
+        }
+
+        unsafe fn try_write<T: RegInt>(&self, ptr: *mut T, value: T) -> Result<(), Self::Error> {
+            // The device only supports 16-bit register accesses
+            assert_eq!(core::mem::size_of::<T>(), 2, "SPI registers must be 16 bits wide");
+            let spi_addr = ptr.addr() as u8;
+            let spi_data: &[u8] = value.to_ne_bytes().as_ref();
+            let command: [u8; 3] = build_spi_write_access(spi_addr, spi_data);
+            spi_transaction(command)?;
+            Ok(())
+        }
+    }
+
+    fn main() {
+        // pass the RegisterIO implementation into the addrmap constructor
+        let spi_registers = SpiAddrmap::from_ptr_with(0 as _, &SpiRegisterIO);
+        // now access registers as normal
+        let reg0_value = spi_registers.reg0().try_read().unwrap();
+    }
+
+Links:
+
+* Cargo docs for the `RawRegisterIO <examples/peakrdl_rust/io/trait.RawRegisterIO.html>`__ trait
+* Cargo docs for the `RegisterIO <examples/peakrdl_rust/io/trait.RegisterIO.html>`__ trait

@@ -18,7 +18,7 @@ impl<const N: usize> Memory<N> {
     }
 }
 
-const SIZE: usize = TurboEncab::SIZE;
+const SIZE: usize = TurboEncab::<()>::SIZE;
 static mut MEMORY: Memory<SIZE> = Memory::new_zeroed();
 #[allow(static_mut_refs)]
 const TURBO_ENCAB: TurboEncab = unsafe { TurboEncab::from_ptr(MEMORY.as_mut_ptr() as _) };

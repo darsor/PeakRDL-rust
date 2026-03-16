@@ -36,3 +36,24 @@ Version numbers:
   * smoke-test `Cargo.toml`
   * PEAKRDL_RUST_CRATE_MIN_VERSION in `__init__.py`
   * `peakrdl-rust-build/README.md`
+
+## Driver API
+
+Options:
+1. `Driver` generic on all types, similar to Rust allocator API
+2. Marker trait similar to `Access` which turns off implementation of default read/write functions, and enables custom implementations via user trait
+
+`Driver` generic would require some basic read/write methods for accesswidth accesses.
+Marker trait method would allow user to specify their own custom API.
+
+Both methods require a generic on all types and could use a default generic type to simplify API in the common case.
+Both methods allow multiple instantiations of the same register files using different drivers.
+
+A tunneled interface introduces failure points. Volatile memory reads/writes are expected to always succeed.
+Don't want users to have to unwrap/handle `Result`s in the common case.
+ * Marker traits handle this by allowing the user to define their own read/write API
+ * Driver implementation
+ 
+Could simplify things for `Driver` implementers with a secondary trait (`DriverAccess`?) that just implements
+simple peeks/pokes. Then a blanket `Driver` implementation for anything that implements `DriverAccess`.
+Then user doesn't have to worry about accesswidth, endianness, etc.

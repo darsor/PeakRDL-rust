@@ -125,7 +125,7 @@ Each generated register struct includes:
 * A ``Default`` impl that returns the reset value of the register.
 
 These register structs are not instantiated directly. Instead, a handle to a
-register component will be of the type ``crate::reg::Reg<Register, Access>``.
+register component will be of the type ``peakrdl_rust::reg::Reg<Register>``.
 The ``Reg`` type handles reading, writing, and modifying the register value
 in memory, while the register-specific type it takes as a generic is used to
 read and write fields within the register value. This allows multiple fields
@@ -135,7 +135,7 @@ For example:
 
 .. code-block:: rust
 
-    let ctrl_reg: Reg<Ctrl, RW> = registers.spi().ctrl();
+    let ctrl_reg: Reg<Ctrl> = registers.spi().ctrl();
 
     // read the register value
     let ctrl_reg_value: Ctrl = ctrl_reg.read();
@@ -149,9 +149,15 @@ For example:
         // the updated 'ctrl' register is written to memory after the closure exits
     });
 
-The ``Reg`` struct is also generic over the access type of the register (R, W,
-or RW). This makes it so that, for example, read-only registers don't expose
+The ``Reg`` struct uses the associated types of the ``Register`` trait, including
+the register width, access width, endianess, and access permissions to customize
+and restrict its read/write implementations. For example, read-only registers don't expose
 any methods for writing the value to memory.
+
+The ``Reg`` struct is also generic over the ``RegisterIO`` implementation that implementations
+the actual memory accesses. This generic defaults regular volatile pointer I/O and does not
+need to be specified in the common case. See the example for
+`tunneled registers <examples.html#advanced-tunneled-registers>`__.
 
 Wide Registers
 ^^^^^^^^^^^^^^

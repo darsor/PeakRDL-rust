@@ -1,5 +1,9 @@
 //! Types for numeric fixed-point field representations
 
+use num_traits::{AsPrimitive, Float};
+
+use crate::reg::RegInt;
+
 /// A fixed-point number implementation using an underlying primitive integer type.
 ///
 /// # Type Parameters
@@ -37,10 +41,7 @@ pub struct FixedPoint<P, const I: isize, const F: isize> {
 
 impl<P, const I: isize, const F: isize> core::fmt::Debug for FixedPoint<P, I, F>
 where
-    P: num_traits::PrimInt
-        + num_traits::AsPrimitive<f64>
-        + num_traits::WrappingSub
-        + core::fmt::Debug,
+    P: RegInt + AsPrimitive<f64>,
 {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         use core::fmt::Write as _;
@@ -56,7 +57,7 @@ where
 
 impl<P, const I: isize, const F: isize> FixedPoint<P, I, F>
 where
-    P: num_traits::PrimInt + num_traits::WrappingSub,
+    P: RegInt,
 {
     /// Creates a fixed-point number from its raw bit representation.
     ///
@@ -252,8 +253,8 @@ where
     /// ```
     pub fn quantize<T>(value: T) -> T
     where
-        T: num_traits::Float + 'static,
-        P: num_traits::AsPrimitive<T>,
+        T: Float + 'static,
+        P: AsPrimitive<T>,
     {
         Self::from_float(value).to_float()
     }
@@ -282,7 +283,7 @@ where
     #[must_use]
     pub fn from_f32(value: f32) -> Self
     where
-        P: num_traits::AsPrimitive<f32>,
+        P: AsPrimitive<f32>,
     {
         Self::from_float(value)
     }
@@ -311,7 +312,7 @@ where
     #[must_use]
     pub fn from_f64(value: f64) -> Self
     where
-        P: num_traits::AsPrimitive<f64>,
+        P: AsPrimitive<f64>,
     {
         Self::from_float(value)
     }
@@ -319,8 +320,8 @@ where
     #[must_use]
     fn from_float<T>(value: T) -> Self
     where
-        T: num_traits::Float + 'static,
-        P: num_traits::AsPrimitive<T>,
+        T: Float + 'static,
+        P: AsPrimitive<T>,
     {
         assert!(!value.is_nan(), "Can't convert NaN to FixedPoint");
 
@@ -360,7 +361,7 @@ where
     #[must_use]
     pub fn to_f32(self) -> f32
     where
-        P: num_traits::AsPrimitive<f32>,
+        P: AsPrimitive<f32>,
     {
         self.to_float()
     }
@@ -381,7 +382,7 @@ where
     #[must_use]
     pub fn to_f64(self) -> f64
     where
-        P: num_traits::AsPrimitive<f64>,
+        P: AsPrimitive<f64>,
     {
         self.to_float()
     }
@@ -389,8 +390,8 @@ where
     #[must_use]
     fn to_float<T>(self) -> T
     where
-        T: num_traits::Float + 'static,
-        P: num_traits::AsPrimitive<T>,
+        T: Float + 'static,
+        P: AsPrimitive<T>,
     {
         #[allow(clippy::cast_possible_truncation)]
         let scale = T::from(2)
@@ -419,8 +420,8 @@ where
 /// ```
 impl<T, P, const I: isize, const F: isize> From<T> for FixedPoint<P, I, F>
 where
-    T: num_traits::Float + 'static,
-    P: num_traits::PrimInt + num_traits::AsPrimitive<T> + num_traits::WrappingSub,
+    T: Float + 'static,
+    P: RegInt + AsPrimitive<T>,
 {
     fn from(value: T) -> Self {
         Self::from_float(value)
