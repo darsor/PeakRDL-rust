@@ -25,11 +25,11 @@ const TURBO_ENCAB: TurboEncab = unsafe { TurboEncab::from_ptr(MEMORY.as_mut_ptr(
 
 #[test]
 fn test_read() {
-    use peakrdl_rust::{access, reg::Reg};
+    use peakrdl_rust::reg::Reg;
     use peakrdl_rust_test::components::turbo_encab::status::Status;
 
     // Get a representation of the status register for the Turbo Encabulator
-    let status_reg: Reg<Status, access::R> = TURBO_ENCAB.status();
+    let status_reg: Reg<Status> = TURBO_ENCAB.status();
 
     // Read the register, returning a newtype of its 32-bit value
     let status: Status = status_reg.read();
@@ -41,11 +41,11 @@ fn test_read() {
 
 #[test]
 fn test_write() {
-    use peakrdl_rust::{access, reg::Reg};
+    use peakrdl_rust::reg::Reg;
     use peakrdl_rust_test::components::turbo_encab::ctrl::Ctrl;
 
     // Get a representation of the control register for the Turbo Encabulator
-    let ctrl_reg: Reg<Ctrl, access::RW> = TURBO_ENCAB.ctrl();
+    let ctrl_reg: Reg<Ctrl> = TURBO_ENCAB.ctrl();
 
     // Writing to the register takes a closure
     ctrl_reg.write(|ctrl: &mut Ctrl| {
@@ -72,11 +72,11 @@ fn test_modify() {
         ctrl.set_diractance(100);
     });
     // test-modify-example
-    use peakrdl_rust::{access, reg::Reg};
+    use peakrdl_rust::reg::Reg;
     use peakrdl_rust_test::components::turbo_encab::ctrl::Ctrl;
 
     // Get a representation of the control register for the Turbo Encabulator
-    let ctrl_reg: Reg<Ctrl, access::RW> = TURBO_ENCAB.ctrl();
+    let ctrl_reg: Reg<Ctrl> = TURBO_ENCAB.ctrl();
 
     // The `modify` method performs a read-modify-write access.
     ctrl_reg.modify(|ctrl: &mut Ctrl| {
@@ -129,10 +129,7 @@ fn test_enum() {
 
 #[test]
 fn test_memory() {
-    use peakrdl_rust::{
-        access,
-        mem::{MemEntry, Memory as _},
-    };
+    use peakrdl_rust::mem::{MemEntry, Memory as _};
     use peakrdl_rust_test::components::turbo_encab::measurements::Measurements;
 
     let measurement_mem: Measurements = TURBO_ENCAB.measurements();
@@ -140,7 +137,7 @@ fn test_memory() {
     assert_eq!(measurement_mem.width(), 32);
 
     // Access a memory entry by index
-    let mut first_entry: MemEntry<u32, access::RW, _> = measurement_mem.index(0);
+    let mut first_entry: MemEntry<Measurements> = measurement_mem.index(0);
     first_entry.write(0x1234_5678);
     assert_eq!(first_entry.read(), 0x1234_5678);
 

@@ -26,6 +26,7 @@ impl core::default::Default for {{ctx.type_name|kw_filter}} {
 impl peakrdl_rust::reg::Register for {{ctx.type_name|kw_filter}} {
     type Regwidth = u{{ctx.regwidth}};
     type Accesswidth = u{{ctx.accesswidth}};
+    type Access = peakrdl_rust::access::{{ctx.access}};
     type Endian = peakrdl_rust::endian::{{ctx.endian}};
 
     unsafe fn from_raw(val: Self::Regwidth) -> Self {

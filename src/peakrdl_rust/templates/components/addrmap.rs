@@ -38,15 +38,15 @@ impl {{ctx.type_name|kw_filter}} {
     #[inline(always)]
     #[must_use]
     {% if reg.array is none %}
-    pub const fn {{reg.inst_name|kw_filter}}(&self) -> peakrdl_rust::reg::Reg<{{reg_type_name}}, peakrdl_rust::access::{{reg.access}}> {
+    pub const fn {{reg.inst_name|kw_filter}}(&self) -> peakrdl_rust::reg::Reg<{{reg_type_name}}> {
         unsafe { peakrdl_rust::reg::Reg::from_ptr(self.ptr.wrapping_byte_add({{"0x{:_X}".format(reg.addr_offset)}}).cast()) }
     }
     {% else %}
-    pub const fn {{reg.inst_name|kw_filter}}(&self) -> {{reg.array.type.format("peakrdl_rust::reg::Reg<" ~ reg_type_name ~ ", peakrdl_rust::access::" ~ reg.access ~ ">")}} {
+    pub const fn {{reg.inst_name|kw_filter}}(&self) -> {{reg.array.type.format("peakrdl_rust::reg::Reg<" ~ reg_type_name ~ ">")}} {
         // SAFETY: We will initialize every element before using the array
         let mut array = {{reg.array.type.format("core::mem::MaybeUninit::uninit()")}};
 
-        {% set expr = "unsafe { peakrdl_rust::reg::Reg::<" ~ reg_type_name ~ ", peakrdl_rust::access::" ~ reg.access ~ ">::from_ptr(self.ptr.wrapping_byte_add(" ~ reg.array.addr_offset ~ ").cast()) }"  %}
+        {% set expr = "unsafe { peakrdl_rust::reg::Reg::<" ~ reg_type_name ~ ">::from_ptr(self.ptr.wrapping_byte_add(" ~ reg.array.addr_offset ~ ").cast()) }"  %}
         {{ macros.loop(0, reg.array.dims, expr) | indent(8) }}
 
         // SAFETY: All elements have been initialized above

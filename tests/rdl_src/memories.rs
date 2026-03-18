@@ -1,6 +1,6 @@
 use peakrdl_rust::{
-    access::{R, RW, W},
-    mem::{MemEntry, Memory},
+    access::{Read, Write},
+    mem::Memory,
 };
 use peakrdl_rust_test::Memories;
 
@@ -60,9 +60,25 @@ fn test_memory_iter() {
     }
 }
 
+fn implements_read<M: Memory>(_: M)
+where
+    M::Access: Read,
+{
+}
+fn implements_write<M: Memory>(_: M)
+where
+    M::Access: Write,
+{
+}
+fn implements_read_write<M: Memory>(_: M)
+where
+    M::Access: Read + Write,
+{
+}
+
 #[test]
 fn test_memory_access() {
-    let _: MemEntry<u32, R, _> = TOP.mem_2_32_r().index(0);
-    let _: MemEntry<u32, W, _> = TOP.mem_2_32_w().index(0);
-    let _: MemEntry<u32, RW, _> = TOP.mem_2_32_rw().index(0);
+    implements_read(TOP.mem_2_32_r());
+    implements_write(TOP.mem_2_32_w());
+    implements_read_write(TOP.mem_2_32_rw());
 }

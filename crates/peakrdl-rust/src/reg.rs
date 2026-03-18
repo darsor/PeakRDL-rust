@@ -2,10 +2,9 @@
 #![allow(clippy::inline_always)]
 
 use crate::{
-    access::{self, Access},
+    access::{Access, Read, Write},
     endian::Endian,
 };
-use core::marker::PhantomData;
 use num_traits::{AsPrimitive, Bounded, PrimInt, identities::ConstZero};
 
 /// Trait implemented by all register types.
@@ -16,6 +15,8 @@ pub trait Register: Copy {
     /// Primitive integer type representing the size of memory accesses used when
     /// reading/writing this register.
     type Accesswidth: PrimInt + AsPrimitive<Self::Regwidth> + Bounded;
+    /// Access controls for this register.
+    type Access: Access;
     /// Endianness of this register.
     type Endian: Endian;
 
@@ -33,37 +34,36 @@ pub trait Register: Copy {
 
 /// Register abstraction used to read, write, and modify register values
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
-pub struct Reg<T: Register, A: Access> {
-    ptr: *mut T::Regwidth,
-    phantom: PhantomData<A>,
+pub struct Reg<R: Register> {
+    ptr: *mut R::Regwidth,
 }
 
-unsafe impl<T: Register, A: Access> Send for Reg<T, A> {}
-unsafe impl<T: Register, A: Access> Sync for Reg<T, A> {}
+unsafe impl<R: Register> Send for Reg<R> {}
+unsafe impl<R: Register> Sync for Reg<R> {}
 
 // pointer conversion functions
-impl<T: Register, A: Access> Reg<T, A> {
+impl<R: Register> Reg<R> {
     /// # Safety
     ///
     /// The caller must guarantee that the provided address points to a
-    /// hardware register of type `T` with access `A`.
+    /// hardware register of type `R`.
     #[inline(always)]
-    pub const unsafe fn from_ptr(ptr: *mut T::Regwidth) -> Self {
-        Self {
-            ptr,
-            phantom: PhantomData,
-        }
+    pub const unsafe fn from_ptr(ptr: *mut R::Regwidth) -> Self {
+        Self { ptr }
     }
 
     #[inline(always)]
     #[must_use]
-    pub const fn as_ptr(&self) -> *mut T {
+    pub const fn as_ptr(&self) -> *mut R {
         self.ptr.cast()
     }
 }
 
 // read access
-impl<T: Register, A: access::Read> Reg<T, A> {
+impl<R: Register> Reg<R>
+where
+    R::Access: Read,
+{
     /// Read a register value.
     ///
     /// If the register is to be modified (i.e., a read-modify-write), use the
@@ -78,13 +78,16 @@ impl<T: Register, A: access::Read> Reg<T, A> {
     /// ```
     #[inline(always)]
     #[allow(clippy::must_use_candidate)]
-    pub fn read(&self) -> T {
+    pub fn read(&self) -> R {
         unsafe { read_register(self.ptr) }
     }
 }
 
 // write access
-impl<T: Register, A: access::Write> Reg<T, A> {
+impl<R: Register> Reg<R>
+where
+    R::Access: Write,
+{
     /// Write a register value.
     ///
     /// Typically one would use [`Reg::write`] or [`Reg::modify`] to update a
@@ -99,12 +102,15 @@ impl<T: Register, A: access::Write> Reg<T, A> {
     /// registers.regfile().reg_array()[1].write_value(reg0);
     /// ```
     #[inline(always)]
-    pub fn write_value(&self, val: T) {
+    pub fn write_value(&self, val: R) {
         unsafe { write_register(self.ptr, val) }
     }
 }
 
-impl<T: Default + Register, A: access::Write> Reg<T, A> {
+impl<R: Default + Register> Reg<R>
+where
+    R::Access: Write,
+{
     /// Write a register.
     ///
     /// This method takes a closure. The input to the closure is a mutable reference
@@ -121,7 +127,7 @@ impl<T: Default + Register, A: access::Write> Reg<T, A> {
     /// });
     /// ```
     #[inline(always)]
-    pub fn write<R>(&self, f: impl FnOnce(&mut T) -> R) -> R {
+    pub fn write<T>(&self, f: impl FnOnce(&mut R) -> T) -> T {
         let mut val = Default::default();
         let res = f(&mut val);
         self.write_value(val);
@@ -130,7 +136,10 @@ impl<T: Default + Register, A: access::Write> Reg<T, A> {
 }
 
 // read/write access
-impl<T: Register, A: access::Read + access::Write> Reg<T, A> {
+impl<R: Register> Reg<R>
+where
+    R::Access: Read + Write,
+{
     /// Modify a register.
     ///
     /// This method takes a closure. The input to the closure is a mutable reference
@@ -150,7 +159,7 @@ impl<T: Register, A: access::Read + access::Write> Reg<T, A> {
     /// });
     /// ```
     #[inline(always)]
-    pub fn modify<R>(&self, f: impl FnOnce(&mut T) -> R) -> R {
+    pub fn modify<T>(&self, f: impl FnOnce(&mut R) -> T) -> T {
         let mut val = self.read();
         let res = f(&mut val);
         self.write_value(val);
@@ -158,7 +167,10 @@ impl<T: Register, A: access::Read + access::Write> Reg<T, A> {
     }
 }
 
-unsafe fn read_register<R: Register>(ptr: *const R::Regwidth) -> R {
+unsafe fn read_register<R: Register>(ptr: *const R::Regwidth) -> R
+where
+    R::Access: Read,
+{
     let ptr = ptr.cast::<R::Accesswidth>();
 
     let accesswidth = 8 * core::mem::size_of::<R::Accesswidth>();
@@ -182,7 +194,10 @@ unsafe fn read_register<R: Register>(ptr: *const R::Regwidth) -> R {
     unsafe { R::from_raw(raw_value) }
 }
 
-unsafe fn write_register<R: Register>(ptr: *mut R::Regwidth, value: R) {
+unsafe fn write_register<R: Register>(ptr: *mut R::Regwidth, value: R)
+where
+    R::Access: Write,
+{
     let ptr = ptr.cast::<R::Accesswidth>();
     let value = value.to_raw();
 

@@ -77,7 +77,6 @@ class RegisterInst(Instantiation):
 
     # address offset from parent component, only used if array is None
     addr_offset: Optional[int]
-    access: str  # "R", "W", or "RW"
     array: Optional[Array]
 
 
@@ -151,6 +150,7 @@ class Register(Component):
 
     regwidth: int
     accesswidth: int
+    access: str  # "R", "W", or "RW"
     reset_val: int
     fields: list[FieldInst]
     has_sw_readable: bool
@@ -253,7 +253,7 @@ class ContextScanner(RDLListener):
                 addr_offset = child.address_offset
 
             if isinstance(child, RegNode):
-                if not (access := utils.reg_access(child)):
+                if not utils.reg_access(child):
                     continue
                 registers.append(
                     RegisterInst(
@@ -264,7 +264,6 @@ class ContextScanner(RDLListener):
                         + kw_filter(utils.rust_type_name(child)),
                         array=array,
                         addr_offset=addr_offset,
-                        access=access,
                     )
                 )
             elif isinstance(child, (AddrmapNode, RegfileNode)):
@@ -360,6 +359,9 @@ class ContextScanner(RDLListener):
             # already handled
             return WalkerAction.SkipDescendants
 
+        if not (access := utils.reg_access(node)):
+            return WalkerAction.Continue
+
         reg_reset_val = 0
         fields: list[FieldInst] = []
         for field in node.fields():
@@ -445,6 +447,7 @@ class ContextScanner(RDLListener):
             type_name=utils.rust_type_name(node),
             regwidth=node.get_property("regwidth"),
             accesswidth=node.get_property("accesswidth"),
+            access=access,
             reset_val=reg_reset_val,
             fields=fields,
             has_sw_readable=node.has_sw_readable,
