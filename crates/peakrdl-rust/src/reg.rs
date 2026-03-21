@@ -17,8 +17,10 @@ pub trait Register: Copy {
     type Accesswidth: PrimInt + AsPrimitive<Self::Regwidth> + Bounded;
     /// Access controls for this register.
     type Access: Access;
-    /// Endianness of this register.
-    type Endian: Endian;
+    /// Ordering of bytes within each accesswidth subword.
+    type ByteEndian: Endian;
+    /// Ordering of accesswidth subwords within the register.
+    type WordEndian: Endian;
 
     /// Convert a raw bit value into a Register instance.
     ///
@@ -185,8 +187,8 @@ where
             unsafe { (i, ptr.wrapping_add(i).read_volatile()) }
         })
         .fold(R::Regwidth::ZERO, |reg, (i, subword)| {
-            let significance = R::Endian::address_order_to_significance(i, num_subwords);
-            let subword = R::Endian::from_register_endian(subword);
+            let significance = R::WordEndian::address_order_to_significance(i, num_subwords);
+            let subword = R::ByteEndian::from_register_endian(subword);
             reg | (subword.as_() << (significance * accesswidth))
         });
     // SAFETY: The value was just read directly from hardware, and should
@@ -208,9 +210,9 @@ where
 
     // write one subword at a time, starting at the lowest address
     for i in 0..num_subwords {
-        let significance = R::Endian::address_order_to_significance(i, num_subwords);
+        let significance = R::WordEndian::address_order_to_significance(i, num_subwords);
         let subword = (value >> (significance * accesswidth)) & mask;
-        let subword = R::Endian::to_register_endian(subword.as_());
+        let subword = R::ByteEndian::to_register_endian(subword.as_());
         // SAFETY: SystemRDL guarantees accesswidth <= regwidth, so we won't
         // write outside the bounds of the original pointer.
         unsafe {

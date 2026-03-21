@@ -9,7 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- `Access` is now an associated type of the `Register` trait
+- `Access` is now an associated type of the `Register` trait, so `Access` is no longer a direct generic of the `Reg` type
+- Split the `Endian` associated type of the `Register` trait into `ByteEndian` and `WordEndian`
 - `T: Register` generic of the `Reg` type was renamed to `R`
 
 ## [0.1.1] - 2026-03-13

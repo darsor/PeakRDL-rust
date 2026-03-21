@@ -10,7 +10,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Updated to peakrdl-rust dependency crate v0.2.0
-- `Access` is now an associated type of the `Register` trait
 - `MemEntry` and `MemEntryIter` are now generic over the memory type instead of access and endianness.
 
 ## [0.6.2] - 2026-03-13

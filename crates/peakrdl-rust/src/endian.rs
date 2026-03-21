@@ -26,18 +26,10 @@ pub struct BigEndian;
 /// Little endian byte and word ordering
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct LittleEndian;
-/// Little endian byte ordering with big endian word ordering
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct WordBigByteLittleEndian;
-/// Big endian byte ordering with little endian word ordering
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct WordLittleByteBigEndian;
 
 trait Sealed {}
 impl Sealed for BigEndian {}
 impl Sealed for LittleEndian {}
-impl Sealed for WordBigByteLittleEndian {}
-impl Sealed for WordLittleByteBigEndian {}
 
 impl Endian for BigEndian {
     fn to_register_endian<T: PrimInt>(value: T) -> T {
@@ -61,36 +53,6 @@ impl Endian for LittleEndian {
 
     fn from_register_endian<T: PrimInt>(value: T) -> T {
         T::from_le(value)
-    }
-
-    fn address_order_to_significance(address_order: usize, _num_subwords: usize) -> usize {
-        // The lowest address is the least significant word
-        address_order
-    }
-}
-
-impl Endian for WordBigByteLittleEndian {
-    fn to_register_endian<T: PrimInt>(value: T) -> T {
-        value.to_le()
-    }
-
-    fn from_register_endian<T: PrimInt>(value: T) -> T {
-        T::from_le(value)
-    }
-
-    fn address_order_to_significance(address_order: usize, num_subwords: usize) -> usize {
-        // The lowest address is the most significant word
-        num_subwords - 1 - address_order
-    }
-}
-
-impl Endian for WordLittleByteBigEndian {
-    fn to_register_endian<T: PrimInt>(value: T) -> T {
-        value.to_be()
-    }
-
-    fn from_register_endian<T: PrimInt>(value: T) -> T {
-        T::from_be(value)
     }
 
     fn address_order_to_significance(address_order: usize, _num_subwords: usize) -> usize {

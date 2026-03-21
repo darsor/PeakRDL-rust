@@ -27,7 +27,8 @@ impl peakrdl_rust::reg::Register for {{ctx.type_name|kw_filter}} {
     type Regwidth = u{{ctx.regwidth}};
     type Accesswidth = u{{ctx.accesswidth}};
     type Access = peakrdl_rust::access::{{ctx.access}};
-    type Endian = peakrdl_rust::endian::{{ctx.endian}};
+    type ByteEndian = peakrdl_rust::endian::{{ctx.byte_endian}}Endian;
+    type WordEndian = peakrdl_rust::endian::{{ctx.word_endian}}Endian;
 
     unsafe fn from_raw(val: Self::Regwidth) -> Self {
         Self(val)

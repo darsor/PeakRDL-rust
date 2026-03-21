@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Literal
 
 import jinja2 as jj
 from systemrdl.node import AddrmapNode
@@ -44,16 +44,8 @@ class DesignState:
             default_endian = "little"
         byte_endian = kwargs.pop("byte_endian", None) or default_endian
         word_endian = kwargs.pop("word_endian", None) or default_endian
-        if byte_endian == word_endian:
-            self.endian = byte_endian.capitalize() + "Endian"
-        else:
-            self.endian = (
-                "Word"
-                + word_endian.capitalize()
-                + "Byte"
-                + byte_endian.capitalize()
-                + "Endian"
-            )
+        self.byte_endian: Literal["Big", "Little"] = byte_endian.capitalize()  # type: ignore
+        self.word_endian: Literal["Big", "Little"] = word_endian.capitalize()  # type: ignore
 
         # ------------------------
         # Collect info for export
@@ -62,7 +54,9 @@ class DesignState:
         scanner.run()
         self.has_fixedpoint: bool = scanner.has_fixedpoint
 
-        component_context = ContextScanner(self.top_nodes, self.endian)
+        component_context = ContextScanner(
+            self.top_nodes, self.byte_endian, self.word_endian
+        )
         component_context.run()
         self.top_component_modules: list[str] = component_context.top_component_modules
         self.components: dict[Path, Component] = component_context.components

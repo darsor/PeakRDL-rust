@@ -15,7 +15,7 @@ unsafe impl Sync for {{ctx.type_name|kw_filter}} {}
 impl peakrdl_rust::mem::Memory for {{ctx.type_name|kw_filter}} {
     type Memwidth = {{ctx.primitive}};
     type Access = peakrdl_rust::access::{{ctx.access}};
-    type Endian = peakrdl_rust::endian::{{ctx.endian}};
+    type Endian = peakrdl_rust::endian::{{ctx.endian}}Endian;
 
     fn first_entry_ptr(&self) -> *mut Self::Memwidth {
         self.ptr

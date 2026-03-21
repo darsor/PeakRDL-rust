@@ -2,7 +2,7 @@ import abc
 import math
 from dataclasses import dataclass
 from pathlib import Path
-from typing import ClassVar, Optional, Union
+from typing import ClassVar, Literal, Optional, Union
 
 import jinja2 as jj
 from caseconverter import pascalcase, snakecase
@@ -139,7 +139,7 @@ class Memory(Component):
     registers: list[RegisterInst]
     size: int
     access: str  # "R", "W", or "RW"
-    endian: str
+    endian: Literal["Big", "Little"]
 
 
 @dataclass
@@ -154,7 +154,8 @@ class Register(Component):
     reset_val: int
     fields: list[FieldInst]
     has_sw_readable: bool
-    endian: str
+    byte_endian: Literal["Big", "Little"]
+    word_endian: Literal["Big", "Little"]
 
 
 @dataclass
@@ -177,9 +178,15 @@ class Enum(Component):
 
 
 class ContextScanner(RDLListener):
-    def __init__(self, top_nodes: list[AddrmapNode], endian: str) -> None:
+    def __init__(
+        self,
+        top_nodes: list[AddrmapNode],
+        byte_endian: Literal["Big", "Little"],
+        word_endian: Literal["Big", "Little"],
+    ) -> None:
         self.top_nodes = top_nodes
-        self.endian = endian
+        self.byte_endian: Literal["Big", "Little"] = byte_endian
+        self.word_endian: Literal["Big", "Little"] = word_endian
         self.top_component_modules: list[str] = []
         self.components: dict[Path, Component] = {}
         self.msg = top_nodes[0].env.msg
@@ -340,7 +347,7 @@ class ContextScanner(RDLListener):
                 registers=registers,
                 size=node.size,
                 access=access,
-                endian=self.endian,
+                endian=self.byte_endian,
             )
         return WalkerAction.Continue
 
@@ -451,7 +458,8 @@ class ContextScanner(RDLListener):
             reset_val=reg_reset_val,
             fields=fields,
             has_sw_readable=node.has_sw_readable,
-            endian=self.endian,
+            byte_endian=self.byte_endian,
+            word_endian=self.word_endian,
         )
 
         return WalkerAction.Continue
