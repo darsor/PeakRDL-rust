@@ -1,3 +1,4 @@
+//! Traits for customizing the register I/O implementation
 use crate::{
     access::{Read, Write},
     endian::Endian,
