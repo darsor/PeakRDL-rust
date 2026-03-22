@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [unreleased]
 
+## [0.2.0] - 2026-03-22
+
 ### Changed
 
 - `Access` is now an associated type of the `Register` trait, so `Access` is no longer a direct generic of the `Reg` type

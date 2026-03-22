@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [unreleased]
 
+## [0.7.0] - 2026-03-22
+
 ### Changed
 
 - Require peakrdl-rust dependency crate >=0.2.0, <0.3.0
