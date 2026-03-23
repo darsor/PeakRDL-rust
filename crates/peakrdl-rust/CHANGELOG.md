@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [unreleased]
 
+## [0.2.1] - 2026-03-23
+
+### Fixed
+
+- Added `#![no_std]` for proper building when included in `no_std` projects.
+
 ## [0.2.0] - 2026-03-22
 
 ### Changed
