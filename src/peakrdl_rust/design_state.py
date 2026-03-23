@@ -49,11 +49,14 @@ class DesignState:
 
         self.access_mode: str
         self.access_mode = kwargs.pop("access_mode", "software")
-        if self.access_mode not in ("software", "hardware", "read_only"):
+        if self.access_mode not in ("software", "hardware"):
             raise ValueError(
                 f"Invalid access_mode '{self.access_mode}'. "
-                "Must be one of: 'software', 'hardware', 'read_only'"
+                "Must be one of: 'software', 'hardware'"
             )
+
+        self.read_only: bool
+        self.read_only = kwargs.pop("fmt", False)
 
         # ------------------------
         # Collect info for export

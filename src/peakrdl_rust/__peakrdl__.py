@@ -22,6 +22,8 @@ class Exporter(ExporterSubcommandPlugin):
         "no_fmt": schema.Boolean(),
         "byte_endian": schema.Choice(["big", "little"]),
         "word_endian": schema.Choice(["big", "little"]),
+        "access_mode": schema.Choice(["software", "hardware"]),
+        "read_only": schema.Boolean(),
     }
 
     def add_exporter_arguments(self, arg_group: "argparse._ActionsContainer") -> None:
@@ -63,6 +65,26 @@ class Exporter(ExporterSubcommandPlugin):
             """,
         )
 
+        arg_group.add_argument(
+            "--access-mode",
+            choices=["software", "hardware"],
+            default="software",
+            help="""
+            Which RDL access attribute (hw or sw) to use for register/field
+            access permissions.
+            """,
+        )
+
+        arg_group.add_argument(
+            "--read-only",
+            action="store_true",
+            default=False,
+            help="""
+            Treat all registers and fields as read-only. Write-only registers and
+            fields are not exposed.
+            """,
+        )
+
     def do_export(self, top_node: "AddrmapNode", options: "argparse.Namespace") -> None:
         x = RustExporter()
         x.export(
@@ -72,4 +94,6 @@ class Exporter(ExporterSubcommandPlugin):
             fmt=options.fmt,
             byte_endian=options.byte_endian,
             word_endian=options.word_endian,
+            access_mode=options.access_mode,
+            read_only=options.read_only,
         )

@@ -17,6 +17,7 @@ For example:
     byte_endian = "big"
     word_endian = "little"
     access_mode = "software"
+    read_only = false
 
 
 .. data:: force
@@ -61,6 +62,13 @@ For example:
 
     - ``software`` - Use software read/write access properties (sw property)
     - ``hardware`` - Use hardware read/write access properties (hw property)
-    - ``read_only`` - Force all registers and fields to be read-only
 
     Default: ``software``
+
+
+.. data:: read_only
+
+    If true, treat all registers and fields as read-only. Write-only registers and
+    fields are not exposed.
+
+    Default: ``false``

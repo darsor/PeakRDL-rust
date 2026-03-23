@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [unreleased]
 
+### Added
+
+- `access_mode` parameter to control whether software or hardware access permissions are used.
+- `read_only` parameter to force all registers/fields to be treated as read-only.
+
 ## [0.7.1] - 2026-03-23
 
 ### Fixed

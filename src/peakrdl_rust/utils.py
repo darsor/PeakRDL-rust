@@ -170,17 +170,18 @@ def crate_enum_module_path(field: FieldNode, enum: type[UserEnum]) -> list[str]:
         return parent_modules + ["named_types", module_name]
 
 
-def reg_access(node: RegNode, access_mode: str = "software") -> Union[str, None]:
-    if access_mode == "read_only":
-        return "R"
-    
+def reg_access(
+    node: RegNode,
+    access_mode: str = "software",
+    read_only: bool = False,
+) -> Union[str, None]:
     if access_mode == "hardware":
         readable = node.has_hw_readable
-        writable = node.has_hw_writable
+        writable = node.has_hw_writable and not read_only
     else:  # software (default)
         readable = node.has_sw_readable
-        writable = node.has_sw_writable
-    
+        writable = node.has_sw_writable and not read_only
+
     if readable:
         if writable:
             return "RW"
@@ -193,17 +194,43 @@ def reg_access(node: RegNode, access_mode: str = "software") -> Union[str, None]
             return None
 
 
-def field_access(node: Union[FieldNode, MemNode], access_mode: str = "software") -> Union[str, None]:
-    if access_mode == "read_only":
-        return "R"
-    
+def field_access(
+    node: FieldNode,
+    access_mode: str = "software",
+    read_only: bool = False,
+) -> Union[str, None]:
     if access_mode == "hardware":
         readable = node.is_hw_readable
-        writable = node.is_hw_writable
+        writable = node.is_hw_writable and not read_only
     else:  # software (default)
         readable = node.is_sw_readable
-        writable = node.is_sw_writable
-    
+        writable = node.is_sw_writable and not read_only
+
+    if readable:
+        if writable:
+            return "RW"
+        else:
+            return "R"
+    else:
+        if writable:
+            return "W"
+        else:
+            return None
+
+
+def mem_access(
+    node: MemNode,
+    access_mode: str = "software",
+    read_only: bool = False,
+) -> Union[str, None]:
+    if access_mode == "hardware":
+        # Assume RW since there's no hw access attribute for memories
+        readable = True
+        writable = not read_only
+    else:  # software (default)
+        readable = node.is_sw_readable
+        writable = node.is_sw_writable and not read_only
+
     if readable:
         if writable:
             return "RW"

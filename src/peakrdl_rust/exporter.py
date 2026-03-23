@@ -35,9 +35,11 @@ class RustExporter:
             the `littleendian` and `bigendian` addrmap properties.
         access_mode: str
             Access mode for register/field access functions. One of:
-            - 'software' (default): Returns software read/write access properties
-            - 'hardware': Returns hardware read/write access properties
-            - 'read_only': Returns read-only for all access types
+            - `software` (default): Use software read/write access properties
+            - `hardware`: Use hardware read/write access properties
+        read_only: bool
+            Treat all registers and fields as read-only. Write-only registers and
+            fields are not exposed.
         """
         # If it is the root node, skip to top addrmap
         if isinstance(node, RootNode):
