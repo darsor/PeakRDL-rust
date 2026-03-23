@@ -1,2 +1,2 @@
 #!/usr/bin/env sh
-uv run --no-project --with peakrdl-rust[cli]==0.7.0 peakrdl rust "$@"
+uv run --no-project --with peakrdl-rust[cli]==0.7.1 peakrdl rust "$@"

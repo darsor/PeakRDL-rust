@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [unreleased]
 
+## [0.7.1] - 2026-03-23
+
+### Fixed
+
+- Lifetimes returned by component getter methods are properly set to the parent's lifetime.
+
 ## [0.7.0] - 2026-03-22
 
 ### Changed

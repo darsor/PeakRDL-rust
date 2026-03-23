@@ -79,22 +79,22 @@ impl<'io, IO> {{struct_name}}<'io, IO> {
 
 {% if ctx.registers|length > 0 %}
 // Virtual registers
-impl<IO: peakrdl_rust::io::RegisterIO> {{struct_name}}<'_, IO> {
+impl<'io, IO: peakrdl_rust::io::RegisterIO> {{struct_name}}<'io, IO> {
 {% for reg in ctx.registers %}
     {% set reg_type_name = reg.type_name|kw_filter %}
     {{reg.comment | indent()}}
     #[inline(always)]
     #[must_use]
     {% if reg.array is none %}
-    pub const fn {{reg.inst_name|kw_filter}}(&self) -> peakrdl_rust::reg::Reg<'_, {{reg_type_name}}, IO> {
+    pub const fn {{reg.inst_name|kw_filter}}(&self) -> peakrdl_rust::reg::Reg<'io, {{reg_type_name}}, IO> {
         unsafe { peakrdl_rust::reg::Reg::from_ptr_with(self.ptr.wrapping_byte_add({{"0x{:_X}".format(reg.addr_offset)}}).cast(), self.io) }
     }
     {% else %}
-    pub const fn {{reg.inst_name|kw_filter}}(&self) -> {{reg.array.type.format("peakrdl_rust::reg::Reg<'_, " ~ reg_type_name ~ ", IO>")}} {
+    pub const fn {{reg.inst_name|kw_filter}}(&self) -> {{reg.array.type.format("peakrdl_rust::reg::Reg<'io, " ~ reg_type_name ~ ", IO>")}} {
         // SAFETY: We will initialize every element before using the array
         let mut array = {{reg.array.type.format("core::mem::MaybeUninit::uninit()")}};
 
-        {% set expr = "unsafe { peakrdl_rust::reg::Reg::<'_, " ~ reg_type_name ~ ", IO>::from_ptr_with(self.ptr.wrapping_byte_add(" ~ reg.array.addr_offset ~ ").cast(), self.io) }"  %}
+        {% set expr = "unsafe { peakrdl_rust::reg::Reg::<'io, " ~ reg_type_name ~ ", IO>::from_ptr_with(self.ptr.wrapping_byte_add(" ~ reg.array.addr_offset ~ ").cast(), self.io) }"  %}
         {{ macros.loop(0, reg.array.dims, expr) | indent(8) }}
 
         // SAFETY: All elements have been initialized above

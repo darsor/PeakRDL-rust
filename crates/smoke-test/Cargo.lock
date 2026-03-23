@@ -271,16 +271,16 @@ checksum = "04744f49eae99ab78e0d5c0b603ab218f515ea8cfe5a456d7629ad883a3b6e7d"
 
 [[package]]
 name = "peakrdl-rust"
-version = "0.1.1"
+version = "0.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c90dec3e7d767b944f51311189f5aefd30e8f42827dfef2254d25fe0cd648ced"
+checksum = "d1457722d2675208afcd3c306e859f26e9d3b2c6d58e8c7f8260ca5af738f4dc"
 dependencies = [
  "num-traits",
 ]
 
 [[package]]
 name = "peakrdl-rust-build"
-version = "0.6.2"
+version = "0.7.1"
 dependencies = [
  "dirs",
  "flate2",

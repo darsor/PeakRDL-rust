@@ -11,7 +11,7 @@ In your crate's `Cargo.toml`, add:
 peakrdl-rust = "0.2.1"
 
 [build-dependencies]
-peakrdl-rust-build = { version = "0.7.0", features = ["download-bin"] }
+peakrdl-rust-build = { version = "0.7.1", features = ["download-bin"] }
 ```
 
 In your `build.rs`:
