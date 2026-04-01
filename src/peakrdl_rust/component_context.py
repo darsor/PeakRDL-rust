@@ -188,7 +188,6 @@ class ContextScanner(RDLListener):
         self.top_nodes = top_nodes
         self.byte_endian: Literal["Big", "Little"] = byte_endian
         self.word_endian: Literal["Big", "Little"] = word_endian
-        self.access_mode = access_mode
         self.top_component_modules: list[str] = []
         self.components: dict[Path, Component] = {}
         self.msg = top_nodes[0].env.msg
