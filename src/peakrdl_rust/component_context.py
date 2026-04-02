@@ -368,7 +368,7 @@ class ContextScanner(RDLListener):
             # already handled
             return WalkerAction.SkipDescendants
 
-        if not (access := utils.reg_access(node)):
+        if not (access := utils.reg_access(node, self.access_mode)):
             return WalkerAction.Continue
 
         reg_reset_val = 0
