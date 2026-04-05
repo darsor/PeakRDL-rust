@@ -12,6 +12,8 @@ while {{idx}} < {{dims[depth]}} {
 {%- endmacro -%}
 
 {% macro includes(ctx) %}
+#[allow(unused_imports)]
+use super::_root; // alias to root module of generated code
 {% for use in ctx.use_statements %}
 {{use}}
 {% endfor %}
@@ -26,6 +28,8 @@ pub mod {{mod|kw_filter}};
 {% if ctx.named_type_declarations|length > 0 %}
 /// Named types defined within this component's body
 pub mod named_types {
+    #[allow(unused_imports)]
+    use super::_root; // alias to root module of generated code
     {% for mod in ctx.named_type_declarations %}
     pub mod {{mod|kw_filter}};
     {% endfor %}

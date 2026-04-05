@@ -16,6 +16,12 @@ pub mod components;
 pub use {{top_node}};
 {% endfor %}
 
+/// Alias this module as the root of the generated code
+mod _root {
+    #[allow(unused_imports)]
+    pub use super::*;
+}
+
 /// Version of PeakRDL-rust used to generate this code
 pub const PEAKRDL_RUST_VERSION: &str = "{{ctx.peakrdl_rust_version}}";
 
