@@ -1,0 +1,4 @@
+mod generated;
+{% if ctx.test_name != "non_root_module" %}
+pub use generated::*;
+{% endif %}
