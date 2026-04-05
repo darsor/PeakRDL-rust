@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [unreleased]
 
+### Fixed
+
+- Generate self-contained `use` statements that don't rely on the module structure outside the generated code. ([#9](https://github.com/darsor/PeakRDL-rust/issues/9))
+
 ## [0.7.1] - 2026-03-23
 
 ### Fixed
