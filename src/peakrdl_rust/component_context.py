@@ -310,7 +310,7 @@ class ContextScanner(RDLListener):
             else:
                 module_names = utils.crate_module_path(child)
                 scoped_module = "::".join(
-                    ["crate", "components"] + list(map(kw_filter, module_names))
+                    ["_root", "components"] + list(map(kw_filter, module_names))
                 )
                 named_type_instances.append((inst_name, scoped_module))
 
@@ -532,7 +532,7 @@ class ContextScanner(RDLListener):
             instantiating_file = self.get_node_module_file(instantiating_node)
             assert instantiating_file in self.components
             scoped_module = "::".join(
-                ["crate", "components"] + list(map(kw_filter, module_names))
+                ["_root", "components"] + list(map(kw_filter, module_names))
             )
             self.components[instantiating_file].named_type_instances.append(
                 (snakecase(field.inst_name), scoped_module)

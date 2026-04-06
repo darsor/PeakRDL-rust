@@ -5,6 +5,7 @@ import subprocess
 from pathlib import Path
 from typing import TYPE_CHECKING
 
+import jinja2 as jj
 import pytest
 from systemrdl.compiler import RDLCompiler
 
@@ -71,11 +72,22 @@ def do_export(rdl_file: Path) -> Path:
         (crate_dir / "tests").mkdir(exist_ok=True)
         shutil.copyfile(integration_test, crate_dir / "tests" / integration_test.name)
 
-    # copy boilerplate templates
+    # render boilerplate templates
     templates_dir = Path(__file__).parent / "templates"
-    print(f"copied to {crate_dir / 'Cargo.toml'}")
-    shutil.copyfile(templates_dir / "Cargo.toml.tmpl", crate_dir / "Cargo.toml")
-    shutil.copyfile(templates_dir / "lib.rs.tmpl", src_dir / "lib.rs")
+    loader = jj.FileSystemLoader(templates_dir.resolve())
+    jj_env = jj.Environment(
+        loader=loader,
+        undefined=jj.StrictUndefined,
+        trim_blocks=True,
+        lstrip_blocks=True,
+    )
+    context = {
+        "test_name": rdl_file.stem,
+    }
+    with open(crate_dir / "Cargo.toml", "w") as f:
+        jj_env.get_template("Cargo.toml.jinja2").stream(ctx=context).dump(f)  # type: ignore # jinja incorrectly typed
+    with open(src_dir / "lib.rs", "w") as f:
+        jj_env.get_template("lib.rs.jinja2").stream(ctx=context).dump(f)  # type: ignore # jinja incorrectly typed
 
     return crate_dir
 
