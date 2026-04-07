@@ -1,8 +1,11 @@
 [package]
-name = "peakrdl-rust-test"
+name = "{{ctx.test_name}}"
 description = "Test case for PeakRDL-rust"
 version = "0.1.0"
 edition = "2024"
 
 [dependencies]
 peakrdl-rust = { path = "../../../crates/peakrdl-rust", features = ["fixedpoint"] }
+
+[dev-dependencies]
+trybuild = "1.0"

@@ -1,5 +1,5 @@
 #![allow(unused_variables)]
-use peakrdl_rust_test::TurboEncab;
+use turboencabulator::TurboEncab;
 
 /// A block of memory used for simulating hardware registers.
 ///
@@ -26,7 +26,7 @@ const TURBO_ENCAB: TurboEncab = unsafe { TurboEncab::from_ptr(MEMORY.as_mut_ptr(
 #[test]
 fn test_read() {
     use peakrdl_rust::reg::Reg;
-    use peakrdl_rust_test::components::turbo_encab::status::Status;
+    use turboencabulator::components::turbo_encab::status::Status;
 
     // Get a representation of the status register for the Turbo Encabulator
     let status_reg: Reg<Status> = TURBO_ENCAB.status();
@@ -42,7 +42,7 @@ fn test_read() {
 #[test]
 fn test_write() {
     use peakrdl_rust::reg::Reg;
-    use peakrdl_rust_test::components::turbo_encab::ctrl::Ctrl;
+    use turboencabulator::components::turbo_encab::ctrl::Ctrl;
 
     // Get a representation of the control register for the Turbo Encabulator
     let ctrl_reg: Reg<Ctrl> = TURBO_ENCAB.ctrl();
@@ -73,7 +73,7 @@ fn test_modify() {
     });
     // test-modify-example
     use peakrdl_rust::reg::Reg;
-    use peakrdl_rust_test::components::turbo_encab::ctrl::Ctrl;
+    use turboencabulator::components::turbo_encab::ctrl::Ctrl;
 
     // Get a representation of the control register for the Turbo Encabulator
     let ctrl_reg: Reg<Ctrl> = TURBO_ENCAB.ctrl();
@@ -96,7 +96,7 @@ fn test_modify() {
 
 #[test]
 fn test_array() {
-    use peakrdl_rust_test::components::turbo_encab::grammeter::Grammeter;
+    use turboencabulator::components::turbo_encab::grammeter::Grammeter;
 
     // The SystemRDL source defines an array of 12 grammeters. Handles to each
     // are accessed by the getter method. These lightweight handles store nothing
@@ -111,7 +111,7 @@ fn test_array() {
 #[test]
 fn test_enum() {
     use peakrdl_rust::encode::UnknownVariant;
-    use peakrdl_rust_test::components::turbo_encab::grammeter::status::state::GrammeterStateE;
+    use turboencabulator::components::turbo_encab::grammeter::status::state::GrammeterStateE;
 
     match TURBO_ENCAB.grammeter()[3].status().read().state() {
         // Fields with the "encode" property are represented by a Rust enum
@@ -130,7 +130,7 @@ fn test_enum() {
 #[test]
 fn test_memory() {
     use peakrdl_rust::mem::{MemEntry, Memory as _};
-    use peakrdl_rust_test::components::turbo_encab::measurements::Measurements;
+    use turboencabulator::components::turbo_encab::measurements::Measurements;
 
     let measurement_mem: Measurements = TURBO_ENCAB.measurements();
     assert_eq!(measurement_mem.num_entries(), 57);
@@ -150,7 +150,7 @@ fn test_memory() {
 
 #[test]
 fn test_fixedpoint() {
-    use peakrdl_rust_test::components::turbo_encab::ctrl::ReluctanceFixedPoint;
+    use turboencabulator::components::turbo_encab::ctrl::ReluctanceFixedPoint;
 
     let ctrl_reg = TURBO_ENCAB.ctrl();
     ctrl_reg.write(|ctrl| {

@@ -1,8 +1,8 @@
-use peakrdl_rust::{encode::UnknownVariant, io::MockIO};
-use peakrdl_rust_test::{
+use enums::{
     components::enum_test1::named_types::{my_enum::MyEnum, self_::Self_},
     EnumTest1,
 };
+use peakrdl_rust::{encode::UnknownVariant, io::MockIO};
 
 const SIZE: usize = EnumTest1::<()>::SIZE;
 
