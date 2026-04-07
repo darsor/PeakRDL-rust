@@ -183,13 +183,18 @@ class ContextScanner(RDLListener):
         top_nodes: list[AddrmapNode],
         byte_endian: Literal["Big", "Little"],
         word_endian: Literal["Big", "Little"],
+        access_mode: str = "software",
+        read_only: bool = False,
     ) -> None:
         self.top_nodes = top_nodes
         self.byte_endian: Literal["Big", "Little"] = byte_endian
         self.word_endian: Literal["Big", "Little"] = word_endian
+        self.access_mode = access_mode
+        self.read_only = read_only
         self.top_component_modules: list[str] = []
         self.components: dict[Path, Component] = {}
         self.msg = top_nodes[0].env.msg
+        self.access_mode = access_mode
 
     def run(self) -> None:
         for node in self.top_nodes:
@@ -260,7 +265,7 @@ class ContextScanner(RDLListener):
                 addr_offset = child.address_offset
 
             if isinstance(child, RegNode):
-                if not utils.reg_access(child):
+                if not utils.reg_access(child, self.access_mode, self.read_only):
                     continue
                 registers.append(
                     RegisterInst(
@@ -325,10 +330,10 @@ class ContextScanner(RDLListener):
                 memories=memories,
                 size=node.size,
             )
-        else:
+        else:  # MemNode
             assert len(submaps) == 0
             assert len(memories) == 0
-            if not (access := utils.field_access(node)):
+            if not (access := utils.mem_access(node, self.access_mode, self.read_only)):
                 return WalkerAction.Continue
             memwidth = node.get_property("memwidth")
             primitive_width = 2 ** int(math.ceil(math.log2(memwidth)))
@@ -366,12 +371,19 @@ class ContextScanner(RDLListener):
             # already handled
             return WalkerAction.SkipDescendants
 
-        if not (access := utils.reg_access(node)):
+        if not (reg_access := utils.reg_access(node, self.access_mode, self.read_only)):
             return WalkerAction.Continue
 
         reg_reset_val = 0
         fields: list[FieldInst] = []
         for field in node.fields():
+            if not (
+                field_access := utils.field_access(
+                    field, self.access_mode, self.read_only
+                )
+            ):
+                continue
+
             encoding = field.get_property("encode")
             if encoding is not None:
                 encoding_name = (
@@ -429,7 +441,7 @@ class ContextScanner(RDLListener):
                     comment=utils.doc_comment(field),
                     inst_name=snakecase(field.inst_name),
                     type_name=pascalcase(field.inst_name),
-                    access=utils.field_access(field),
+                    access=field_access,
                     primitive=primitive,
                     encoding=encoding_name,
                     exhaustive=exhaustive,
@@ -454,7 +466,7 @@ class ContextScanner(RDLListener):
             type_name=utils.rust_type_name(node),
             regwidth=node.get_property("regwidth"),
             accesswidth=node.get_property("accesswidth"),
-            access=access,
+            access=reg_access,
             reset_val=reg_reset_val,
             fields=fields,
             has_sw_readable=node.has_sw_readable,

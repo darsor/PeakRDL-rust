@@ -1,0 +1,5 @@
+error[E0599]: no method named `hw_na` found for struct `HwReg` in the current scope
+  --> tests/compile_fail/no_hw_na_field.rs:11:43
+   |
+11 |     let hw_na_value = top.hw_reg().read().hw_na();
+   |                                           ^^^^^ method not found in `HwReg`

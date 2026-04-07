@@ -1,8 +1,8 @@
+use memories::Memories;
 use peakrdl_rust::{
     access::{Read, Write},
     mem::Memory,
 };
-use peakrdl_rust_test::Memories;
 
 /// A block of memory used for simulating hardware registers.
 ///

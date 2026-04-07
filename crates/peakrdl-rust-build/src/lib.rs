@@ -21,6 +21,15 @@ pub enum Endian {
     Little,
 }
 
+/// Access mode
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub enum AccessMode {
+    /// Use software access permissions (sw property)
+    Software,
+    /// Use hardware access permissions (hw property)
+    Hardware,
+}
+
 /// Builder for configuring and running the PeakRDL-rust code generator.
 #[derive(Debug)]
 pub struct Generator {
@@ -54,6 +63,11 @@ pub struct Generator {
     /// By default uses the `littleendian` and `bigendian` addrmap properties,
     /// or little endian if not defined.
     word_endian: Option<Endian>,
+    // Access mode for register/field access functions.
+    access_mode: Option<AccessMode>,
+    // Treat all registers and fields as read-only. Write-only registers and
+    // fields are not exposed.
+    read_only: bool,
 }
 
 impl Default for Generator {
@@ -79,6 +93,8 @@ impl Generator {
             fmt: false,
             byte_endian: None,
             word_endian: None,
+            access_mode: None,
+            read_only: false,
         }
     }
 
@@ -174,7 +190,20 @@ impl Generator {
         self
     }
 
+    /// Set the access mode for register/field access functions.
+    pub fn access_mode(&mut self, mode: AccessMode) -> &mut Self {
+        self.access_mode = Some(mode);
+        self
+    }
+
+    /// Set to `true` to treat all registers/fields as read-only.
+    pub fn read_only(&mut self, read_only: bool) -> &mut Self {
+        self.read_only = read_only;
+        self
+    }
+
     #[allow(clippy::missing_errors_doc)]
+    #[allow(clippy::too_many_lines)]
     /// Run the code generator.
     ///
     /// This will:
@@ -282,7 +311,21 @@ impl Generator {
             Some(Endian::Little) => {
                 cmd.args(["--word-endian", "little"]);
             }
-            _ => (),
+            None => (),
+        }
+
+        match self.access_mode {
+            Some(AccessMode::Hardware) => {
+                cmd.args(["--access-mode", "hardware"]);
+            }
+            Some(AccessMode::Software) => {
+                cmd.args(["--access-mode", "software"]);
+            }
+            None => (),
+        }
+
+        if self.read_only {
+            cmd.arg("--read-only");
         }
 
         for file in &self.files {

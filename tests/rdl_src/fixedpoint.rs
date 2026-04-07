@@ -1,4 +1,4 @@
-use peakrdl_rust_test::components::top;
+use fixedpoint::components::top;
 
 #[test]
 fn test_reset_val() {

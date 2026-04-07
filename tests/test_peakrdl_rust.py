@@ -1,9 +1,8 @@
 import os
 import re
-import shutil
 import subprocess
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 
 import jinja2 as jj
 import pytest
@@ -21,10 +20,11 @@ def get_rdl_files() -> list[Path]:
     return list(rdl_src_dir.glob("*.rdl"))
 
 
-def do_export(rdl_file: Path) -> Path:
-    crate_name = rdl_file.stem.replace("-", "_")
+def do_export(rdl_file: Path, test_name: Optional[str] = None, **export_kwargs) -> Path:
+    if test_name is None:
+        test_name = rdl_file.stem.replace("-", "_")
 
-    crate_dir = Path(__file__).parent / "output" / crate_name
+    crate_dir = Path(__file__).parent / "output" / test_name
     crate_dir.mkdir(exist_ok=True, parents=True)
 
     src_dir = crate_dir / "src"
@@ -58,19 +58,31 @@ def do_export(rdl_file: Path) -> Path:
         root_node = rdlc.elaborate(top_def_name=name)
         top_nodes.append(root_node.top)
 
-    x = RustExporter()
-    x.export(
-        top_nodes,
-        path=str(generated_dir),
-        fmt=True,
-        force=True,
-    )
+    kwargs = {
+        "path": str(generated_dir),
+        "fmt": True,
+        "force": True,
+    }
+    kwargs.update(export_kwargs)
 
-    # copy integration test into package if it exists
-    integration_test = rdl_file.parent / (rdl_file.stem + ".rs")
+    x = RustExporter()
+    x.export(top_nodes, **kwargs)
+
+    # symlink integration test into package if it exists
+    test_dir = crate_dir / "tests"
+    integration_test = rdl_file.parent / (test_name + ".rs")
     if integration_test.exists():
-        (crate_dir / "tests").mkdir(exist_ok=True)
-        shutil.copyfile(integration_test, crate_dir / "tests" / integration_test.name)
+        test_dir.mkdir(exist_ok=True)
+        if not (test_dir / integration_test.name).exists():
+            (test_dir / integration_test.name).symlink_to(integration_test)
+
+    # symlink trybuild ui tests into package if they exist
+    compile_fail_dir = rdl_file.parent / "compile_fail" / test_name
+    if compile_fail_dir.exists():
+        if not (test_dir / "compile_fail").exists():
+            (test_dir / "compile_fail").symlink_to(
+                compile_fail_dir, target_is_directory=True
+            )
 
     # render boilerplate templates
     templates_dir = Path(__file__).parent / "templates"
@@ -82,7 +94,7 @@ def do_export(rdl_file: Path) -> Path:
         lstrip_blocks=True,
     )
     context = {
-        "test_name": rdl_file.stem,
+        "test_name": test_name,
     }
     with open(crate_dir / "Cargo.toml", "w") as f:
         jj_env.get_template("Cargo.toml.jinja2").stream(ctx=context).dump(f)  # type: ignore # jinja incorrectly typed

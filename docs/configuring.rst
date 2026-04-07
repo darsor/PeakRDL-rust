@@ -16,6 +16,8 @@ For example:
     fmt = true
     byte_endian = "big"
     word_endian = "little"
+    access_mode = "software"
+    read_only = false
 
 
 .. data:: force
@@ -49,3 +51,24 @@ For example:
     word endianness.
 
     Default: addrmap endianness propery, or ``little`` if not defined
+
+
+.. data:: access_mode
+
+    Controls which access properties are used for register and field access
+    determination.
+
+    Options:
+
+    - ``software`` - Use software read/write access properties (sw property)
+    - ``hardware`` - Use hardware read/write access properties (hw property)
+
+    Default: ``software``
+
+
+.. data:: read_only
+
+    If true, treat all registers and fields as read-only. Write-only registers and
+    fields are not exposed.
+
+    Default: ``false``

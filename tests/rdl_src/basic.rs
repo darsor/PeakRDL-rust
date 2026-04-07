@@ -1,5 +1,5 @@
+use basic::Basic;
 use peakrdl_rust::io::MockIO;
-use peakrdl_rust_test::Basic;
 
 const SIZE: usize = Basic::<()>::SIZE;
 

@@ -1,0 +1,11 @@
+error[E0599]: no method named `sw_reg` found for struct `AccessModesTest<'io, IO>` in the current scope
+  --> tests/compile_fail/no_sw_reg.rs:11:22
+   |
+11 |     let sw_reg = top.sw_reg();
+   |                      ^^^^^^
+   |
+help: there is a method `hw_reg` with a similar name
+   |
+11 -     let sw_reg = top.sw_reg();
+11 +     let sw_reg = top.hw_reg();
+   |
