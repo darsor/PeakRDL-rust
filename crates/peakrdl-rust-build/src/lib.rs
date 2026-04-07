@@ -203,6 +203,7 @@ impl Generator {
     }
 
     #[allow(clippy::missing_errors_doc)]
+    #[allow(clippy::too_many_lines)]
     /// Run the code generator.
     ///
     /// This will:

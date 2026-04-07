@@ -1,6 +1,5 @@
 import os
 import re
-import shutil
 import subprocess
 from pathlib import Path
 from typing import TYPE_CHECKING, Optional
