@@ -56,7 +56,7 @@ class DesignState:
             )
 
         self.read_only: bool
-        self.read_only = kwargs.pop("fmt", False)
+        self.read_only = kwargs.pop("read_only", False)
 
         # ------------------------
         # Collect info for export
@@ -66,7 +66,11 @@ class DesignState:
         self.has_fixedpoint: bool = scanner.has_fixedpoint
 
         component_context = ContextScanner(
-            self.top_nodes, self.byte_endian, self.word_endian, self.access_mode
+            self.top_nodes,
+            self.byte_endian,
+            self.word_endian,
+            self.access_mode,
+            self.read_only,
         )
         component_context.run()
         self.top_component_modules: list[str] = component_context.top_component_modules

@@ -371,12 +371,19 @@ class ContextScanner(RDLListener):
             # already handled
             return WalkerAction.SkipDescendants
 
-        if not (access := utils.reg_access(node, self.access_mode)):
+        if not (reg_access := utils.reg_access(node, self.access_mode, self.read_only)):
             return WalkerAction.Continue
 
         reg_reset_val = 0
         fields: list[FieldInst] = []
         for field in node.fields():
+            if not (
+                field_access := utils.field_access(
+                    field, self.access_mode, self.read_only
+                )
+            ):
+                continue
+
             encoding = field.get_property("encode")
             if encoding is not None:
                 encoding_name = (
@@ -434,7 +441,7 @@ class ContextScanner(RDLListener):
                     comment=utils.doc_comment(field),
                     inst_name=snakecase(field.inst_name),
                     type_name=pascalcase(field.inst_name),
-                    access=utils.field_access(field, self.access_mode, self.read_only),
+                    access=field_access,
                     primitive=primitive,
                     encoding=encoding_name,
                     exhaustive=exhaustive,
@@ -459,7 +466,7 @@ class ContextScanner(RDLListener):
             type_name=utils.rust_type_name(node),
             regwidth=node.get_property("regwidth"),
             accesswidth=node.get_property("accesswidth"),
-            access=access,
+            access=reg_access,
             reset_val=reg_reset_val,
             fields=fields,
             has_sw_readable=node.has_sw_readable,
