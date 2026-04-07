@@ -1,0 +1,5 @@
+error[E0599]: no method named `set_sw_w` found for struct `SwReg` in the current scope
+  --> tests/compile_fail/no_set_sw_w.rs:13:18
+   |
+13 |     sw_reg_value.set_sw_w(0x55);
+   |                  ^^^^^^^^ method not found in `SwReg`

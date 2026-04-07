@@ -1,0 +1,13 @@
+error[E0599]: the method `write` exists for struct `Reg<'_, SwReg, MockIO<8>>`, but its trait bounds were not satisfied
+  --> tests/compile_fail/no_write_method.rs:11:18
+   |
+11 |     top.sw_reg().write(|reg| {});
+   |                  ^^^^^ method cannot be called on `Reg<'_, SwReg, MockIO<8>>` due to unsatisfied trait bounds
+   |
+  ::: $PEAKRDL_RUST/src/access.rs
+   |
+   | pub struct R;
+   | ------------ doesn't satisfy `R: peakrdl_rust::access::Write`
+   |
+   = note: the following trait bounds were not satisfied:
+           `R: peakrdl_rust::access::Write`

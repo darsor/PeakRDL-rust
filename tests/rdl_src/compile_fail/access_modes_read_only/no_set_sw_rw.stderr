@@ -1,0 +1,11 @@
+error[E0599]: no method named `set_sw_rw` found for struct `SwReg` in the current scope
+  --> tests/compile_fail/no_set_sw_rw.rs:13:18
+   |
+13 |     sw_reg_value.set_sw_rw(0x55);
+   |                  ^^^^^^^^^
+   |
+help: there is a method `sw_rw` with a similar name, but with different arguments
+  --> src/generated/components/access_modes_test/sw_reg.rs
+   |
+   |     pub fn sw_rw(&self) -> u8 {
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^
