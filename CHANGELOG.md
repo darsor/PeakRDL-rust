@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [unreleased]
 
+### Fixed
+
+- `peakrdl-rust-build` crate uses host arch instead of target arch to determine which `peakrdl-rust` binary to download.
+
 ## [0.7.2] - 2026-04-06
 
 ### Added

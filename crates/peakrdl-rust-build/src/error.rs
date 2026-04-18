@@ -29,9 +29,9 @@ pub enum Error {
 
     /// The current platform is not supported.
     #[error(
-        "unsupported platform: {os}-{arch}; open an issue to request support: https://github.com/darsor/PeakRDL-rust/issues"
+        "unsupported host platform: {host}; open an issue to request support: https://github.com/darsor/PeakRDL-rust/issues"
     )]
-    UnsupportedPlatform { os: String, arch: String },
+    UnsupportedPlatform { host: String },
 
     /// Failed to download the generator binary.
     #[error("failed to download generator binary from {url}: {reason}")]

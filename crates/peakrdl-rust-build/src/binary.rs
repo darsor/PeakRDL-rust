@@ -63,12 +63,12 @@ pub(crate) mod download {
     /// GitHub Releases base URL.
     const GITHUB_RELEASES_BASE: &str = "https://github.com/darsor/PeakRDL-rust/releases/download";
 
-    /// Per-platform binary info: `(target_os, target_arch, asset_filename)`.
+    /// Per-platform binary info: `(host_os, host_arch, asset_filename)`.
     const PLATFORM_ASSETS: &[(&str, &str, &str)] = &[
         ("linux", "x86_64", "peakrdl-rust-linux-x86_64.tar.gz"),
         ("linux", "aarch64", "peakrdl-rust-linux-aarch64.tar.gz"),
-        ("macos", "x86_64", "peakrdl-rust-darwin-x86_64.tar.gz"),
-        ("macos", "aarch64", "peakrdl-rust-darwin-aarch64.tar.gz"),
+        ("darwin", "x86_64", "peakrdl-rust-darwin-x86_64.tar.gz"),
+        ("darwin", "aarch64", "peakrdl-rust-darwin-aarch64.tar.gz"),
         ("windows", "x86_64", "peakrdl-rust-windows-x86_64.tar.gz"),
     ];
 
@@ -79,12 +79,18 @@ pub(crate) mod download {
     }
 
     pub(crate) fn platform_info() -> Result<(&'static str, &'static str)> {
-        let os = std::env::var("CARGO_CFG_TARGET_OS").unwrap_or_default();
-        let arch = std::env::var("CARGO_CFG_TARGET_ARCH").unwrap_or_default();
+        let host = std::env::var("HOST").unwrap_or_default();
+
+        // The host triple is in the form <arch>-<vendor>-<os>[-<env>],
+        // e.g. "x86_64-unknown-linux-gnu" or "aarch64-apple-darwin".
+        let mut parts = host.splitn(3, '-');
+        let arch = parts.next().unwrap_or_default();
+        let _vendor = parts.next();
+        let os_and_env = parts.next().unwrap_or_default();
 
         for &(p_os, p_arch, asset) in PLATFORM_ASSETS {
-            if os == p_os && arch == p_arch {
-                let exe = if os == "windows" {
+            if os_and_env.starts_with(p_os) && arch == p_arch {
+                let exe = if os_and_env.starts_with("windows") {
                     "peakrdl-rust.exe"
                 } else {
                     "peakrdl-rust"
@@ -93,7 +99,7 @@ pub(crate) mod download {
             }
         }
 
-        Err(Error::UnsupportedPlatform { os, arch })
+        Err(Error::UnsupportedPlatform { host })
     }
 
     pub(crate) fn cache_binary_path(exe_name: &str) -> Result<PathBuf> {

@@ -241,6 +241,7 @@ impl Generator {
 
         // Also re-run if the user overrides the binary path.
         println!("cargo:rerun-if-env-changed=PEAKRDL_RUST_BINARY");
+        println!("cargo:rerun-if-env-changed=HOST");
 
         let generator = binary::resolve_generator_binary()?;
         println!("cargo:rerun-if-changed={}", generator.display());
