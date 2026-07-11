@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [unreleased]
 
+### Changed
+
+- `RegisterIO::try_read_register`/`try_write_register` now take a single-word
+  fast path (`num_subwords == 1`). For single-word registers — the common case —
+  the access folds to a single volatile load/store instead of the generic
+  subword loop (`map`/`try_fold` and a `for` loop). `num_subwords` is a
+  compile-time constant, so the multi-word loop is dropped entirely for
+  single-word registers; it is retained as a fallback for multi-word registers,
+  so behavior is unchanged. (Measured ~10% `.text` reduction on a register-heavy
+  RISC-V `-Oz` firmware.)
+
 ## [0.2.1] - 2026-03-23
 
 ### Fixed

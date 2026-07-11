@@ -107,6 +107,19 @@ where
         let regwidth = 8 * core::mem::size_of::<R::Regwidth>();
         let num_subwords = regwidth / accesswidth;
 
+        // Fast path: a single-word register is one volatile load. `num_subwords`
+        // is a compile-time constant (derived from `size_of`), so for single-word
+        // registers the multi-word loop below is dropped entirely and the access
+        // folds to a single load at the call site.
+        if num_subwords == 1 {
+            // SAFETY: accesswidth == regwidth here, so this reads exactly the
+            // register's bounds (same guarantee the loop relies on).
+            let subword = unsafe { self.try_read::<R::Accesswidth>(ptr)? };
+            let subword = R::ByteEndian::from_register_endian(subword);
+            // SAFETY: value just read directly from hardware.
+            return unsafe { Ok(R::from_raw(subword.as_())) };
+        }
+
         // read one subword at a time, starting at the lowest address
         let raw_value = (0..num_subwords)
             .map(|i| {
@@ -139,6 +152,16 @@ where
         let regwidth = 8 * core::mem::size_of::<R::Regwidth>();
         let num_subwords = regwidth / accesswidth;
         let mask = R::Accesswidth::max_value().as_();
+
+        // Fast path: a single-word register is one volatile store. `num_subwords`
+        // is a compile-time constant, so for single-word registers the loop below
+        // is dropped entirely and the access folds to a single store at the call site.
+        if num_subwords == 1 {
+            let subword = R::ByteEndian::to_register_endian(value.as_());
+            // SAFETY: accesswidth == regwidth here, so this writes exactly the
+            // register's bounds (same guarantee the loop relies on).
+            return unsafe { self.try_write::<R::Accesswidth>(ptr, subword) };
+        }
 
         // write one subword at a time, starting at the lowest address
         for i in 0..num_subwords {
