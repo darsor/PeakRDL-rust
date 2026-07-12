@@ -5,7 +5,7 @@ edition = "2024"
 publish = false
 
 [dependencies]
-peakrdl-rust = { version = "0.2.1" }
+peakrdl-rust = { version = "0.2.2" }
 
 [build-dependencies]
 anyhow = "1.0.102"

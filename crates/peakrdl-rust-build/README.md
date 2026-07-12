@@ -8,7 +8,7 @@ In your crate's `Cargo.toml`, add:
 ```ignore
 [dependencies]
 # the generated code implements traits defined in this crate
-peakrdl-rust = "0.2.1"
+peakrdl-rust = "0.2.2"
 
 [build-dependencies]
 peakrdl-rust-build = { version = "0.7.3", features = ["download-bin"] }
