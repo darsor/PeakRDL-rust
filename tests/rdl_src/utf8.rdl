@@ -1,0 +1,20 @@
+// Test non-ASCII non-english UTF-8
+addrmap utf8 {
+    reg {
+        default sw = rw;
+        default hw = r;
+        field {
+            name = "Café";
+            desc = "Дмитрий";
+        } field_a;
+        field {
+            name = "العربية";
+            desc = "简体中文";
+        } field_b;
+        field {
+            name = "Test register 👋";
+            desc = "¡Let's go! 🚀";
+        } field_c;
+    } reg_a;
+
+};
