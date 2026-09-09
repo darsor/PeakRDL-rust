@@ -96,10 +96,16 @@ def do_export(rdl_file: Path, test_name: Optional[str] = None, **export_kwargs) 
     context = {
         "test_name": test_name,
     }
-    with open(crate_dir / "Cargo.toml", "w") as f:
-        jj_env.get_template("Cargo.toml.jinja2").stream(ctx=context).dump(f)  # type: ignore # jinja incorrectly typed
-    with open(src_dir / "lib.rs", "w") as f:
-        jj_env.get_template("lib.rs.jinja2").stream(ctx=context).dump(f)  # type: ignore # jinja incorrectly typed
+    with open(crate_dir / "Cargo.toml", "wb") as f:
+        jj_env.get_template("Cargo.toml.jinja2").stream(ctx=context).dump(
+            f,  # type: ignore # jinja incorrectly typed
+            encoding="utf-8",
+        )
+    with open(src_dir / "lib.rs", "wb") as f:
+        jj_env.get_template("lib.rs.jinja2").stream(ctx=context).dump(
+            f,  # type: ignore # jinja incorrectly typed
+            encoding="utf-8",
+        )
 
     return crate_dir
 

@@ -45,9 +45,9 @@ class Component(abc.ABC):
     def render(self, output_dir: Path, jj_env: jj.Environment) -> None:
         out_file = output_dir / self.file
         out_file.parent.mkdir(parents=True, exist_ok=True)
-        with out_file.open("w") as f:
+        with out_file.open("wb") as f:
             template = jj_env.get_template(self.template)
-            template.stream(ctx=self).dump(f)  # type: ignore # jinja incorrectly typed
+            template.stream(ctx=self).dump(f, encoding="utf-8")  # type: ignore # jinja incorrectly typed
 
 
 @dataclass

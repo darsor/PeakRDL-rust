@@ -28,9 +28,9 @@ def write_module(ds: DesignState) -> list[Path]:
         "crate_min_version": PEAKRDL_RUST_CRATE_MIN_VERSION,
         "crate_max_version": crate_max_version,
     }
-    with mod_rs_path.open("w") as f:
+    with mod_rs_path.open("wb") as f:
         template = ds.jj_env.get_template("mod.rs")
-        template.stream(ctx=context).dump(f)  # type: ignore # jinja incorrectly typed
+        template.stream(ctx=context).dump(f, encoding="utf-8")  # type: ignore # jinja incorrectly typed
     generated_files.append(mod_rs_path)
 
     # components.rs
@@ -39,9 +39,9 @@ def write_module(ds: DesignState) -> list[Path]:
     context = {
         "components": ds.top_component_modules,
     }
-    with components_rs_path.open("w") as f:
+    with components_rs_path.open("wb") as f:
         template = ds.jj_env.get_template("components.rs")
-        template.stream(ctx=context).dump(f)  # type: ignore # jinja incorrectly typed
+        template.stream(ctx=context).dump(f, encoding="utf-8")  # type: ignore # jinja incorrectly typed
     generated_files.append(components_rs_path)
 
     for path, comp in ds.components.items():
