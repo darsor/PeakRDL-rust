@@ -70,7 +70,7 @@ cli = [
 ]
 
 [build-system]
-requires = ["uv_build"]
+requires = ["uv_build~=0.12"]
 build-backend = "uv_build"
 
 [tool.pyright]
