@@ -47,7 +47,7 @@ class Component(abc.ABC):
         out_file.parent.mkdir(parents=True, exist_ok=True)
         with out_file.open("wb") as f:
             template = jj_env.get_template(self.template)
-            template.stream(ctx=self).dump(f, encoding="utf-8")  # type: ignore # jinja incorrectly typed
+            template.stream(ctx=self).dump(f, encoding="utf-8")
 
 
 @dataclass

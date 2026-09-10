@@ -30,7 +30,7 @@ def write_module(ds: DesignState) -> list[Path]:
     }
     with mod_rs_path.open("wb") as f:
         template = ds.jj_env.get_template("mod.rs")
-        template.stream(ctx=context).dump(f, encoding="utf-8")  # type: ignore # jinja incorrectly typed
+        template.stream(ctx=context).dump(f, encoding="utf-8")
     generated_files.append(mod_rs_path)
 
     # components.rs
@@ -41,7 +41,7 @@ def write_module(ds: DesignState) -> list[Path]:
     }
     with components_rs_path.open("wb") as f:
         template = ds.jj_env.get_template("components.rs")
-        template.stream(ctx=context).dump(f, encoding="utf-8")  # type: ignore # jinja incorrectly typed
+        template.stream(ctx=context).dump(f, encoding="utf-8")
     generated_files.append(components_rs_path)
 
     for path, comp in ds.components.items():
