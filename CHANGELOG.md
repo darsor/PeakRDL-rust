@@ -10,6 +10,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - `AsyncRegisterIO` and `RawAsyncRegisterIO` traits.
+- Async register access methods on `Reg` when using an `AsyncRegisterIO` transport.
+
+### Changed
+
+- Relaxed `IO: RegisterIO` trait bound on the `Reg` type.
 
 ### Fixed
 

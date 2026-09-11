@@ -45,4 +45,5 @@ peakrdl rust --help
 - [x] Unwrap encoded field enums if exhaustive
 - [x] Restrict read/write to memories
 - [x] Add examples to docs
+- [x] Async register access
 - [ ] Regwidth > native integer types

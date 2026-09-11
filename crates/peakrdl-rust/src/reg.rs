@@ -6,7 +6,7 @@ use core::convert::Infallible;
 use crate::{
     access::{Access, Read, Write},
     endian::Endian,
-    io::{PtrIO, RegisterIO},
+    io::{AsyncRegisterIO, PtrIO, RegisterIO},
 };
 use num_traits::{
     AsPrimitive, FromBytes, PrimInt, ToBytes, WrappingAdd, WrappingSub, identities::ConstZero,
@@ -64,8 +64,9 @@ pub trait Register: Copy {
 
 /// Register abstraction used to read, write, and modify register values.
 ///
-/// This is generic over both the [`Register`] to access and the [`RegisterIO`] type
-/// used to access the register.
+/// This is generic over both the [`Register`] to access and an `IO` type
+/// (typically [`RegisterIO`] and/or [`AsyncRegisterIO`]) used to access
+/// the register.
 ///
 /// The [`Register`] trait has associated types defining the register width,
 /// access controls, and endianness which are used to customize the read/write
@@ -74,7 +75,7 @@ pub trait Register: Copy {
 /// [`RegisterIO`] defaults to regular volatile pointer
 /// I/O and is only needed for advanced use cases like tunneled registers.
 #[derive(Debug, PartialEq, Eq)]
-pub struct Reg<'io, R: Register, IO: RegisterIO = PtrIO> {
+pub struct Reg<'io, R: Register, IO = PtrIO> {
     ptr: *mut R::Regwidth,
     io: &'io IO,
 }
@@ -132,7 +133,7 @@ where
     /// Try to read a register value.
     ///
     /// If the register is to be modified (i.e., a read-modify-write), use the
-    /// [`Reg::modify`] method instead.
+    /// [`Reg::try_modify`] method instead.
     ///
     /// # Example
     ///
@@ -148,6 +149,7 @@ where
     }
 }
 
+// infallible read access
 impl<R: Register, IO: RegisterIO<Error = Infallible>> Reg<'_, R, IO>
 where
     R::Access: Read,
@@ -171,7 +173,7 @@ where
     }
 }
 
-// write access
+// write value access
 impl<R: Register, IO: RegisterIO> Reg<'_, R, IO>
 where
     R::Access: Write,
@@ -197,6 +199,7 @@ where
     }
 }
 
+// infallible write value access
 impl<R: Register, IO: RegisterIO<Error = Infallible>> Reg<'_, R, IO>
 where
     R::Access: Write,
@@ -221,6 +224,7 @@ where
     }
 }
 
+// write access
 impl<R: Default + Register, IO: RegisterIO> Reg<'_, R, IO>
 where
     R::Access: Write,
@@ -250,6 +254,7 @@ where
     }
 }
 
+// infallible write access
 impl<R: Default + Register, IO: RegisterIO<Error = Infallible>> Reg<'_, R, IO>
 where
     R::Access: Write,
@@ -308,6 +313,7 @@ where
     }
 }
 
+// infallible read/write access
 impl<R: Register, IO: RegisterIO<Error = Infallible>> Reg<'_, R, IO>
 where
     R::Access: Read + Write,
@@ -333,6 +339,223 @@ where
     #[inline(always)]
     pub fn modify<T>(&self, f: impl FnOnce(&mut R) -> T) -> T {
         self.try_modify(f).unwrap_infallible()
+    }
+}
+
+// async read access
+impl<R: Register, IO: AsyncRegisterIO> Reg<'_, R, IO>
+where
+    R::Access: Read,
+{
+    /// Try to read a register value.
+    ///
+    /// If the register is to be modified (i.e., a read-modify-write), use the
+    /// [`Reg::try_modify_async`] method instead.
+    ///
+    /// # Example
+    ///
+    /// ```ignore
+    /// let reg1_val = registers.regfile().register1().try_read_async().await.unwrap();
+    /// let field1_val = reg1_val.field1();
+    /// let field2_val = reg1_val.field2();
+    /// ```
+    #[inline(always)]
+    #[allow(clippy::missing_errors_doc)]
+    pub async fn try_read_async(&self) -> Result<R, IO::Error> {
+        unsafe { self.io.try_read_register(self.ptr).await }
+    }
+}
+
+// infallible async read access
+impl<R: Register, IO: AsyncRegisterIO<Error = Infallible>> Reg<'_, R, IO>
+where
+    R::Access: Read,
+{
+    /// Read a register value.
+    ///
+    /// If the register is to be modified (i.e., a read-modify-write), use the
+    /// [`Reg::modify_async`] method instead.
+    ///
+    /// # Example
+    ///
+    /// ```ignore
+    /// let reg1_val = registers.regfile().register1().read_async().await;
+    /// let field1_val = reg1_val.field1();
+    /// let field2_val = reg1_val.field2();
+    /// ```
+    #[inline(always)]
+    #[allow(clippy::must_use_candidate)]
+    pub async fn read_async(&self) -> R {
+        self.try_read_async().await.unwrap_infallible()
+    }
+}
+
+// async write value access
+impl<R: Register, IO: AsyncRegisterIO> Reg<'_, R, IO>
+where
+    R::Access: Write,
+{
+    /// Try to write a register value.
+    ///
+    /// Typically one would use [`Reg::try_write_async`] or [`Reg::try_modify_async`]
+    /// to update a register's contents, but this method has a few different use cases such
+    /// as updating a register with a stored value, or updating one register with
+    /// the contents of another.
+    ///
+    /// # Example
+    ///
+    /// ```ignore
+    /// # write array index 0 value to index 1
+    /// let reg0 = registers.regfile().reg_array()[0].try_read_async().await.unwrap();
+    /// registers.regfile().reg_array()[1].try_write_value_async(reg0).await.unwrap();
+    /// ```
+    #[inline(always)]
+    #[allow(clippy::missing_errors_doc)]
+    pub async fn try_write_value_async(&self, val: R) -> Result<(), IO::Error> {
+        unsafe { self.io.try_write_register(self.ptr, val).await }
+    }
+}
+
+// infallible async write value access
+impl<R: Register, IO: AsyncRegisterIO<Error = Infallible>> Reg<'_, R, IO>
+where
+    R::Access: Write,
+{
+    /// Write a register value.
+    ///
+    /// Typically one would use [`Reg::write_async`] or [`Reg::modify_async`] to update a
+    /// register's contents, but this method has a few different use cases such
+    /// as updating a register with a stored value, or updating one register with
+    /// the contents of another.
+    ///
+    /// # Example
+    ///
+    /// ```ignore
+    /// # write array index 0 value to index 1
+    /// let reg0 = registers.regfile().reg_array()[0].read_async().await;
+    /// registers.regfile().reg_array()[1].write_value_async(reg0).await;
+    /// ```
+    #[inline(always)]
+    pub async fn write_value_async(&self, val: R) {
+        self.try_write_value_async(val).await.unwrap_infallible();
+    }
+}
+
+// async write access
+impl<R: Default + Register, IO: AsyncRegisterIO> Reg<'_, R, IO>
+where
+    R::Access: Write,
+{
+    /// Try to write a register.
+    ///
+    /// This method takes a closure. The input to the closure is a mutable reference
+    /// to the default value of the register. It can be updated in the closure. The
+    /// updated value is then written to the hardware register.
+    ///
+    /// # Example
+    ///
+    /// ```ignore
+    /// registers.regfile().register1().try_write_async(|r| {
+    ///     // r contains the default (reset) value of the register
+    ///     r.set_field1(0x1);
+    ///     r.set_field2(0x0);
+    /// }).await.unwrap();
+    /// ```
+    #[inline(always)]
+    #[allow(clippy::missing_errors_doc)]
+    pub async fn try_write_async<T>(&self, f: impl FnOnce(&mut R) -> T) -> Result<T, IO::Error> {
+        let mut val = Default::default();
+        let res = f(&mut val);
+        self.try_write_value_async(val).await?;
+        Ok(res)
+    }
+}
+
+// infallible async write access
+impl<R: Default + Register, IO: AsyncRegisterIO<Error = Infallible>> Reg<'_, R, IO>
+where
+    R::Access: Write,
+{
+    /// Write a register.
+    ///
+    /// This method takes a closure. The input to the closure is a mutable reference
+    /// to the default value of the register. It can be updated in the closure. The
+    /// updated value is then written to the hardware register.
+    ///
+    /// # Example
+    ///
+    /// ```ignore
+    /// registers.regfile().register1().write_async(|r| {
+    ///     // r contains the default (reset) value of the register
+    ///     r.set_field1(0x1);
+    ///     r.set_field2(0x0);
+    /// }).await;
+    /// ```
+    #[inline(always)]
+    pub async fn write_async<T>(&self, f: impl FnOnce(&mut R) -> T) -> T {
+        self.try_write_async(f).await.unwrap_infallible()
+    }
+}
+
+// async read/write access
+impl<R: Register, IO: AsyncRegisterIO> Reg<'_, R, IO>
+where
+    R::Access: Read + Write,
+{
+    /// Try to modify a register.
+    ///
+    /// This method takes a closure. The input to the closure is a mutable reference
+    /// to the current value of the register. It can be updated in the closure. The
+    /// updated value is then written back to the hardware register.
+    ///
+    /// # Example
+    ///
+    /// ```ignore
+    /// let orig_r = registers.regfile().register1().try_modify_async(|r| {
+    ///     // r contains the current value of the register
+    ///     orig_r = r.clone()
+    ///     r.set_field1(r.field1());
+    ///     r.set_field2(0x0);
+    ///     // whatever value the closure returns is returned by the .try_modify() method
+    ///     orig_r
+    /// }).await.unwrap();
+    /// ```
+    #[inline(always)]
+    #[allow(clippy::missing_errors_doc)]
+    pub async fn try_modify_async<T>(&self, f: impl FnOnce(&mut R) -> T) -> Result<T, IO::Error> {
+        let mut val = self.try_read_async().await?;
+        let res = f(&mut val);
+        self.try_write_value_async(val).await?;
+        Ok(res)
+    }
+}
+
+// infallible async read/write access
+impl<R: Register, IO: AsyncRegisterIO<Error = Infallible>> Reg<'_, R, IO>
+where
+    R::Access: Read + Write,
+{
+    /// Modify a register.
+    ///
+    /// This method takes a closure. The input to the closure is a mutable reference
+    /// to the current value of the register. It can be updated in the closure. The
+    /// updated value is then written back to the hardware register.
+    ///
+    /// # Example
+    ///
+    /// ```ignore
+    /// let orig_r = registers.regfile().register1().modify_async(|r| {
+    ///     // r contains the current value of the register
+    ///     orig_r = r.clone()
+    ///     r.set_field1(r.field1());
+    ///     r.set_field2(0x0);
+    ///     // whatever value the closure returns is returned by the .modify() method
+    ///     orig_r
+    /// }).await;
+    /// ```
+    #[inline(always)]
+    pub async fn modify_async<T>(&self, f: impl FnOnce(&mut R) -> T) -> T {
+        self.try_modify_async(f).await.unwrap_infallible()
     }
 }
 
