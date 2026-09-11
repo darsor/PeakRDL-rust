@@ -154,7 +154,7 @@ the register width, access width, endianess, and access permissions to customize
 and restrict its read/write implementations. For example, read-only registers don't expose
 any methods for writing the value to memory.
 
-The ``Reg`` struct is also generic over the ``RegisterIO`` implementation that implementations
+The ``Reg`` struct is also generic over a ``RegisterIO`` and/or ``AsyncRegisterIO`` implementation that implementations
 the actual memory accesses. This generic defaults regular volatile pointer I/O and does not
 need to be specified in the common case. See the example for
 `tunneled registers <examples.html#advanced-tunneled-registers>`__.

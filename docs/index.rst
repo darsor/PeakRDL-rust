@@ -11,6 +11,7 @@ Features:
 * Includes component names and descriptions as doc comments in the generated code
 * Embedded-friendly code generation with ``no_std`` support
 * Preserves the hierarchical structure of SystemRDL
+* Supports custom register transport layers for accessing registers on remote devices (including async support)
 * Supports complex nested regfiles, arrays, and memory components
 * Supports enumerated field types
 * Supports signed and fixed-point field types
