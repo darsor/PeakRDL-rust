@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- `AsyncRegisterIO` and `RawAsyncRegisterIO` traits.
+
 ### Fixed
 
 - Generated outputs are now always UTF-8 (previously some locale settings could generate invalid non-UTF-8 Rust source files).
