@@ -415,3 +415,42 @@ impl<const N: usize> RawRegisterIO for MockIO<N> {
         Ok(())
     }
 }
+
+impl<const N: usize> RawAsyncRegisterIO for MockIO<N> {
+    type Error = core::convert::Infallible;
+
+    async unsafe fn try_read<T: RegInt>(&self, ptr: *const T) -> Result<T, Self::Error> {
+        YieldOnce::new().await;
+        unsafe { <Self as RawRegisterIO>::try_read(self, ptr) }
+    }
+
+    async unsafe fn try_write<T: RegInt>(&self, ptr: *mut T, value: T) -> Result<(), Self::Error> {
+        YieldOnce::new().await;
+        unsafe { <Self as RawRegisterIO>::try_write(self, ptr, value) }
+    }
+}
+
+/// Simple future for testing async traits
+struct YieldOnce(bool);
+
+impl YieldOnce {
+    fn new() -> Self {
+        Self(false)
+    }
+}
+
+impl Future for YieldOnce {
+    type Output = ();
+    fn poll(
+        mut self: core::pin::Pin<&mut Self>,
+        cx: &mut core::task::Context<'_>,
+    ) -> core::task::Poll<()> {
+        if self.0 {
+            core::task::Poll::Ready(())
+        } else {
+            self.0 = true;
+            cx.waker().wake_by_ref(); // re-schedule immediately, don't hang forever
+            core::task::Poll::Pending
+        }
+    }
+}
