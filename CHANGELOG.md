@@ -19,6 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Generated outputs are now always UTF-8 (previously some locale settings could generate invalid non-UTF-8 Rust source files).
+- Minimum GLIBC version on Linux reduced from 2.38 to 2.17.
 
 ## [0.7.4] - 2026-08-23
 
