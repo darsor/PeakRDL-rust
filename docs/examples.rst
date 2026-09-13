@@ -219,7 +219,12 @@ this by allowing the user to define a custom ``RegisterIO`` implementation.
         let reg0_value = spi_registers.reg0().try_read().unwrap();
     }
 
+PeakRDL-rust also has ``async`` variants of the ``RegisterIO`` traits for asynchronous
+register transport implementations.
+
 Links:
 
 * Cargo docs for the `RawRegisterIO <examples/peakrdl_rust/io/trait.RawRegisterIO.html>`__ trait
 * Cargo docs for the `RegisterIO <examples/peakrdl_rust/io/trait.RegisterIO.html>`__ trait
+* Cargo docs for the `RawAsyncRegisterIO <examples/peakrdl_rust/io/trait.RawAsyncRegisterIO.html>`__ trait
+* Cargo docs for the `AsyncRegisterIO <examples/peakrdl_rust/io/trait.AsyncRegisterIO.html>`__ trait

@@ -24,7 +24,7 @@ pub trait RawRegisterIO {
     ///
     /// # Safety
     ///
-    /// This method may dereference raw pointer. The caller must ensure the pointer
+    /// This method may dereference a raw pointer. The caller must ensure the pointer
     /// is valid and points to a valid memory location.
     #[allow(clippy::missing_errors_doc)]
     unsafe fn try_read<T: RegInt>(&self, ptr: *const T) -> Result<T, Self::Error>;
@@ -40,6 +40,44 @@ pub trait RawRegisterIO {
     /// is valid and points to a valid writeable memory location.
     #[allow(clippy::missing_errors_doc)]
     unsafe fn try_write<T: RegInt>(&self, ptr: *mut T, value: T) -> Result<(), Self::Error>;
+}
+
+/// Raw async register I/O trait
+///
+/// This can be useful when register access is performed through an intermediary
+/// async transport (e.g., SPI or I2C).
+///
+/// Types that implement this trait also automatically implement [`AsyncRegisterIO`].
+pub trait RawAsyncRegisterIO {
+    /// The error type this register transport returns. For infallible transports
+    /// (e.g., direct volatile pointer accesses), this should be [`core::convert::Infallible`]
+    /// so that the [`Reg`][crate::reg::Reg] type can provide an infallible API in addition
+    /// to the `try_*` API.
+    type Error;
+
+    /// Try to read a primitive integer from memory.
+    ///
+    /// The returned value is in the register's native endianness (not necessarily
+    /// the host's endianness).
+    ///
+    /// # Safety
+    ///
+    /// This method may dereference a raw pointer. The caller must ensure the pointer
+    /// is valid and points to a valid memory location.
+    #[allow(clippy::missing_errors_doc, async_fn_in_trait)]
+    async unsafe fn try_read<T: RegInt>(&self, ptr: *const T) -> Result<T, Self::Error>;
+
+    /// Try to write primitive integer to memory
+    ///
+    /// The provided value is in the register's native endianness (not necessarily
+    /// the host's endianness).
+    ///
+    /// # Safety
+    ///
+    /// This method may dereference a raw pointer. The caller must ensure the pointer
+    /// is valid and points to a valid writeable memory location.
+    #[allow(clippy::missing_errors_doc, async_fn_in_trait)]
+    async unsafe fn try_write<T: RegInt>(&self, ptr: *mut T, value: T) -> Result<(), Self::Error>;
 }
 
 /// Register I/O
@@ -80,6 +118,55 @@ pub trait RegisterIO {
     /// is valid and points to a valid writeable memory location.
     #[allow(clippy::missing_errors_doc)]
     unsafe fn try_write_register<R: Register>(
+        &self,
+        ptr: *mut R::Regwidth,
+        value: R,
+    ) -> Result<(), Self::Error>
+    where
+        R::Access: Write;
+}
+
+/// Async Register I/O
+///
+/// This can be useful when register access is performed through an intermediary
+/// async transport (e.g., SPI or I2C).
+///
+/// Register accesses are performed through implementers of this trait. This trait's
+/// methods handle details like endianness, multi-word writes, etc.
+///
+/// Most user I/O interfaces should simply implement the [`RawAsyncRegisterIO`] trait, since a
+/// blanket implementation exists for all implementers of [`RawAsyncRegisterIO`].
+pub trait AsyncRegisterIO {
+    type Error;
+
+    /// Read a register value asynchronously
+    ///
+    /// This method must respect the register's endianness and accesswidth,
+    /// as encoded in the generic [`Register`]'s associated types.
+    ///
+    /// # Safety
+    ///
+    /// This method may dereference a raw pointer. The caller must ensure the pointer
+    /// is valid and points to a valid memory location.
+    #[allow(clippy::missing_errors_doc, async_fn_in_trait)]
+    async unsafe fn try_read_register<R: Register>(
+        &self,
+        ptr: *const R::Regwidth,
+    ) -> Result<R, Self::Error>
+    where
+        R::Access: Read;
+
+    /// Write a register value asynchronously
+    ///
+    /// This method must respect the register's endianness and accesswidth,
+    /// as encoded in the generic [`Register`]'s associated types.
+    ///
+    /// # Safety
+    ///
+    /// This method may dereference a raw pointer. The caller must ensure the pointer
+    /// is valid and points to a valid writeable memory location.
+    #[allow(clippy::missing_errors_doc, async_fn_in_trait)]
+    async unsafe fn try_write_register<R: Register>(
         &self,
         ptr: *mut R::Regwidth,
         value: R,
@@ -178,6 +265,96 @@ where
     }
 }
 
+impl<T> AsyncRegisterIO for T
+where
+    T: RawAsyncRegisterIO,
+{
+    type Error = T::Error;
+
+    async unsafe fn try_read_register<R: Register>(
+        &self,
+        ptr: *const R::Regwidth,
+    ) -> Result<R, Self::Error>
+    where
+        R::Access: Read,
+    {
+        let ptr = ptr.cast::<R::Accesswidth>();
+
+        let accesswidth = 8 * core::mem::size_of::<R::Accesswidth>();
+        let regwidth = 8 * core::mem::size_of::<R::Regwidth>();
+        let num_subwords = regwidth / accesswidth;
+
+        // Fast path: a single-word register is one volatile load. `num_subwords`
+        // is a compile-time constant (derived from `size_of`), so for single-word
+        // registers the multi-word loop below is dropped entirely and the access
+        // folds to a single load at the call site.
+        if num_subwords == 1 {
+            // SAFETY: accesswidth == regwidth here, so this reads exactly the
+            // register's bounds (same guarantee the loop relies on).
+            let subword = unsafe { self.try_read::<R::Accesswidth>(ptr).await? };
+            let subword = R::ByteEndian::from_register_endian(subword);
+            // SAFETY: value just read directly from hardware.
+            return unsafe { Ok(R::from_raw(subword.as_())) };
+        }
+
+        // read one subword at a time, starting at the lowest address
+        let mut raw_value = R::Regwidth::ZERO;
+        for i in 0..num_subwords {
+            // SAFETY: SystemRDL guarantees accesswidth <= regwidth, so we won't
+            // read outside the bounds of the original pointer.
+            let subword = unsafe { self.try_read(ptr.wrapping_add(i)).await? };
+
+            let significance = R::WordEndian::address_order_to_significance(i, num_subwords);
+            let subword = R::ByteEndian::from_register_endian(subword);
+            raw_value = raw_value | (subword.as_() << (significance * accesswidth));
+        }
+
+        // SAFETY: The value was just read directly from hardware, and should
+        // therefore be a valid register value.
+        unsafe { Ok(R::from_raw(raw_value)) }
+    }
+
+    async unsafe fn try_write_register<R: Register>(
+        &self,
+        ptr: *mut R::Regwidth,
+        value: R,
+    ) -> Result<(), Self::Error>
+    where
+        R::Access: Write,
+    {
+        let ptr = ptr.cast::<R::Accesswidth>();
+        let value = value.to_raw();
+
+        let accesswidth = 8 * core::mem::size_of::<R::Accesswidth>();
+        let regwidth = 8 * core::mem::size_of::<R::Regwidth>();
+        let num_subwords = regwidth / accesswidth;
+        let mask = R::Accesswidth::max_value().as_();
+
+        // Fast path: a single-word register is one volatile store. `num_subwords`
+        // is a compile-time constant, so for single-word registers the loop below
+        // is dropped entirely and the access folds to a single store at the call site.
+        if num_subwords == 1 {
+            let subword = R::ByteEndian::to_register_endian(value.as_());
+            // SAFETY: accesswidth == regwidth here, so this writes exactly the
+            // register's bounds (same guarantee the loop relies on).
+            return unsafe { self.try_write::<R::Accesswidth>(ptr, subword).await };
+        }
+
+        // write one subword at a time, starting at the lowest address
+        for i in 0..num_subwords {
+            let significance = R::WordEndian::address_order_to_significance(i, num_subwords);
+            let subword = (value >> (significance * accesswidth)) & mask;
+            let subword = R::ByteEndian::to_register_endian(subword.as_());
+            // SAFETY: SystemRDL guarantees accesswidth <= regwidth, so we won't
+            // write outside the bounds of the original pointer.
+            unsafe {
+                self.try_write(ptr.wrapping_add(i), subword).await?;
+            }
+        }
+        Ok(())
+    }
+}
+
 /// Default [`RegisterIO`] implementation.
 ///
 /// Provides infallible register access through volatile pointer reads
@@ -236,5 +413,44 @@ impl<const N: usize> RawRegisterIO for MockIO<N> {
         let bytes = &mut data[addr..addr + size];
         bytes.copy_from_slice(value.to_ne_bytes().as_ref());
         Ok(())
+    }
+}
+
+impl<const N: usize> RawAsyncRegisterIO for MockIO<N> {
+    type Error = core::convert::Infallible;
+
+    async unsafe fn try_read<T: RegInt>(&self, ptr: *const T) -> Result<T, Self::Error> {
+        YieldOnce::new().await;
+        unsafe { <Self as RawRegisterIO>::try_read(self, ptr) }
+    }
+
+    async unsafe fn try_write<T: RegInt>(&self, ptr: *mut T, value: T) -> Result<(), Self::Error> {
+        YieldOnce::new().await;
+        unsafe { <Self as RawRegisterIO>::try_write(self, ptr, value) }
+    }
+}
+
+/// Simple future for testing async traits
+struct YieldOnce(bool);
+
+impl YieldOnce {
+    fn new() -> Self {
+        Self(false)
+    }
+}
+
+impl Future for YieldOnce {
+    type Output = ();
+    fn poll(
+        mut self: core::pin::Pin<&mut Self>,
+        cx: &mut core::task::Context<'_>,
+    ) -> core::task::Poll<()> {
+        if self.0 {
+            core::task::Poll::Ready(())
+        } else {
+            self.0 = true;
+            cx.waker().wake_by_ref(); // re-schedule immediately, don't hang forever
+            core::task::Poll::Pending
+        }
     }
 }
